@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Accueil - Dashboard</title>
+</head>
+<body>
+
+<!-- Le contenu spécifique à la page d'accueil commence ici -->
+<section>
+    <div class="container-fluid">
+        <h1>Bienvenue dans l'espace Vie Étudiante</h1>
+        <p class="lead">Découvrez les événements à venir et rejoignez les clubs qui vous intéressent.</p>
+
+        <hr>
+        <!-- Zone d'affichage des clubs -->
+        <div class="row">
+            <!-- 1. La boucle Thymeleaf : th:each -->
+            <div class="col-md-4 mb-4" th:each="club : ${clubs}">
+                <!-- 2. Utilisation des classes "card" de Bootstrap -->
+                <div class="card h-100">
+                    <!-- Image du club (on met une image par défaut pour l'instant) -->
+                    <img th:src="${club.logo != null ? club.logo : '/images/default-club.png'}" class="card-img-top" alt="Logo du club">
+
+                    <div class="card-body">
+                        <!-- 3. Affichage des données du club -->
+                        <h5 class="card-title" th:text="${club.nom}">Nom du Club</h5>
+                        <p class="card-text" th:text="${club.description}">Description du club...</p>
+                    </div>
+
+                    <div class="card-footer">
+                        <a href="#" class="btn btn-primary">Voir détails</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message si aucun club n'est trouvé -->
+            <div th:if="${clubs.isEmpty()}">
+                <p>Aucun club n'a été créé pour le moment.</p>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Le contenu spécifique se termine ici -->
+
+</body>
+</html>
