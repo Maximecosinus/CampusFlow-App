@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name="clubs")
@@ -32,10 +33,19 @@ public class Club {
     @JoinColumn(name= "chef_club_id")
     private Utilisateur chefClub;
 
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime dateCreation;
+
+    @Column(nullable = false, updatable = false)
+    protected void onCreate(){
+        this.dateCreation= LocalDateTime.now();
+    }
+
     @ManyToMany(mappedBy = "clubsInscrits")
     private Set<Utilisateur> membres = new HashSet<>();
 
     @OneToMany(mappedBy = "club")
     private Set <Evenement> evenementsOrganises = new HashSet<>();
+
 
 }

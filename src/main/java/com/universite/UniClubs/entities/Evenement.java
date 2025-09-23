@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.LocalDate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -31,6 +32,16 @@ public class Evenement {
     private String lieu;
 
     private Integer capaciteMax;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime datePublication;
+
+    private String photo;
+
+    @PrePersist
+    protected void onPublish(){
+        this.datePublication= LocalDateTime.now();
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="club_id")

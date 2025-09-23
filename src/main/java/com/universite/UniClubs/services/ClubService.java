@@ -5,4 +5,5 @@ import java.util.List;
 
 public interface ClubService {
     List<Club> getAllClubs();
+    List<Club> findRecentclubs();
 }

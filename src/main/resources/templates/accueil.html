@@ -12,10 +12,31 @@
         <p class="lead">Découvrez les événements à venir et rejoignez les clubs qui vous intéressent.</p>
 
         <hr>
-        <!-- Zone d'affichage des clubs -->
+        <!-- Section des Évènements à Venir-->
+        <h2>Évènements à Venir</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4" th:each="event : ${evenementsAVenir}">
+                <div class="card h-100">
+                    <img th:src="${event.photo != null ? event.photo : '/images/default-event.png'}" class="card-img-top" alt="Image de l'événement">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${event.titre}">Titre de l'évènement</h5>
+                        <p class="card-text">Le <span th:text="${#temporals.format(event.dateHeureDebut, 'dd MMMM yyyy à HH:mm')}"></span>
+                        </p>
+                        <p class="card-text" th:text="${event.lieu}">Lieu de l'évènement</p>
+                    </div>
+                    <div class="card-footer">
+                        <a href="#" class="btn btn-info">Plus d'infos</a>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${evenementsAVenir.isEmpty()}"> <p>Aucun évènement à venir pour le moment.</p></div>
+        </div>
+        <hr>
+        <!-- Section des Clubs récents -->
+        <h2>Clubs Récents</h2>
         <div class="row">
             <!-- 1. La boucle Thymeleaf : th:each -->
-            <div class="col-md-4 mb-4" th:each="club : ${clubs}">
+            <div class="col-md-4 mb-4" th:each="club : ${clubsRecents}">
                 <!-- 2. Utilisation des classes "card" de Bootstrap -->
                 <div class="card h-100">
                     <!-- Image du club (on met une image par défaut pour l'instant) -->
@@ -32,9 +53,8 @@
                     </div>
                 </div>
             </div>
-
             <!-- Message si aucun club n'est trouvé -->
-            <div th:if="${clubs.isEmpty()}">
+            <div th:if="${clubsRecents.isEmpty()}">
                 <p>Aucun club n'a été créé pour le moment.</p>
             </div>
         </div>

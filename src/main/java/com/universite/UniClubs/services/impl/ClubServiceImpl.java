@@ -18,4 +18,10 @@ public class ClubServiceImpl implements ClubService {
     public List<Club> getAllClubs() {
         return clubRepository.findAll();
     }
+
+    @Override
+    public List<Club> findRecentclubs() {
+
+        return clubRepository.findTop3ByOrderByDateCreationDesc();
+    }
 }
