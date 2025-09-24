@@ -39,6 +39,6 @@ public class DiscoveryController {
         model.addAttribute("utilisateur", utilisateurConnecte);
         model.addAttribute("allClubs",clubService.getAllClubs());
 
-    return "clubs-list";
+    return "Clubs-list";
     }
 }
