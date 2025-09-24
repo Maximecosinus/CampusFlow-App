@@ -36,7 +36,7 @@
 
           <div class="card-footer bg-transparent border-top-0">
             <!-- Lien vers la future page de détail du club -->
-            <a href="#" class="btn btn-primary w-100">Voir les détails</a>
+            <a th:href="@{/clubs/{id}(id=${club.id})}" class="btn btn-primary w-100">Voir les détails</a>
           </div>
         </div>
       </div>

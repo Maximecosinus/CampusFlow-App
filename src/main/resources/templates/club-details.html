@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}"
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${club.nom}">Détails du Club</title>
+</head>
+<body>
+<!-- Le contenu spécifique de la page -->
+<section>
+    <div class="container-fluid">
+        <!-- On utilise l'objet "club" passé par le contrôleur -->
+
+        <!-- En-tête avec le nom du club et le logo -->
+        <div class="d-flex align-items-center mb-4">
+            <img th:src="${club.logo != null ? club.logo : '/images/default-club.png'}"
+                 alt="Logo" style="width: 100px; height: 100px; border-radius: 50%;" class="me-4">
+            <div>
+                <h1 th:text="${club.nom}">Nom du Club</h1>
+                <!-- On affichera le nom du président ici plus tard -->
+                <p class="lead text-muted">Présidé par : [Nom du Président]</p>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- Description complète du club -->
+        <h3>Description</h3>
+        <p th:text="${club.description}">Description complète du club...</p>
+
+        <hr>
+
+        <!-- Boutons d'action -->
+        <div class="mt-4">
+            <!-- Logique d'affichage des boutons à implémenter plus tard -->
+            <a href="#" class="btn btn-success">S'inscrire au club</a>
+            <!-- <a href="#" class="btn btn-danger">Se désinscrire</a> -->
+        </div>
+
+    </div>
+</section>
+</body>
+</html>

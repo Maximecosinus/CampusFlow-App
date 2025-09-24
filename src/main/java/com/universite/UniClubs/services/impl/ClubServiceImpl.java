@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class ClubServiceImpl implements ClubService {
@@ -23,5 +25,10 @@ public class ClubServiceImpl implements ClubService {
     public List<Club> findRecentclubs() {
 
         return clubRepository.findTop3ByOrderByDateCreationDesc();
+    }
+
+    @Override
+    public Optional<Club> findClubById(UUID id){
+        return clubRepository.findById(id);
     }
 }
