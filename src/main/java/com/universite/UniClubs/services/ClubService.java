@@ -9,4 +9,5 @@ public interface ClubService {
     List<Club> getAllClubs();
     List<Club> findRecentclubs();
     Optional<Club> findClubById(UUID id);
+    Club findClubWithDetailsById(UUID clubId); // <-- Ajoutez/Modifiez cette ligne
 }

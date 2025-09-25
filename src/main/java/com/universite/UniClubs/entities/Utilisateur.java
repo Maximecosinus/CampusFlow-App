@@ -2,9 +2,7 @@ package com.universite.UniClubs.entities;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -50,5 +48,7 @@ public class Utilisateur {
             joinColumns = @JoinColumn(name = "utilisateur_id"),
             inverseJoinColumns = @JoinColumn(name = "club_id")
     )
+    @EqualsAndHashCode.Exclude // <-- AJOUTER ÇA
+    @ToString.Exclude          // <-- AJOUTER ÇA
     private Set<Club> clubsInscrits = new HashSet<>();
 }

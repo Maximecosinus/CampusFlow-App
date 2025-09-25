@@ -33,10 +33,13 @@
         <!-- Boutons d'action -->
         <div class="mt-4">
             <!-- Logique d'affichage des boutons à implémenter plus tard -->
-            <a href="#" class="btn btn-success">S'inscrire au club</a>
-            <!-- <a href="#" class="btn btn-danger">Se désinscrire</a> -->
+            <form th:action="@{/clubs/{id}/inscrire(id=${club.id})}" method="post" th:unless="${estDejaInscrit}">
+                <button type="submit" class="btn btn-success">S'Inscrire au Club</button>
+            </form>
         </div>
-
+        <div th:if="${estDejaInscrit}">
+            <p class="text-muted">Vous êtes déjà membre de ce club.</p>
+        </div>
     </div>
 </section>
 </body>

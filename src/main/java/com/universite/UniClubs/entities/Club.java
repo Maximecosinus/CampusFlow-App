@@ -1,6 +1,8 @@
 package com.universite.UniClubs.entities;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode; // <-- Import à ajouter
+import lombok.ToString;         // <-- Import à ajouter
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -42,9 +44,13 @@ public class Club {
     }
 
     @ManyToMany(mappedBy = "clubsInscrits")
+    @EqualsAndHashCode.Exclude // <-- AJOUTER ÇA
+    @ToString.Exclude          // <-- AJOUTER ÇA
     private Set<Utilisateur> membres = new HashSet<>();
 
     @OneToMany(mappedBy = "club")
+    @EqualsAndHashCode.Exclude // <-- AJOUTER ÇA
+    @ToString.Exclude          // <-- AJOUTER ÇA
     private Set <Evenement> evenementsOrganises = new HashSet<>();
 
 
