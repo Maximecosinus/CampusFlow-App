@@ -10,4 +10,5 @@ public interface UtilisateurService {
     Utilisateur creerEtudiant(UserRegistrationDto registrationDto);
     void inscrireUtilisateurAuclub(String emailUtilisateur, UUID idClub);
     boolean estInscrit(String emailUtilisateur, UUID idClub);
+    void desinscrireUtilisateurDuClub(String emailUtilisateur, UUID idClub);
 }

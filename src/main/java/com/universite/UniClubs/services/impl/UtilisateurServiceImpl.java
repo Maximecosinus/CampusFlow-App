@@ -66,6 +66,23 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     }
 
     @Override
+    @Transactional
+    public void desinscrireUtilisateurDuClub(String emailUtilisateur, UUID idClub){
+        Utilisateur utilisateur = utilisateurRepository.findByEmailWithClubsInscrits(emailUtilisateur).orElseThrow(
+                () -> new RuntimeException("Utilisateur non trouvé")
+        );
+
+        //On trouve le club à retirer de la liste
+        Club clubAretirer = utilisateur.getClubsInscrits().stream()
+                .filter(club -> club.getId().equals(idClub))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("L'utilisateur n'est pas inscrit à ce club"));
+
+        //On retire le club de la collection
+        utilisateur.getClubsInscrits().remove(clubAretirer);
+    }
+
+    @Override
     public boolean estInscrit(String emailUtilisateur, UUID idClub) {
         return utilisateurRepository.isUserSubscribedToClub(emailUtilisateur, idClub);
 

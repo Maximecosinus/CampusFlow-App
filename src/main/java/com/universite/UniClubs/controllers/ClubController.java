@@ -58,4 +58,14 @@ public class ClubController {
         utilisateurService.inscrireUtilisateurAuclub(principal.getName(), id);
         return "redirect:/clubs/" + id;
     }
+
+    @PostMapping("/{id}/desinscrire")
+    public String processDesinscription(@PathVariable UUID id,Principal principal ){
+        if(principal ==null){
+            return "redirect:/login";
+        }
+
+        utilisateurService.desinscrireUtilisateurDuClub(principal.getName(), id);
+        return "redirect:/clubs/" + id;
+    }
 }
