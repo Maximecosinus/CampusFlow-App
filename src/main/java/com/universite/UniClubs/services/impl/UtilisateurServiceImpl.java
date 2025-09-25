@@ -88,4 +88,9 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
     }
 
+    @Override
+    public Optional<Utilisateur> findByEmailWithClubsInscrits(String email) {
+        return utilisateurRepository.findByEmailWithClubsInscrits(email);
+    }
+
 }
