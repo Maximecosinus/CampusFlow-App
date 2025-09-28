@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<!-- On réutilise notre layout de base -->
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+  <title>Mon Profil - CampusFlow</title>
+</head>
+<body>
+<section>
+  <div class="container-fluid">
+    <h1 class="mb-4">Mon Profil</h1>
+
+    <!-- Message de succès après la mise à jour -->
+    <div th:if="${param.success}" class="alert alert-success">
+      Votre profil a été mis à jour avec succès.
+    </div>
+
+    <!--
+        Formulaire de mise à jour.
+        th:object="${profile}" va pré-remplir les champs
+        avec les données du DTO que nous avons passé.
+    -->
+    <form th:action="@{/profil/modifier}" th:object="${profile}" method="post">
+      <div class="mb-3">
+        <label for="prenom" class="form-label">Prénom</label>
+        <input type="text" id="prenom" class="form-control" th:field="*{prenom}" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="nom" class="form-label">Nom</label>
+        <input type="text" id="nom" class="form-control" th:field="*{nom}" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="bio" class="form-label">Biographie</label>
+        <textarea id="bio" class="form-control" th:field="*{bio}" rows="4"
+                  placeholder="Parlez un peu de vous, de vos passions..."></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+    </form>
+  </div>
+</section>
+</body>
+</html>

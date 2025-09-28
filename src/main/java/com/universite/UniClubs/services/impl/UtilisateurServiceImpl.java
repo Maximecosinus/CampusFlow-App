@@ -1,6 +1,7 @@
 package com.universite.UniClubs.services.impl;
 
 
+import com.universite.UniClubs.dto.UserProfileDto;
 import com.universite.UniClubs.dto.UserRegistrationDto;
 import com.universite.UniClubs.entities.Club;
 import com.universite.UniClubs.entities.Role;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // 1. Importer l'annotation
+import com.universite.UniClubs.dto.UserProfileDto;
 
 
 import java.util.Optional;
@@ -91,6 +93,31 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     @Override
     public Optional<Utilisateur> findByEmailWithClubsInscrits(String email) {
         return utilisateurRepository.findByEmailWithClubsInscrits(email);
+    }
+
+    @Override
+    public Optional<UserProfileDto> getUserProfileByEmail(String email) {
+        return utilisateurRepository.findByEmail(email)
+                .map(utilisateur -> {
+                    UserProfileDto dto= new UserProfileDto();
+                    dto.setNom(utilisateur.getNom());
+                    dto.setPrenom(utilisateur.getPrenom());
+                    dto.setBio(utilisateur.getBio());
+                    return dto;
+                });
+    }
+
+    @Override
+    @Transactional
+    public void updateUserProfile(String email, UserProfileDto profileDto) {
+        //on récupère l'utilisateur dans la base de données
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        // On met à jour ses propriétés avvec les valeurs du DTO
+        utilisateur.setNom((profileDto.getNom()));
+        utilisateur.setPrenom(profileDto.getPrenom());
+        utilisateur.setBio(profileDto.getBio());
     }
 
 }

@@ -23,12 +23,16 @@
             <!-- LIEN COMMUN A TOUS -->
             <li class="nav-item">
                 <a th:href="@{/accueil}" class="nav-link active">Accueil</a>
+
+            </li>
+            <li>
+                <a th:href="@{/profil}" class="nav-link active">Profil</a>
             </li>
 
             <!-- ===== MENUS POUR L'ETUDIANT ===== -->
             <div th:if="${utilisateur.role.name() == 'ETUDIANT'}">
                 <li><a th:href="@{/decouvrir}" class="nav-link text-white">Découvrir</a></li>
-                <li><a th:href="@{/mes-clubs}" class="nav-link text-white">Mes Clubs</a></li>
+                <li><a th:href="@{/profil/mes-clubs}" class="nav-link text-white">Mes Clubs</a></li>
                 <li><a th:href="@{/calendrier}" class="nav-link text-white">Calendrier</a></li>
             </div>
 
