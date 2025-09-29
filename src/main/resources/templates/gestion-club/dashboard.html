@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <!-- Le titre utilise le nom du club récupéré depuis le modèle -->
+    <title th:text="'Gestion de ' + ${club.nom}">Gestion de Club</title>
+</head>
+<body>
+<section>
+    <div class="container-fluid">
+        <!-- On affiche le nom du club pour confirmer que ça marche -->
+        <h1 th:text="'Tableau de bord du ' + ${club.nom}">Tableau de bord du Club</h1>
+        <p class="lead">Gérez les membres, les événements et les communications de votre club.</p>
+
+        <hr>
+
+        <!-- Ici, nous ajouterons les statistiques et les raccourcis décrits dans ton cahier des charges -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <!-- On affiche le nombre de membres -->
+                        <h5 class="card-title">Membres Inscrits</h5>
+                        <p class="display-4" th:text="${#lists.size(club.membres)}">0</p>
+                    </div>
+                </div>
+            </div>
+            <!-- On ajoutera d'autres cartes pour les événements à venir, etc. -->
+        </div>
+    </div>
+</section>
+</body>
+</html>

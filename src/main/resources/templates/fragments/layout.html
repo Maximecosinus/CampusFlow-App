@@ -37,6 +37,7 @@
             <!-- ===== MENUS POUR LE CHEF DE CLUB (en plus de ceux de l'étudiant) ===== -->
             <div th:if="${utilisateur.role.name() == 'CHEF_DE_CLUB'}">
                 <li><a th:href="@{/decouvrir}" class="nav-link text-white">Découvrir</a></li>
+                <li><a th:href="@{/profil/mes-clubs}" class="nav-link text-white">Mes Clubs</a></li>
                 <li><a th:href="@{/gestion-club}" class="nav-link text-white">Gestion de mon Club</a></li>
                 <li><a th:href="@{/calendrier}" class="nav-link text-white">Calendrier</a></li>
             </div>

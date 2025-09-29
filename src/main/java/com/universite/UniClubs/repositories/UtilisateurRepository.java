@@ -20,5 +20,8 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, UUID> 
     @Query("SELECT u FROM Utilisateur u LEFT JOIN FETCH u.clubsInscrits WHERE u.email = :email")
     Optional<Utilisateur> findByEmailWithClubsInscrits(@Param("email") String email);
 
+    @Query("SELECT u FROM Utilisateur u LEFT JOIN FETCH u.clubsDiriges WHERE u.email = :email")
+    Optional<Utilisateur> findByEmailWithClubsDiriges(@Param("email") String email);
+
     String email(String email);
 }
