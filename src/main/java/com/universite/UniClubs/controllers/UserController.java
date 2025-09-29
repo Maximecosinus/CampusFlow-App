@@ -4,14 +4,18 @@ package com.universite.UniClubs.controllers;
 import com.universite.UniClubs.dto.UserProfileDto;
 import com.universite.UniClubs.entities.Club;
 import com.universite.UniClubs.entities.Utilisateur;
+import com.universite.UniClubs.repositories.UtilisateurRepository;
 import com.universite.UniClubs.services.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
 import java.util.Collections;
@@ -23,6 +27,9 @@ public class UserController {
 
     @Autowired
     private UtilisateurService utilisateurService;
+
+    @Autowired
+    private UtilisateurRepository utilisateurRepository;
 
     @GetMapping("/mes-clubs")
     public String ShowMyClubsPage(Model model, Principal principal) {
@@ -49,6 +56,8 @@ public class UserController {
         if (principal == null) {
             return "redirect:/login";
         }
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(principal.getName()).orElseThrow(()-> new UsernameNotFoundException(principal.getName()));
+        model.addAttribute("utilisateur", utilisateur);
 
         //On récupère le DTO du profil et on l'ajoute au modèle
         UserProfileDto userProfile = utilisateurService.getUserProfileByEmail(principal.getName())
@@ -67,6 +76,17 @@ public class UserController {
         }
         //On appelle le service pour mettre à jour les infromations
         utilisateurService.updateUserProfile((principal.getName()), ProfileDto);
+        return "redirect:/profil?success";
+    }
+
+    @PostMapping("/modifier-photo")
+    public String processPhotoUpdate(@RequestParam("photo") MultipartFile photo, Principal principal) {
+        if (principal == null || photo.isEmpty()) {
+            return "redirect:/profil";
+        }
+
+        utilisateurService.updateUserPhoto(principal.getName(), photo);
+
         return "redirect:/profil?success";
     }
 

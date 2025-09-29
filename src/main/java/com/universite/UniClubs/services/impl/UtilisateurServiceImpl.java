@@ -8,12 +8,14 @@ import com.universite.UniClubs.entities.Role;
 import com.universite.UniClubs.entities.Utilisateur;
 import com.universite.UniClubs.repositories.ClubRepository;
 import com.universite.UniClubs.repositories.UtilisateurRepository;
+import com.universite.UniClubs.services.FileStorageService;
 import com.universite.UniClubs.services.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // 1. Importer l'annotation
-import com.universite.UniClubs.dto.UserProfileDto;
+import org.springframework.web.multipart.MultipartFile;
+
 
 
 import java.util.Optional;
@@ -30,6 +32,9 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private FileStorageService fileStorageService;
 
     @Override
     public Utilisateur creerEtudiant(UserRegistrationDto registrationDto){
@@ -118,6 +123,19 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         utilisateur.setNom((profileDto.getNom()));
         utilisateur.setPrenom(profileDto.getPrenom());
         utilisateur.setBio(profileDto.getBio());
+    }
+
+    @Override
+    @Transactional
+    public void updateUserPhoto(String email, MultipartFile photo) {
+        //On utilise notre service pour sauvegarder la nouvelle photo
+        String photoPath = fileStorageService.storeFile(photo, "avatars");
+
+        // Omn récupère l'utilisateur
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        //On met à jour le chemin de sa photo de profil
+        utilisateur.setPhotoProfil(photoPath);
     }
 
 }

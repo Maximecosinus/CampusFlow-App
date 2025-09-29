@@ -25,9 +25,7 @@
                 <a th:href="@{/accueil}" class="nav-link active">Accueil</a>
 
             </li>
-            <li>
-                <a th:href="@{/profil}" class="nav-link active">Profil</a>
-            </li>
+
 
             <!-- ===== MENUS POUR L'ETUDIANT ===== -->
             <div th:if="${utilisateur.role.name() == 'ETUDIANT'}">
@@ -59,6 +57,9 @@
             </div>
         </ul>
         <hr>
+        <li>
+            <a th:href="@{/profil}">Profil</a>
+        </li>
         <!-- Zone pour le profil utilisateur ou déconnexion -->
         <div>
             <form th:action="@{/logout}" method="post">
