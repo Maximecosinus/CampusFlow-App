@@ -4,4 +4,5 @@ import java.util.List;
 
 public interface EvenementService {
     List<Evenement> findUpcomingEvents();
+    List<Evenement> findAllUpcomingEvents();
 }

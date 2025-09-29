@@ -20,4 +20,9 @@ public class EvenementServiceImp implements EvenementService {
     public List<Evenement> findUpcomingEvents(){
         return evenementRepository.findTop3ByDateHeureDebutAfterOrderByDateHeureDebutAsc(LocalDateTime.now());
     }
+
+    @Override
+    public List<Evenement> findAllUpcomingEvents(){
+        return evenementRepository.findAllByDateHeureDebutAfterOrderByDateHeureDebutAsc(LocalDateTime.now());
+    }
 }

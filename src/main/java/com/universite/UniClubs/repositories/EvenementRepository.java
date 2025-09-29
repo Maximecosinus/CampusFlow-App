@@ -13,4 +13,5 @@ import java.util.List;
 public interface EvenementRepository extends JpaRepository<Evenement, UUID> {
 
     List<Evenement> findTop3ByDateHeureDebutAfterOrderByDateHeureDebutAsc(LocalDateTime maintenant);
+    List<Evenement> findAllByDateHeureDebutAfterOrderByDateHeureDebutAsc(LocalDateTime maintenant);
 }
