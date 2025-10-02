@@ -9,10 +9,7 @@ import com.universite.UniClubs.services.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.UUID;
@@ -21,31 +18,22 @@ import java.util.UUID;
 @RequestMapping("/clubs")
 public class ClubController {
 
-    @Autowired
-    private UtilisateurRepository utilisateurRepository;
+
     @Autowired
     private ClubService clubService;
     @Autowired
     private UtilisateurService utilisateurService;
 
     @GetMapping("/{id}")
-    public String showCLubDetailsPage(@PathVariable UUID id, Model model, Principal principal ){
-
-        String email = principal.getName();
-        Utilisateur utilsateurConnecte = utilisateurRepository.findByEmail(email).orElse(null);
-        model.addAttribute("utilisateur", utilsateurConnecte);
-        //On trouve le club par son ID
-        //Club club = clubService.findClubById(id).orElseThrow(() -> new IllegalArgumentException("Invalid club ID: " + id));
-
+    public String showCLubDetailsPage(@PathVariable UUID id, Model model, @ModelAttribute("utilisateurConnecte") Utilisateur utilisateurConnecte){
         boolean estDejaInscrit = false;
-        if(principal != null){
-            estDejaInscrit= utilisateurService.estInscrit(principal.getName(), id);
+        if(utilisateurConnecte != null){
+            estDejaInscrit = utilisateurService.estInscrit(utilisateurConnecte.getEmail(), id);
         }
         Club club = clubService.findClubWithDetailsById(id);
         //Ajoute le club trouvé au modèle pour l'envoyer à la vue
         model.addAttribute("club", club);
         model.addAttribute("estDejaInscrit", estDejaInscrit);
-
         return  "club-details";
     }
 

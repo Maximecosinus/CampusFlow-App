@@ -28,43 +28,32 @@ public class UserController {
     @Autowired
     private UtilisateurService utilisateurService;
 
-    @Autowired
-    private UtilisateurRepository utilisateurRepository;
-
     @GetMapping("/mes-clubs")
-    public String ShowMyClubsPage(Model model, Principal principal) {
-        if (principal == null) {
+    public String ShowMyClubsPage(Model model, @ModelAttribute("utilisateurConnecte") Utilisateur utilisateurConnecte) {
+        if (utilisateurConnecte == null) {
             return "redirect:/login";
         }
-        //On récupère l'utilisateur connecté et ses clubs
-        Utilisateur utilisateur = utilisateurService.findByEmailWithClubsInscrits(principal.getName()).orElse(null);
-
-        Set<Club> mesClubs = Collections.emptySet();
-        if (utilisateur != null) {
-            mesClubs= utilisateur.getClubsInscrits();
-        }
-
         //Ajouter la liste des clubs de l'utilissteur au modèle
-        model.addAttribute("mesClubs", mesClubs);
+        model.addAttribute("mesClubs", utilisateurConnecte.getClubsInscrits());
 
         return "mes-clubs";
     }
 
     //méthode pour afficher le formulaire du profil
     @GetMapping
-    public String showProfilePage(Model model, Principal principal){
-        if (principal == null) {
+    public String showProfilePage(Model model,  @ModelAttribute("utilisateurConnecte") Utilisateur utilisateurConnecte){
+        if (utilisateurConnecte == null) {
             return "redirect:/login";
         }
-        Utilisateur utilisateur = utilisateurRepository.findByEmail(principal.getName()).orElseThrow(()-> new UsernameNotFoundException(principal.getName()));
-        model.addAttribute("utilisateur", utilisateur);
-
-        //On récupère le DTO du profil et on l'ajoute au modèle
-        UserProfileDto userProfile = utilisateurService.getUserProfileByEmail(principal.getName())
-                .orElseThrow(() -> new RuntimeException("Profil utiliateur introuvable"));
+        // On peut créer le DTO directement à partir de l'objet déjà chargé
+        UserProfileDto userProfile = new UserProfileDto();
+        userProfile.setNom(utilisateurConnecte.getNom());
+        userProfile.setPrenom(utilisateurConnecte.getPrenom());
+        userProfile.setBio(utilisateurConnecte.getBio());
 
         model.addAttribute("profile", userProfile);
-
+        // On passe aussi l'utilisateur complet pour la photo
+        model.addAttribute("utilisateur", utilisateurConnecte);
         return "profil";
     }
 

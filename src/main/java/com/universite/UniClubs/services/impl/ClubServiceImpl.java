@@ -3,6 +3,7 @@ package com.universite.UniClubs.services.impl;
 import com.universite.UniClubs.entities.Club;
 import com.universite.UniClubs.repositories.ClubRepository;
 import com.universite.UniClubs.services.ClubService;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional; // Import correct
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class ClubServiceImpl implements ClubService {
 
     @Override
     public List<Club> findRecentclubs() {
-        return clubRepository.findTop3ByOrderByDateCreationDesc();
+        return clubRepository.findRecentClubsWithChef(PageRequest.of(0, 3));
     }
 
     // Cette méthode reste inchangée, elle est correcte.

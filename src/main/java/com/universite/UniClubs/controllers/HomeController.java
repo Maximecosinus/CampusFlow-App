@@ -23,22 +23,11 @@ public class HomeController {
     private ClubService clubService;
 
     @Autowired
-    private UtilisateurRepository utilisateurRepository;
-
-    @Autowired
     private EvenementService evenementService;
 
     @GetMapping("/accueil")
-    public String showHomePage(Model model, Principal principal) {
+    public String showHomePage(Model model) {
 
-        //récupérer l'email de l'utilisateur connecté
-        String email = principal.getName();
-
-        //récupéerer l,objet Utilisateur complet depuis la base de données
-        Utilisateur utilsateurConnecte = utilisateurRepository.findByEmail(email).orElse(null);
-
-        //Ajoute l'utilisateur et son rôle
-        model.addAttribute("utilisateur", utilsateurConnecte);
         model.addAttribute("clubs", clubService.getAllClubs());
         model.addAttribute("clubsRecents", clubService.findRecentclubs());
         model.addAttribute("evenementsAVenir",evenementService.findUpcomingEvents());

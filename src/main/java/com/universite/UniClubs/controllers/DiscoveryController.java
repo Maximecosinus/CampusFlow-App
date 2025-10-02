@@ -16,27 +16,18 @@ import java.security.Principal;
 @RequestMapping("/decouvrir")
 public class DiscoveryController {
 
-    @Autowired
-    private UtilisateurRepository utilisateurRepository;
 
     @Autowired
     private ClubService clubService;
 
     @GetMapping
-    public String showDiscoveryPortal(Model model, Principal principal ) {
-
-        String email = principal.getName();
-        Utilisateur utilisateurConnecte = utilisateurRepository.findByEmail(email).orElse(null);
-        model.addAttribute("utilisateur", utilisateurConnecte);
+    public String showDiscoveryPortal(Model model) {
 
         return "decouvrir";
     }
 
     @GetMapping("/clubs")
-    public String showClubsListPage(Model model, Principal principal ) {
-        String email = principal.getName();
-        Utilisateur utilisateurConnecte = utilisateurRepository.findByEmail(email).orElse(null);
-        model.addAttribute("utilisateur", utilisateurConnecte);
+    public String showClubsListPage(Model model) {
         model.addAttribute("allClubs",clubService.getAllClubs());
 
     return "Clubs-list";

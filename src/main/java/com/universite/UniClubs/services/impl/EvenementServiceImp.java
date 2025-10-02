@@ -6,6 +6,7 @@ import com.universite.UniClubs.repositories.EvenementRepository;
 import com.universite.UniClubs.services.EvenementService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,7 +20,7 @@ public class EvenementServiceImp implements EvenementService {
 
     @Override
     public List<Evenement> findUpcomingEvents(){
-        return evenementRepository.findTop3ByDateHeureDebutAfterOrderByDateHeureDebutAsc(LocalDateTime.now());
+        return evenementRepository.findUpcomingEventsWithClub(LocalDateTime.now(), PageRequest.of(0, 3));
     }
 
     @Override

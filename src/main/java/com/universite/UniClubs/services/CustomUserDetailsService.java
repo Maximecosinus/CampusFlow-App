@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
+// Dans CustomUserDetailsService.java
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
@@ -20,16 +21,13 @@ public class CustomUserDetailsService implements UserDetailsService {
     private UtilisateurRepository utilisateurRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws
-            UsernameNotFoundException{
-                    Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
-                            .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé avec l'email:"+email));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        //Utilisateur utilisateur = utilisateurRepository.findByEmailWithAllDetails(email)
+                //.orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé avec l'email:" + email));
+        Utilisateur utilisateur = utilisateurRepository.findByEmailForSecurity(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé avec l'email:" + email));
 
-                return new User(
-                utilisateur.getEmail(),
-                utilisateur.getMotDePasse(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_"
-                        + utilisateur.getRole().name()))
-        );
+        // On retourne notre nouvel objet qui contient l'entité complète
+        return new CustomUserDetails(utilisateur);
     }
 }

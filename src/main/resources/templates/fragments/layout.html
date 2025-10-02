@@ -28,14 +28,14 @@
 
 
             <!-- ===== MENUS POUR L'ETUDIANT ===== -->
-            <div th:if="${utilisateur.role.name() == 'ETUDIANT'}">
+            <div th:if="${utilisateurConnecte.role.name() == 'ETUDIANT'}">
                 <li><a th:href="@{/decouvrir}" class="nav-link text-white">Découvrir</a></li>
                 <li><a th:href="@{/profil/mes-clubs}" class="nav-link text-white">Mes Clubs</a></li>
                 <li><a th:href="@{/calendrier}" class="nav-link text-white">Calendrier</a></li>
             </div>
 
             <!-- ===== MENUS POUR LE CHEF DE CLUB (en plus de ceux de l'étudiant) ===== -->
-            <div th:if="${utilisateur.role.name() == 'CHEF_DE_CLUB'}">
+            <div th:if="${utilisateurConnecte.role.name() == 'CHEF_DE_CLUB'}">
                 <li><a th:href="@{/decouvrir}" class="nav-link text-white">Découvrir</a></li>
                 <li><a th:href="@{/profil/mes-clubs}" class="nav-link text-white">Mes Clubs</a></li>
                 <li><a th:href="@{/gestion-club}" class="nav-link text-white">Gestion de mon Club</a></li>
@@ -43,14 +43,14 @@
             </div>
 
             <!-- ===== MENUS POUR L'ADMINISTRATEUR ===== -->
-            <div th:if="${utilisateur.role.name() == 'ADMIN'}">
+            <div th:if="${utilisateurConnecte.role.name() == 'ADMIN'}">
                 <li><a th:href="@{/admin/clubs}" class="nav-link text-white">Gestion des Clubs</a></li>
                 <li><a th:href="@{/admin/evenements}" class="nav-link text-white">Gestion des Événements</a></li>
                 <li><a th:href="@{/admin/rapports}" class="nav-link text-white">Rapports</a></li>
             </div>
 
             <!-- ===== MENUS POUR LE SUPER ADMIN (en plus de ceux de l'admin) ===== -->
-            <div th:if="${utilisateur.role.name() == 'SUPER_ADMIN'}">
+            <div th:if="${utilisateurConnecte.role.name() == 'SUPER_ADMIN'}">
                 <li><a th:href="@{/admin/clubs}" class="nav-link text-white">Gestion des Clubs</a></li>
                 <li><a th:href="@{/admin/evenements}" class="nav-link text-white">Gestion des Événements</a></li>
                 <li><a th:href="@{/admin/utilisateurs}" class="nav-link text-white">Gestion des Utilisateurs</a></li>

@@ -1,9 +1,8 @@
 package com.universite.UniClubs.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDate;
 
 import java.time.LocalDateTime;
@@ -11,7 +10,9 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "evenements")
-@Data
+//@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Evenement {

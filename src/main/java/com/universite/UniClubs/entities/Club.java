@@ -1,11 +1,7 @@
 package com.universite.UniClubs.entities;
 
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode; // <-- Import à ajouter
-import lombok.ToString;         // <-- Import à ajouter
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +10,9 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name="clubs")
-@Data
+//@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Club {

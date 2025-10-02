@@ -10,7 +10,9 @@ import java.util.UUID;
 
 @Entity
 @Table(name="utilisateurs")
-@Data
+//@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Utilisateur {

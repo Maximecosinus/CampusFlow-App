@@ -3,6 +3,7 @@ package com.universite.UniClubs.config;
 
 import com.universite.UniClubs.entities.Utilisateur;
 import com.universite.UniClubs.repositories.UtilisateurRepository;
+import com.universite.UniClubs.services.CustomUserDetails;
 import com.universite.UniClubs.services.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -10,24 +11,26 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.security.Principal;
 
+// Dans GlobalControllerAdvice.java
+import org.springframework.security.core.Authentication; // <-- Nouvel import
+
+// Dans GlobalControllerAdvice.java
 @ControllerAdvice
 public class GlobalControllerAdvice {
 
-    @Autowired
-    private UtilisateurService utilisateurService;
+    @ModelAttribute("utilisateurConnecte")
+    public Utilisateur getUtilisateurConnecte(Authentication authentication) {
+        // AJOUTEZ CETTE LIGNE
+        System.out.println("--- GLOBAL CONTROLLER ADVICE EXÉCUTÉ ---");
 
-    @Autowired
-    private UtilisateurRepository utilisateurRepository;
-
-    @ModelAttribute("utilisateur")
-    public Utilisateur getUtilisateurConnecte(Principal principal) {
-        if (principal != null) {
-            //récupérer l'email de l'utilisateur connecté
-            String email = principal.getName();
-            //récupéerer l,objet Utilisateur complet depuis la base de données
-            Utilisateur utilsateurConnecte = utilisateurRepository.findByEmail(email).orElse(null);
-            return utilsateurConnecte;
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
+            // AJOUTEZ CETTE LIGNE
+            System.out.println("--- Instance de CustomUserDetails trouvée ! ---");
+            return ((CustomUserDetails) authentication.getPrincipal()).getUtilisateur();
         }
+
+        // AJOUTEZ CETTE LIGNE
+        System.out.println("--- ATTENTION: Pas de CustomUserDetails trouvé ou pas d'authentification. ---");
         return null;
     }
 }
