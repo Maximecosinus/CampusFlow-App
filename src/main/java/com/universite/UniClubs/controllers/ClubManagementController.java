@@ -38,4 +38,24 @@ public class ClubManagementController {
         model.addAttribute("club", clubDirige.get());
         return "gestion-club/dashboard";
     }
+
+    // NOUVELLE MÉTHODE pour la page de gestion des membres
+    @GetMapping("/membres")
+    public String showMembersManagementPage(Model model, @ModelAttribute("utilisateurConnecte") Utilisateur chefDeClub) {
+
+        // On récupère le club du chef avec la liste de ses membres déjà chargée
+        Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(chefDeClub.getId());
+
+        if (clubOptional.isEmpty()) {
+            model.addAttribute("error", "Impossible de trouver le club que vous dirigez.");
+            return "error-page";
+        }
+
+        // On passe l'objet club complet à la vue
+        model.addAttribute("club", clubOptional.get());
+
+        return "gestion-club/membres"; // Renvoie vers une nouvelle vue
+    }
+
+
 }

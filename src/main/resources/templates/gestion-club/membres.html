@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="'Membres - ' + ${club.nom}">Gestion des Membres</title>
+</head>
+<body>
+<section>
+    <div class="container-fluid">
+        <!-- En-tête de la page -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 th:text="'Membres du ' + ${club.nom}">Membres du Club</h1>
+            <!-- Lien pour revenir au dashboard du club -->
+            <a th:href="@{/gestion-club}" class="btn btn-secondary">Retour au Dashboard</a>
+        </div>
+
+        <!-- On ajoutera les demandes d'inscription en attente ici plus tard -->
+
+        <!-- Tableau des membres actuels -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h3>Liste des Membres</h3>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Photo</th>
+                        <th>Prénom</th>
+                        <th>Nom</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- On boucle sur la collection "membres" du club -->
+                    <tr th:each="membre : ${club.membres}">
+                        <td>
+                            <img th:src="${membre.photoProfil != null ? membre.photoProfil : '/images/default-avatar.png'}"
+                                 alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px;">
+                        </td>
+                        <td th:text="${membre.prenom}">Prénom</td>
+                        <td th:text="${membre.nom}">Nom</td>
+                        <td th:text="${membre.email}">email@test.com</td>
+                        <td>
+                            <!-- Bouton pour la future fonctionnalité de suppression -->
+                            <button class="btn btn-sm btn-danger">Supprimer</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- Message si le club n'a aucun membre -->
+                <div th:if="${club.membres.isEmpty()}">
+                    <p class="text-center text-muted">Votre club n'a pas encore de membres.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>
