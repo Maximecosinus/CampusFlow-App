@@ -17,5 +17,7 @@ public interface InscriptionRepository extends JpaRepository<Inscription, UUID> 
     Optional<Inscription> findByUtilisateurEmailAndClubId(String email, UUID clubId);
     // Dans InscriptionRepository.java
     boolean existsByUtilisateurEmailAndClubIdAndStatut(String email, UUID clubId, StatutInscription statut);
+    // NOUVELLE MÉTHODE
+    Optional<Inscription> findByUtilisateurAndClub(Utilisateur utilisateur, Club club);
 
 }

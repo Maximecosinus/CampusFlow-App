@@ -31,17 +31,33 @@
         <hr>
 
         <!-- Boutons d'action -->
+        <!-- Boutons d'action -->
         <div class="mt-4">
-            <!-- Logique d'affichage des boutons à implémenter plus tard -->
-            <form th:action="@{/clubs/{id}/inscrire(id=${club.id})}" method="post" th:unless="${estDejaInscrit}">
-                <button type="submit" class="btn btn-success">S'Inscrire au Club</button>
-            </form>
-        </div>
-        <div th:if="${estDejaInscrit}">
-            <p class="text-muted">Vous êtes déjà membre de ce club.</p>
-            <form th:action="@{/clubs/{id}/desinscrire(id=${club.id})}"method="post">
-                <button type="submit" class="btn btn-danger">Se désinscrire</button>
-            </form>
+            <!-- Cas 1 : L'utilisateur n'a jamais fait de demande (le statut est null) -->
+            <div th:if="${statutInscription == null}">
+                <form th:action="@{/clubs/{id}/inscrire(id=${club.id})}" method="post">
+                    <button type="submit" class="btn btn-success">S'inscrire au club</button>
+                </form>
+            </div>
+
+            <!-- Cas 2 : La demande est en attente -->
+            <div th:if="${statutInscription != null && statutInscription.name() == 'EN_ATTENTE'}">
+                <button class="btn btn-warning" disabled>Demande en attente d'approbation</button>
+            </div>
+
+            <!-- Cas 3 : La demande a été acceptée (l'utilisateur est membre) -->
+            <div th:if="${statutInscription != null && statutInscription.name() == 'ACCEPTE'}">
+                <p class="text-success fw-bold"><i class="bi bi-check-circle-fill"></i> Vous êtes membre de ce club.</p>
+                <form th:action="@{/clubs/{id}/desinscrire(id=${club.id})}" method="post">
+                    <button type="submit" class="btn btn-danger">Se désinscrire</button>
+                </form>
+            </div>
+
+            <!-- Cas 4 (Optionnel) : La demande a été refusée -->
+            <div th:if="${statutInscription != null && statutInscription.name() == 'REFUSE'}">
+                <p class="text-danger">Votre dernière demande d'adhésion a été refusée.</p>
+                <!-- On pourrait ici permettre de refaire une demande après un certain temps -->
+            </div>
         </div>
     </div>
 </section>

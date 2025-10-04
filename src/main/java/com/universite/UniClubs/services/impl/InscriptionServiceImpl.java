@@ -10,12 +10,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+import com.universite.UniClubs.repositories.UtilisateurRepository;
+import com.universite.UniClubs.repositories.ClubRepository;
+import com.universite.UniClubs.entities.Utilisateur;
+import com.universite.UniClubs.entities.Club;
+import com.universite.UniClubs.entities.Inscription;
+import java.util.Optional;
 
 @Service
 public class InscriptionServiceImpl implements InscriptionService {
 
     @Autowired
     private InscriptionRepository inscriptionRepository;
+
+    @Autowired
+    private UtilisateurRepository utilisateurRepository;
+
+    @Autowired
+    private ClubRepository clubRepository;
 
     @Override
     @Transactional
@@ -40,5 +52,24 @@ public class InscriptionServiceImpl implements InscriptionService {
             inscription.setStatut(StatutInscription.REFUSE);
             inscription.setMotifRefus(motif); // On stocke le motif
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true) // C'est une opération de lecture seule, c'est bien de le préciser
+    public Optional<StatutInscription> findStatutInscription(String emailUtilisateur, UUID idClub) {
+        // On récupère les entités
+        Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findByEmail(emailUtilisateur);
+        Optional<Club> clubOpt = clubRepository.findById(idClub);
+
+        // Si l'un ou l'autre n'existe pas, il n'y a pas d'inscription
+        if (utilisateurOpt.isEmpty() || clubOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // On cherche l'inscription
+        Optional<Inscription> inscriptionOpt = inscriptionRepository.findByUtilisateurAndClub(utilisateurOpt.get(), clubOpt.get());
+
+        // On renvoie le statut s'il existe, sinon un Optional vide
+        return inscriptionOpt.map(Inscription::getStatut);
     }
 }
