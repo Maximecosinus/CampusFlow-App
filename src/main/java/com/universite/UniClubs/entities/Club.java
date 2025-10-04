@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name="clubs")
@@ -41,10 +42,15 @@ public class Club {
         this.dateCreation= LocalDateTime.now();
     }
 
-    @ManyToMany(mappedBy = "clubsInscrits")
+    /*@ManyToMany(mappedBy = "clubsInscrits")
     @EqualsAndHashCode.Exclude // <-- AJOUTER ÇA
     @ToString.Exclude          // <-- AJOUTER ÇA
-    private Set<Utilisateur> membres = new HashSet<>();
+    private Set<Utilisateur> membres = new HashSet<>();*/
+
+    // AJOUTER LA NOUVELLE RELATION
+    @OneToMany(mappedBy = "club", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private Set<Inscription> inscriptions = new HashSet<>();
 
     @OneToMany(mappedBy = "club")
     @EqualsAndHashCode.Exclude // <-- AJOUTER ÇA

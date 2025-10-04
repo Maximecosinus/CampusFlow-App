@@ -3,6 +3,7 @@ package com.universite.UniClubs.controllers;
 
 import com.universite.UniClubs.dto.UserProfileDto;
 import com.universite.UniClubs.entities.Club;
+import com.universite.UniClubs.entities.Inscription;
 import com.universite.UniClubs.entities.Utilisateur;
 import com.universite.UniClubs.repositories.UtilisateurRepository;
 import com.universite.UniClubs.services.UtilisateurService;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/profil")
@@ -33,8 +35,14 @@ public class UserController {
         if (utilisateurConnecte == null) {
             return "redirect:/login";
         }
-        //Ajouter la liste des clubs de l'utilissteur au modèle
-        model.addAttribute("mesClubs", utilisateurConnecte.getClubsInscrits());
+        Set<Inscription> mesInscriptions = utilisateurConnecte.getInscriptions();
+
+// On transforme ce Set<Inscription> en un Set<Club>
+        Set<Club> mesClubs = mesInscriptions.stream()
+                .map(Inscription::getClub) // Pour chaque objet Inscription, on extrait l'objet Club
+                .collect(Collectors.toSet()); // On rassemble les clubs dans un nouveau Set
+
+        model.addAttribute("mesClubs", mesClubs);
 
         return "mes-clubs";
     }

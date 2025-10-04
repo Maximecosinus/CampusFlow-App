@@ -11,11 +11,20 @@ import java.util.UUID;
 public interface UtilisateurService {
 
     Utilisateur creerEtudiant(UserRegistrationDto registrationDto);
+
     void inscrireUtilisateurAuclub(String emailUtilisateur, UUID idClub);
+
     boolean estInscrit(String emailUtilisateur, UUID idClub);
+
     void desinscrireUtilisateurDuClub(String emailUtilisateur, UUID idClub);
-    Optional<Utilisateur> findByEmailWithClubsInscrits(String email);
+
     Optional<UserProfileDto> getUserProfileByEmail(String email);
+
     void updateUserProfile(String email, UserProfileDto profileDto);
+
     void updateUserPhoto(String email, MultipartFile photo);
+
+    // --- CORRECTION : La méthode suivante a été supprimée ---
+    // Elle était basée sur l'ancienne architecture.
+    // Optional<Utilisateur> findByEmailWithClubsInscrits(String email);
 }

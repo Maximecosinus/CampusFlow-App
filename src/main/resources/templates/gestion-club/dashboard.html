@@ -14,22 +14,36 @@
 
         <hr>
 
-        <!-- Ici, nous ajouterons les statistiques et les raccourcis décrits dans ton cahier des charges -->
         <div class="row mt-4">
             <div class="col-md-4">
                 <div class="card text-center">
                     <div class="card-body">
-                        <!-- On affiche le nombre de membres -->
-                        <h5 class="card-title">Membres Inscrits</h5>
-                        <p class="display-4" th:text="${#lists.size(club.membres)}">0</p>
+                        <!--
+                           CORRECTION : On affiche le nombre de vrais membres.
+                           On prend la liste des inscriptions, on filtre pour ne garder que
+                           celles qui ont le statut 'ACCEPTE', puis on en prend la taille.
+                        -->
+                        <h5 class="card-title">Membres Actifs</h5>
+                        <p class="display-4" th:text="${club.inscriptions.?[statut.name() == 'ACCEPTE'].size()}">0</p>
                     </div>
                 </div>
             </div>
+
+            <!-- Amélioration : On peut aussi afficher les demandes en attente -->
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Demandes en Attente</h5>
+                        <p class="display-4" th:text="${club.inscriptions.?[statut.name() == 'EN_ATTENTE'].size()}">0</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- On ajoutera d'autres cartes pour les événements à venir, etc. -->
         </div>
         <div class="mt-5">
             <h2>Actions rapides</h2>
-            <a th:href="@{/gestion-club/membres}" class="btn btn-primary">Gérer les membres</a>
+            <a th:href="@{/gestion-club/membres}" class="btn btn-primary">Gérer les inscriptions</a>
             <!-- On ajoutera d'autres boutons ici (Gérer les événements, etc.) -->
         </div>
     </div>

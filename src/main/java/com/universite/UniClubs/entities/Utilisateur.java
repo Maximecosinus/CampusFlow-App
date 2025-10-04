@@ -7,7 +7,7 @@ import lombok.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-
+import java.util.Set;
 @Entity
 @Table(name="utilisateurs")
 //@Data
@@ -44,13 +44,8 @@ public class Utilisateur {
     @OneToMany(mappedBy = "chefClub")
     private Set <Club> clubsDiriges = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name= "inscriptions_club",
-            joinColumns = @JoinColumn(name = "utilisateur_id"),
-            inverseJoinColumns = @JoinColumn(name = "club_id")
-    )
-    @EqualsAndHashCode.Exclude // <-- AJOUTER ÇA
-    @ToString.Exclude          // <-- AJOUTER ÇA
-    private Set<Club> clubsInscrits = new HashSet<>();
+    // AJOUTER LA NOUVELLE RELATION
+    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private Set<Inscription> inscriptions = new HashSet<>();
 }

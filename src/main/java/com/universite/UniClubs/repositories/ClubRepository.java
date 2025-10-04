@@ -15,9 +15,7 @@ import java.util.List;
 @Repository
 public interface ClubRepository extends JpaRepository<Club, UUID> {
 
-    List<Club> findTop3ByOrderByDateCreationDesc();
-    @Query("SELECT c FROM Club c LEFT JOIN FETCH c.membres LEFT JOIN FETCH c.evenementsOrganises WHERE c.id = :id")
-    Optional<Club> findByIdWithDetails(UUID id);
+
 
     @Query("SELECT c FROM Club c LEFT JOIN FETCH c.chefClub ORDER BY c.dateCreation DESC")
     List<Club> findRecentClubsWithChef(Pageable pageable);
@@ -26,8 +24,19 @@ public interface ClubRepository extends JpaRepository<Club, UUID> {
     @Query("SELECT DISTINCT c FROM Club c LEFT JOIN FETCH c.chefClub")
     List<Club> findAll();
 
+    // PREMIÈRE REQUÊTE À CORRIGER
     @Query("SELECT c FROM Club c " +
-            "LEFT JOIN FETCH c.membres " +
+            "LEFT JOIN FETCH c.inscriptions i " +      // On charge les inscriptions
+            "LEFT JOIN FETCH i.utilisateur " +           // Pour chaque inscription, on charge l'utilisateur
+            "LEFT JOIN FETCH c.evenementsOrganises " +
+            "WHERE c.id = :id")
+    Optional<Club> findByIdWithDetails(@Param("id") UUID id); // N'oubliez pas @Param("id")
+
+
+    // DEUXIÈME REQUÊTE À CORRIGER
+    @Query("SELECT c FROM Club c " +
+            "LEFT JOIN FETCH c.inscriptions i " +      // On charge les inscriptions
+            "LEFT JOIN FETCH i.utilisateur " +           // Pour chaque inscription, on charge l'utilisateur
             "LEFT JOIN FETCH c.evenementsOrganises " +
             "WHERE c.chefClub.id = :chefId")
     Optional<Club> findClubWithDetailsByChefId(@Param("chefId") UUID chefId);

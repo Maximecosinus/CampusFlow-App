@@ -10,50 +10,66 @@
         <!-- En-tête de la page -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 th:text="'Membres du ' + ${club.nom}">Membres du Club</h1>
-            <!-- Lien pour revenir au dashboard du club -->
             <a th:href="@{/gestion-club}" class="btn btn-secondary">Retour au Dashboard</a>
         </div>
 
-        <!-- On ajoutera les demandes d'inscription en attente ici plus tard -->
-
-        <!-- Tableau des membres actuels -->
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <h3>Liste des Membres</h3>
+        <!-- SECTION DES DEMANDES EN ATTENTE -->
+        <div class="card shadow-sm mb-5">
+            <div class="card-header bg-warning">
+                <h3>Demandes d'adhésion en attente</h3>
             </div>
             <div class="card-body">
-                <table class="table table-hover">
+                <!-- On utilise #lists.isEmpty() et #lists.size() de Thymeleaf pour vérifier la taille de la liste filtrée -->
+                <div th:if="${#lists.isEmpty(club.inscriptions.?[statut.name() == 'EN_ATTENTE'])}">
+                    <p class="text-center text-muted">Aucune demande en attente.</p>
+                </div>
+                <table class="table table-hover" th:unless="${#lists.isEmpty(club.inscriptions.?[statut.name() == 'EN_ATTENTE'])}">
                     <thead>
                     <tr>
-                        <th>Photo</th>
-                        <th>Prénom</th>
-                        <th>Nom</th>
-                        <th>Email</th>
+                        <th>Demandeur</th>
+                        <th>Date de la demande</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <!-- On boucle sur la collection "membres" du club -->
-                    <tr th:each="membre : ${club.membres}">
+                    <!-- On boucle uniquement sur les inscriptions avec le statut EN_ATTENTE -->
+                    <tr th:each="inscription : ${club.inscriptions.?[statut.name() == 'EN_ATTENTE']}">
+                        <td th:text="${inscription.utilisateur.prenom} + ' ' + ${inscription.utilisateur.nom}"></td>
+                        <td th:text="${#temporals.format(inscription.dateDemande, 'dd MMM yyyy')}"></td>
                         <td>
-                            <img th:src="${membre.photoProfil != null ? membre.photoProfil : '/images/default-avatar.png'}"
-                                 alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px;">
-                        </td>
-                        <td th:text="${membre.prenom}">Prénom</td>
-                        <td th:text="${membre.nom}">Nom</td>
-                        <td th:text="${membre.email}">email@test.com</td>
-                        <td>
-                            <!-- Bouton pour la future fonctionnalité de suppression -->
-                            <button class="btn btn-sm btn-danger">Supprimer</button>
+                            <!-- Formulaire pour ACCEPTER -->
+                            <form th:action="@{/gestion-club/membres/approuver/{inscriptionId}(inscriptionId=${inscription.id})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success">Approuver</button>
+                            </form>
+                            <!-- Formulaire pour REFUSER -->
+                            <form th:action="@{/gestion-club/membres/refuser/{inscriptionId}(inscriptionId=${inscription.id})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-danger">Refuser</button>
+                            </form>
                         </td>
                     </tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
 
-                <!-- Message si le club n'a aucun membre -->
-                <div th:if="${club.membres.isEmpty()}">
-                    <p class="text-center text-muted">Votre club n'a pas encore de membres.</p>
+        <!-- SECTION DES MEMBRES ACTIFS -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h3>Liste des Membres Actifs</h3>
+            </div>
+            <div class="card-body">
+                <!-- Même logique de filtrage pour les membres ACCEPTES -->
+                <div th:if="${#lists.isEmpty(club.inscriptions.?[statut.name() == 'ACCEPTE'])}">
+                    <p class="text-center text-muted">Votre club n'a pas encore de membres actifs.</p>
                 </div>
+                <table class="table table-hover" th:unless="${#lists.isEmpty(club.inscriptions.?[statut.name() == 'ACCEPTE'])}">
+                    <!-- ... (le tableau des membres que nous avions avant, mais qui boucle sur les inscriptions acceptées) ... -->
+                    <tbody>
+                    <tr th:each="inscription : ${club.inscriptions.?[statut.name() == 'ACCEPTE']}">
+                        <!-- ... (afficher les colonnes via inscription.utilisateur) ... -->
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

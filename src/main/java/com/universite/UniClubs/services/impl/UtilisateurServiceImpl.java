@@ -1,28 +1,27 @@
 package com.universite.UniClubs.services.impl;
 
-
 import com.universite.UniClubs.dto.UserProfileDto;
 import com.universite.UniClubs.dto.UserRegistrationDto;
-import com.universite.UniClubs.entities.Club;
-import com.universite.UniClubs.entities.Role;
-import com.universite.UniClubs.entities.Utilisateur;
+import com.universite.UniClubs.entities.*;
 import com.universite.UniClubs.repositories.ClubRepository;
+import com.universite.UniClubs.repositories.InscriptionRepository;
 import com.universite.UniClubs.repositories.UtilisateurRepository;
 import com.universite.UniClubs.services.FileStorageService;
 import com.universite.UniClubs.services.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // 1. Importer l'annotation
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-
 
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class UtilisateurServiceImpl implements UtilisateurService {
+
+    @Autowired
+    private InscriptionRepository inscriptionRepository;
 
     @Autowired
     private UtilisateurRepository utilisateurRepository;
@@ -37,74 +36,71 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     private FileStorageService fileStorageService;
 
     @Override
-    public Utilisateur creerEtudiant(UserRegistrationDto registrationDto){
-
-        // On crée une instance de l'entité Utilisateur
+    public Utilisateur creerEtudiant(UserRegistrationDto registrationDto) {
         Utilisateur utilisateur = new Utilisateur();
-        // On mappe les données du DTO vers l'entité
         utilisateur.setNom(registrationDto.getNom());
         utilisateur.setPrenom(registrationDto.getPrenom());
         utilisateur.setEmail(registrationDto.getEmail());
-        // On crypte le mot de passe et on le mappe dans l'utilsateur
         utilisateur.setMotDePasse(passwordEncoder.encode(registrationDto.getMotDePasse()));
-        // On s'assure que le rôle est bien ETUDIANT
         utilisateur.setRole(Role.ETUDIANT);
-        // On sauvegarde l'utilsateur dans la base de donnée
         return utilisateurRepository.save(utilisateur);
-
-    }
-
-    @Override
-    @Transactional // L'annotation reste cruciale
-    public void inscrireUtilisateurAuclub(String userEmail, UUID clubId) {
-        // Étape 1: Charger les entités AVEC LEURS COLLECTIONS en une seule fois.
-        Utilisateur utilisateur = utilisateurRepository.findByEmailWithClubsInscrits(userEmail)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé pour l'email: " + userEmail));
-
-        Club club = clubRepository.findByIdWithDetails(clubId) // On réutilise la méthode que vous avez déjà créée !
-                .orElseThrow(() -> new RuntimeException("Club non trouvé pour l'ID: " + clubId));
-
-        // Étape 2: Maintenant que tout est chargé, la modification est une simple
-        // opération en mémoire, sans risque de chargement paresseux conflictuel.
-        utilisateur.getClubsInscrits().add(club);
-        club.getMembres().add(utilisateur);
-
-        // La transaction se termine ici et Hibernate sauvegarde les changements.
     }
 
     @Override
     @Transactional
-    public void desinscrireUtilisateurDuClub(String emailUtilisateur, UUID idClub){
-        Utilisateur utilisateur = utilisateurRepository.findByEmailWithClubsInscrits(emailUtilisateur).orElseThrow(
-                () -> new RuntimeException("Utilisateur non trouvé")
-        );
+    public void inscrireUtilisateurAuclub(String emailUtilisateur, UUID idClub) {
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(emailUtilisateur)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+        Club club = clubRepository.findById(idClub)
+                .orElseThrow(() -> new RuntimeException("Club non trouvé"));
 
-        //On trouve le club à retirer de la liste
-        Club clubAretirer = utilisateur.getClubsInscrits().stream()
-                .filter(club -> club.getId().equals(idClub))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("L'utilisateur n'est pas inscrit à ce club"));
+        boolean dejaInscritOuEnAttente = inscriptionRepository.existsByUtilisateurAndClub(utilisateur, club);
+        if (dejaInscritOuEnAttente) {
+            // Idéalement, lancer une exception personnalisée ici
+            System.out.println("L'utilisateur a déjà une demande en cours ou est déjà membre.");
+            return;
+        }
 
-        //On retire le club de la collection
-        utilisateur.getClubsInscrits().remove(clubAretirer);
+        Inscription nouvelleInscription = new Inscription();
+        nouvelleInscription.setUtilisateur(utilisateur);
+        nouvelleInscription.setClub(club);
+        nouvelleInscription.setStatut(StatutInscription.EN_ATTENTE);
+
+        inscriptionRepository.save(nouvelleInscription);
+    }
+
+    @Override
+    @Transactional
+    public void desinscrireUtilisateurDuClub(String emailUtilisateur, UUID idClub) {
+        // --- CORRECTION : Logique entièrement réécrite ---
+        // On trouve l'inscription spécifique qui lie cet utilisateur à ce club.
+        Inscription inscription = inscriptionRepository.findByUtilisateurEmailAndClubId(emailUtilisateur, idClub)
+                .orElseThrow(() -> new RuntimeException("Inscription non trouvée pour cet utilisateur et ce club"));
+
+        // Et on la supprime de la base de données. C'est simple et propre.
+        inscriptionRepository.delete(inscription);
     }
 
     @Override
     public boolean estInscrit(String emailUtilisateur, UUID idClub) {
-        return utilisateurRepository.isUserSubscribedToClub(emailUtilisateur, idClub);
-
+        // --- CORRECTION : Logique réécrite pour utiliser InscriptionRepository ---
+        // On vérifie s'il existe une inscription ACCEPTÉE pour cet utilisateur et ce club.
+        return inscriptionRepository.existsByUtilisateurEmailAndClubIdAndStatut(emailUtilisateur, idClub, StatutInscription.ACCEPTE);
     }
 
+    // --- CORRECTION : La méthode suivante a été supprimée ---
+    /*
     @Override
     public Optional<Utilisateur> findByEmailWithClubsInscrits(String email) {
         return utilisateurRepository.findByEmailWithClubsInscrits(email);
     }
+    */
 
     @Override
     public Optional<UserProfileDto> getUserProfileByEmail(String email) {
         return utilisateurRepository.findByEmail(email)
                 .map(utilisateur -> {
-                    UserProfileDto dto= new UserProfileDto();
+                    UserProfileDto dto = new UserProfileDto();
                     dto.setNom(utilisateur.getNom());
                     dto.setPrenom(utilisateur.getPrenom());
                     dto.setBio(utilisateur.getBio());
@@ -115,12 +111,10 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     @Override
     @Transactional
     public void updateUserProfile(String email, UserProfileDto profileDto) {
-        //on récupère l'utilisateur dans la base de données
         Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
-        // On met à jour ses propriétés avvec les valeurs du DTO
-        utilisateur.setNom((profileDto.getNom()));
+        utilisateur.setNom(profileDto.getNom());
         utilisateur.setPrenom(profileDto.getPrenom());
         utilisateur.setBio(profileDto.getBio());
     }
@@ -128,14 +122,9 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     @Override
     @Transactional
     public void updateUserPhoto(String email, MultipartFile photo) {
-        //On utilise notre service pour sauvegarder la nouvelle photo
         String photoPath = fileStorageService.storeFile(photo, "avatars");
-
-        // Omn récupère l'utilisateur
-        Utilisateur utilisateur = utilisateurRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-
-        //On met à jour le chemin de sa photo de profil
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
         utilisateur.setPhotoProfil(photoPath);
     }
-
 }

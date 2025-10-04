@@ -12,9 +12,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import com.universite.UniClubs.services.InscriptionService;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.security.Principal;
 import java.util.Optional;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/gestion-club")
@@ -23,6 +27,9 @@ public class ClubManagementController {
 
     @Autowired
     private ClubRepository clubRepository;
+
+    @Autowired
+    private InscriptionService inscriptionService; // Injecter le nouveau service
 
     @GetMapping
     public String showManagementDashboard(Model model, @ModelAttribute("utilisateurConnecte") Utilisateur chefDeClub) {
@@ -55,6 +62,23 @@ public class ClubManagementController {
         model.addAttribute("club", clubOptional.get());
 
         return "gestion-club/membres"; // Renvoie vers une nouvelle vue
+    }
+
+    // NOUVELLE MÉTHODE pour approuver
+    @PostMapping("/membres/approuver/{inscriptionId}")
+    public String approuverMembre(@PathVariable UUID inscriptionId) {
+        inscriptionService.approuverInscription(inscriptionId);
+        // On redirige vers la même page pour voir le changement
+        return "redirect:/gestion-club/membres";
+    }
+
+    // NOUVELLE MÉTHODE pour refuser
+    @PostMapping("/membres/refuser/{inscriptionId}")
+    public String refuserMembre(@PathVariable UUID inscriptionId) {
+        // Pour l'instant, on met un motif par défaut.
+        // Plus tard, on pourra ajouter une modale pour demander le motif au chef de club.
+        inscriptionService.refuserInscription(inscriptionId, "Refus par le chef du club.");
+        return "redirect:/gestion-club/membres";
     }
 
 
