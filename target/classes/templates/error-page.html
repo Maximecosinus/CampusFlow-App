@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Oups ! Une erreur est survenue</title>
+</head>
+<body>
+<h1>Quelque chose s'est mal passé !</h1>
+<p>Désolé, une erreur inattendue est survenue.</p>
+
+<!-- Ces attributs sont automatiquement fournis par Spring Boot à la page d'erreur -->
+<p>
+    <b>Date :</b> <span th:text="${timestamp}"></span><br/>
+    <b>Erreur :</b> <span th:text="${error}"></span><br/>
+    <b>Status :</b> <span th:text="${status}"></span><br/>
+    <b>Message :</b> <span th:text="${message}"></span><br/>
+    <b>Chemin :</b> <span th:text="${path}"></span>
+</p>
+
+<!-- ATTENTION: N'affichez la trace complète qu'en développement ! -->
+<h2>Trace de l'erreur (pour le débogage)</h2>
+<pre th:text="${trace}"></pre>
+</body>
+</html>

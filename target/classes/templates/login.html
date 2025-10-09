@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Connexion- CampusFlow</title>
+</head>
+<body>
+<h1>Connexion</h1>
+<div th:if="${param.error}">
+    <div style="color: red">Email ou mot de passe invalide</div>
+</div>
+<div th:if="${param.logout}">
+    <div style="color: blue">Vous avez été déconnecté</div>
+</div>
+<form th:action="@{/login}" method="post">
+    <div>
+        <label for="username">Email</label>
+        <input id="username" type="text" name="username" required autofocus="autofocus"/>
+    </div>
+    <div>
+        <label for="password">Mot de passe</label>
+        <input id="password" type="password" name="password" required/>
+    </div>
+    <div>
+        <button type="submit">Se connecter</button>
+    </div>
+</form>
+</body>
+</html>
