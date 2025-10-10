@@ -45,8 +45,8 @@
                     <div class="card-body">
                         <i class="fas fa-calendar fa-2x text-info mb-2"></i>
                         <h5 class="card-title">Événements</h5>
-                        <p class="display-4 text-info mb-0">0</p>
-                        <small class="text-muted">À venir</small>
+                        <p class="display-4 text-info mb-0" th:text="${club.evenementsOrganises.size()}">0</p>
+                        <small class="text-muted">Total</small>
                     </div>
                 </div>
             </div>
@@ -108,7 +108,7 @@
                             <a th:href="@{/gestion-club/membres}" class="btn btn-primary">
                                 <i class="fas fa-users"></i> Gérer les Membres
                             </a>
-                            <a href="#" class="btn btn-success">
+                            <a th:href="@{/gestion-club/evenements}" class="btn btn-success">
                                 <i class="fas fa-plus"></i> Créer un Événement
                             </a>
                             <a href="#" class="btn btn-info">

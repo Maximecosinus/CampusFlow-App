@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="'Gestion des Événements - ' + ${club.nom}">Gestion des Événements</title>
+</head>
+<body>
+<section>
+    <div class="container-fluid">
+        <!-- En-tête de la page -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1>Mes Événements</h1>
+                <p class="text-muted" th:text="'Club : ' + ${club.nom}">Club : Nom du Club</p>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a th:href="@{/gestion-club}">Accueil</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Gestion Événements</li>
+                    </ol>
+                </nav>
+            </div>
+            <div>
+                <a th:href="@{/gestion-club/evenements/creer}" class="btn btn-success me-2">
+                    <i class="fas fa-plus"></i> Créer un nouvel événement
+                </a>
+                <a th:href="@{/gestion-club}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour à l'Accueil
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages de succès/erreur -->
+        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:if="${param.success[0] == 'draft-saved'}">Événement enregistré en brouillon avec succès !</span>
+            <span th:if="${param.success[0] == 'event-published'}">Événement publié avec succès ! Les membres du club ont été notifiés par email.</span>
+            <span th:if="${param.success[0] == 'draft-updated'}">Événement mis à jour en brouillon avec succès !</span>
+            <span th:if="${param.success[0] == 'event-updated-and-published'}">Événement mis à jour et publié avec succès ! Les membres du club ont été notifiés par email.</span>
+            <span th:if="${param.success[0] == 'event-unpublished'}">Événement mis en brouillon avec succès !</span>
+            <span th:if="${param.success[0] == 'event-deleted'}">Événement supprimé avec succès !</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:if="${param.error[0] == 'invalid-action'}">Action invalide. Veuillez réessayer.</span>
+            <span th:if="${param.error[0] == 'event-not-found'}">Événement non trouvé.</span>
+            <span th:if="${param.error[0] == 'club-not-found'}">Impossible de trouver le club que vous dirigez.</span>
+            <span th:if="${param.error[0] == 'unauthorized'}">Vous n'avez pas l'autorisation d'effectuer cette action.</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Tableau des événements -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-calendar-alt"></i> Liste des événements
+                    <span class="badge bg-primary ms-2" th:text="${club.evenementsOrganises.size()}">0</span>
+                </h4>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(club.evenementsOrganises)}">
+                    <div class="text-center py-5">
+                        <i class="fas fa-calendar-plus fa-4x text-muted mb-3"></i>
+                        <h5 class="text-muted">Aucun événement créé</h5>
+                        <p class="text-muted">Commencez par créer votre premier événement pour votre club.</p>
+                        <a th:href="@{/gestion-club/evenements/creer}" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Créer mon premier événement
+                        </a>
+                    </div>
+                </div>
+                
+                <div th:unless="${#lists.isEmpty(club.evenementsOrganises)}">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Titre</th>
+                                    <th>Date</th>
+                                    <th>Lieu</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="evenement : ${club.evenementsOrganises}">
+                                    <td>
+                                        <div>
+                                            <strong th:text="${evenement.titre}"></strong>
+                                            <br>
+                                            <small class="text-muted" th:text="${evenement.description != null ? (#strings.abbreviate(evenement.description, 50)) : 'Aucune description'}"></small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <i class="fas fa-calendar text-primary me-1"></i>
+                                            <span th:text="${#temporals.format(evenement.dateHeureDebut, 'dd MMM yyyy')}"></span>
+                                            <br>
+                                            <i class="fas fa-clock text-secondary me-1"></i>
+                                            <small class="text-muted" th:text="${#temporals.format(evenement.dateHeureDebut, 'HH:mm')}"></small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div th:if="${evenement.lieu != null}">
+                                            <i class="fas fa-map-marker-alt text-danger me-1"></i>
+                                            <span th:text="${evenement.lieu}"></span>
+                                        </div>
+                                        <div th:unless="${evenement.lieu != null}">
+                                            <small class="text-muted">Non spécifié</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span th:if="${evenement.statut.name() == 'BROUILLON'}" 
+                                              class="badge bg-warning text-dark">
+                                            <i class="fas fa-edit me-1"></i>Brouillon
+                                        </span>
+                                        <span th:if="${evenement.statut.name() == 'PUBLIE'}" 
+                                              class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Publié
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons d-flex flex-wrap gap-1">
+                                            <!-- Bouton Modifier -->
+                                            <a th:href="@{/gestion-club/evenements/{id}/modifier(id=${evenement.id})}" 
+                                               class="btn btn-primary btn-sm px-2 py-1" 
+                                               title="Modifier cet événement">
+                                                <i class="fas fa-edit me-1"></i>Modifier
+                                            </a>
+                                            
+                                            <!-- Bouton Publier/Dépublier selon le statut -->
+                                            <form th:if="${evenement.statut.name() == 'BROUILLON'}" 
+                                                  th:action="@{/gestion-club/evenements/{id}/toggle-status(id=${evenement.id})}" 
+                                                  method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-success btn-sm px-2 py-1" 
+                                                        title="Publier cet événement">
+                                                    <i class="fas fa-bullhorn me-1"></i>Publier
+                                                </button>
+                                            </form>
+                                            <form th:if="${evenement.statut.name() == 'PUBLIE'}" 
+                                                  th:action="@{/gestion-club/evenements/{id}/toggle-status(id=${evenement.id})}" 
+                                                  method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-warning btn-sm px-2 py-1" 
+                                                        title="Mettre en brouillon">
+                                                    <i class="fas fa-eye-slash me-1"></i>Dépublier
+                                                </button>
+                                            </form>
+                                            
+                                            <!-- Bouton Voir -->
+                                            <a th:href="@{/gestion-club/evenements/{id}(id=${evenement.id})}" 
+                                               class="btn btn-info btn-sm px-2 py-1" 
+                                               title="Voir les détails de cet événement">
+                                                <i class="fas fa-eye me-1"></i>Voir
+                                            </a>
+                                            
+                                            <!-- Bouton Supprimer -->
+                                            <form th:action="@{/gestion-club/evenements/{id}/supprimer(id=${evenement.id})}" 
+                                                  method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-danger btn-sm px-2 py-1" 
+                                                        title="Supprimer cet événement"
+                                                        onclick="return confirmDeleteEvent('[[${evenement.titre}]]')">
+                                                    <i class="fas fa-trash me-1"></i>Supprimer
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques des événements -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card text-center border-primary">
+                    <div class="card-body">
+                        <i class="fas fa-calendar-check fa-2x text-primary mb-2"></i>
+                        <h5 class="card-title">Événements Publiés</h5>
+                        <p class="display-4 text-primary mb-0" 
+                           th:text="${club.evenementsOrganises.?[statut.name() == 'PUBLIE'].size()}">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center border-warning">
+                    <div class="card-body">
+                        <i class="fas fa-edit fa-2x text-warning mb-2"></i>
+                        <h5 class="card-title">Brouillons</h5>
+                        <p class="display-4 text-warning mb-0" 
+                           th:text="${club.evenementsOrganises.?[statut.name() == 'BROUILLON'].size()}">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center border-info">
+                    <div class="card-body">
+                        <i class="fas fa-calendar-alt fa-2x text-info mb-2"></i>
+                        <h5 class="card-title">Total Événements</h5>
+                        <p class="display-4 text-info mb-0" th:text="${club.evenementsOrganises.size()}">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Ajout des icônes Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<!-- Styles personnalisés -->
+<style>
+    .action-buttons .btn {
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .action-buttons .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .action-buttons {
+        min-width: 300px;
+    }
+    
+    .badge {
+        font-size: 0.875rem;
+        padding: 0.5em 0.75em;
+    }
+</style>
+
+<!-- Script pour les confirmations -->
+<script>
+    function confirmDeleteEvent(eventTitle) {
+        return confirm('Êtes-vous sûr de vouloir supprimer l\'événement "' + eventTitle + '" ? Cette action est irréversible.');
+    }
+</script>
+</body>
+</html>

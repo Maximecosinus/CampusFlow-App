@@ -2,8 +2,12 @@ package com.universite.UniClubs.controllers;
 
 
 import com.universite.UniClubs.entities.Club;
+import com.universite.UniClubs.entities.Evenement;
+import com.universite.UniClubs.entities.StatutEvenement;
 import com.universite.UniClubs.entities.Utilisateur;
 import com.universite.UniClubs.repositories.ClubRepository;
+import com.universite.UniClubs.services.EvenementService;
+import com.universite.UniClubs.services.EmailNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -14,7 +18,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.universite.UniClubs.services.InscriptionService;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,11 +35,30 @@ import java.util.UUID;
 @PreAuthorize("hasRole('CHEF_DE_CLUB')")
 public class ClubManagementController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ClubManagementController.class);
+
     @Autowired
     private ClubRepository clubRepository;
 
     @Autowired
     private InscriptionService inscriptionService; // Injecter le nouveau service
+
+    @Autowired
+    private EvenementService evenementService;
+
+    @Autowired
+    private EmailNotificationService emailNotificationService;
+
+    // Méthode utilitaire pour récupérer l'utilisateur connecté de manière sécurisée
+    private Utilisateur getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof com.universite.UniClubs.services.CustomUserDetails) {
+            com.universite.UniClubs.services.CustomUserDetails userDetails = 
+                (com.universite.UniClubs.services.CustomUserDetails) authentication.getPrincipal();
+            return userDetails.getUtilisateur();
+        }
+        throw new RuntimeException("Utilisateur non authentifié");
+    }
 
     @GetMapping
     public String showManagementDashboard(Model model, @ModelAttribute("utilisateurConnecte") Utilisateur chefDeClub) {
@@ -126,6 +157,424 @@ public class ClubManagementController {
         // TODO: Implémenter la logique de promotion (par exemple, devenir vice-président)
         // Pour l'instant, on redirige avec un message de succès
         return "redirect:/gestion-club/membres?success=member-promoted";
+    }
+
+    // NOUVELLE MÉTHODE pour la page de gestion des événements
+    @GetMapping("/evenements")
+    public String showEventsManagementPage(Model model, @ModelAttribute("utilisateurConnecte") Utilisateur chefDeClub) {
+        // Récupérer le club du chef avec la liste de ses événements déjà chargée
+        Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(chefDeClub.getId());
+
+        if (clubOptional.isEmpty()) {
+            model.addAttribute("error", "Impossible de trouver le club que vous dirigez.");
+            return "error-page";
+        }
+
+        // On passe l'objet club complet à la vue
+        model.addAttribute("club", clubOptional.get());
+
+        return "gestion-club/gestion-evenements";
+    }
+
+    // NOUVELLE MÉTHODE pour afficher le formulaire de création d'événement
+    @GetMapping("/evenements/creer")
+    public String showCreateEventForm(Model model, @ModelAttribute("utilisateurConnecte") Utilisateur chefDeClub) {
+        // Récupérer le club du chef
+        Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(chefDeClub.getId());
+
+        if (clubOptional.isEmpty()) {
+            model.addAttribute("error", "Impossible de trouver le club que vous dirigez.");
+            return "error-page";
+        }
+
+        model.addAttribute("club", clubOptional.get());
+        return "gestion-club/creer-evenement";
+    }
+
+    // NOUVELLE MÉTHODE pour traiter la soumission du formulaire de création d'événement
+    @PostMapping("/evenements/creer")
+    public String createEvent(@RequestParam String titre,
+                             @RequestParam(required = false) String description,
+                             @RequestParam(required = false) String lieu,
+                             @RequestParam String dateEvenement,
+                             @RequestParam String heureEvenement,
+                             @RequestParam(required = false) Integer capaciteMax,
+                             @RequestParam String action,
+                             @ModelAttribute("utilisateurConnecte") Utilisateur chefDeClub,
+                             Model model) {
+        
+        // Récupérer le club du chef
+        Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(chefDeClub.getId());
+        
+        if (clubOptional.isEmpty()) {
+            model.addAttribute("error", "Impossible de trouver le club que vous dirigez.");
+            return "error-page";
+        }
+        
+        Club club = clubOptional.get();
+        
+        try {
+            // Créer l'objet événement
+            Evenement evenement = new Evenement();
+            evenement.setTitre(titre);
+            evenement.setDescription(description);
+            evenement.setLieu(lieu);
+            evenement.setCapaciteMax(capaciteMax);
+            evenement.setClub(club);
+            
+            // Parser la date et l'heure
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            String dateTimeString = dateEvenement + " " + heureEvenement;
+            LocalDateTime dateHeureDebut = LocalDateTime.parse(dateTimeString, formatter);
+            evenement.setDateHeureDebut(dateHeureDebut);
+            
+            // Déterminer le statut selon l'action
+            if ("draft".equals(action)) {
+                evenement.setStatut(StatutEvenement.BROUILLON);
+                evenementService.saveEvent(evenement);
+                return "redirect:/gestion-club/evenements?success=draft-saved";
+            } else if ("publish".equals(action)) {
+                evenement.setStatut(StatutEvenement.PUBLIE);
+                Evenement savedEvent = evenementService.saveEvent(evenement);
+                // Envoyer les emails de notification à tous les membres du club
+                emailNotificationService.notifyClubMembersAboutNewEvent(savedEvent, club);
+                return "redirect:/gestion-club/evenements?success=event-published";
+            }
+            
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur lors de la création de l'événement: " + e.getMessage());
+            model.addAttribute("club", club);
+            return "gestion-club/creer-evenement";
+        }
+        
+        return "redirect:/gestion-club/evenements?error=invalid-action";
+    }
+
+    // NOUVELLE MÉTHODE pour afficher les détails d'un événement
+    @GetMapping("/evenements/{id}")
+    public String viewEventDetails(@PathVariable UUID id, Model model) {
+        logger.info("=== DÉBOGAGE DÉTAILS ÉVÉNEMENT ===");
+        logger.info("ID de l'événement demandé: {}", id);
+        
+        Utilisateur chefDeClub = getCurrentUser();
+        logger.info("Chef de club connecté: {} (ID: {})", chefDeClub.getEmail(), chefDeClub.getId());
+        
+        Optional<Evenement> evenementOptional = evenementService.findByIdWithClub(id);
+        
+        if (evenementOptional.isEmpty()) {
+            logger.warn("Événement non trouvé: {}", id);
+            model.addAttribute("error", "Événement non trouvé.");
+            return "error-page";
+        }
+        
+        Evenement evenement = evenementOptional.get();
+        logger.info("Événement trouvé: {} (ID: {})", evenement.getTitre(), evenement.getId());
+        logger.info("Club de l'événement: {} (ID: {})", 
+                   evenement.getClub() != null ? evenement.getClub().getNom() : "NULL",
+                   evenement.getClub() != null ? evenement.getClub().getId() : "NULL");
+        
+        // Vérifier que l'événement appartient au club du chef
+        logger.info("Recherche du club pour le chef ID: {}", chefDeClub.getId());
+        Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(chefDeClub.getId());
+        
+        if (clubOptional.isEmpty()) {
+            logger.warn("Club non trouvé pour le chef: {}", chefDeClub.getId());
+            model.addAttribute("error", "Impossible de trouver le club que vous dirigez.");
+            return "error-page";
+        }
+        
+        Club club = clubOptional.get();
+        logger.info("Club trouvé: {} (ID: {})", club.getNom(), club.getId());
+        logger.info("Nombre d'événements dans le club: {}", club.getEvenementsOrganises().size());
+        
+        // Lister tous les événements du club pour débogage
+        for (Evenement event : club.getEvenementsOrganises()) {
+            logger.info("Événement du club: {} (ID: {})", event.getTitre(), event.getId());
+        }
+        
+        // Vérification directe : l'événement appartient-il au club du chef ?
+        boolean eventBelongsToClub = evenement.getClub() != null && 
+                                   evenement.getClub().getId().equals(club.getId());
+        
+        logger.info("Vérification directe - L'événement {} appartient au club {}: {}", 
+                   evenement.getId(), club.getId(), eventBelongsToClub);
+        
+        if (!eventBelongsToClub) {
+            logger.warn("Accès non autorisé - L'événement {} n'appartient pas au club {}", evenement.getId(), club.getId());
+            model.addAttribute("error", "Vous n'avez pas l'autorisation de voir cet événement.");
+            return "error-page";
+        }
+        
+        logger.info("Accès autorisé - Affichage des détails");
+        model.addAttribute("evenement", evenement);
+        model.addAttribute("club", clubOptional.get());
+        return "gestion-club/details-evenement";
+    }
+
+    // NOUVELLE MÉTHODE pour afficher le formulaire de modification d'un événement
+    @GetMapping("/evenements/{id}/modifier")
+    public String showEditEventForm(@PathVariable UUID id, Model model) {
+        Utilisateur chefDeClub = getCurrentUser();
+        
+        Optional<Evenement> evenementOptional = evenementService.findByIdWithClub(id);
+        
+        if (evenementOptional.isEmpty()) {
+            model.addAttribute("error", "Événement non trouvé.");
+            return "error-page";
+        }
+        
+        Evenement evenement = evenementOptional.get();
+        
+        // Vérifier que l'événement appartient au club du chef
+        Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(chefDeClub.getId());
+        if (clubOptional.isEmpty()) {
+            model.addAttribute("error", "Impossible de trouver le club que vous dirigez.");
+            return "error-page";
+        }
+        
+        Club club = clubOptional.get();
+        boolean eventBelongsToClub = evenement.getClub() != null && 
+                                   evenement.getClub().getId().equals(club.getId());
+        
+        if (!eventBelongsToClub) {
+            model.addAttribute("error", "Vous n'avez pas l'autorisation de modifier cet événement.");
+            return "error-page";
+        }
+        
+        model.addAttribute("evenement", evenement);
+        model.addAttribute("club", clubOptional.get());
+        return "gestion-club/modifier-evenement";
+    }
+
+    // NOUVELLE MÉTHODE pour traiter la modification d'un événement
+    @PostMapping("/evenements/{id}/modifier")
+    public String updateEvent(@PathVariable UUID id,
+                             @RequestParam String titre,
+                             @RequestParam(required = false) String description,
+                             @RequestParam(required = false) String lieu,
+                             @RequestParam String dateEvenement,
+                             @RequestParam String heureEvenement,
+                             @RequestParam(required = false) Integer capaciteMax,
+                             @RequestParam String action,
+                             Model model) {
+        
+        Utilisateur chefDeClub = getCurrentUser();
+        
+        Optional<Evenement> evenementOptional = evenementService.findByIdWithClub(id);
+        
+        if (evenementOptional.isEmpty()) {
+            model.addAttribute("error", "Événement non trouvé.");
+            return "error-page";
+        }
+        
+        Evenement evenement = evenementOptional.get();
+        
+        // Vérifier que l'événement appartient au club du chef
+        Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(chefDeClub.getId());
+        if (clubOptional.isEmpty()) {
+            model.addAttribute("error", "Impossible de trouver le club que vous dirigez.");
+            return "error-page";
+        }
+        
+        Club club = clubOptional.get();
+        boolean eventBelongsToClub = evenement.getClub() != null && 
+                                   evenement.getClub().getId().equals(club.getId());
+        
+        if (!eventBelongsToClub) {
+            model.addAttribute("error", "Vous n'avez pas l'autorisation de modifier cet événement.");
+            return "error-page";
+        }
+        
+        try {
+            // Mettre à jour les informations de l'événement
+            evenement.setTitre(titre);
+            evenement.setDescription(description);
+            evenement.setLieu(lieu);
+            evenement.setCapaciteMax(capaciteMax);
+            
+            // Parser la date et l'heure
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            String dateTimeString = dateEvenement + " " + heureEvenement;
+            LocalDateTime dateHeureDebut = LocalDateTime.parse(dateTimeString, formatter);
+            evenement.setDateHeureDebut(dateHeureDebut);
+            
+            // Déterminer le statut selon l'action
+            if ("draft".equals(action)) {
+                evenement.setStatut(StatutEvenement.BROUILLON);
+                evenementService.saveEvent(evenement);
+                return "redirect:/gestion-club/evenements?success=draft-updated";
+            } else if ("publish".equals(action)) {
+                evenement.setStatut(StatutEvenement.PUBLIE);
+                Evenement savedEvent = evenementService.saveEvent(evenement);
+                // Envoyer les emails de notification à tous les membres du club
+                emailNotificationService.notifyClubMembersAboutNewEvent(savedEvent, clubOptional.get());
+                return "redirect:/gestion-club/evenements?success=event-updated-and-published";
+            }
+            
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur lors de la modification de l'événement: " + e.getMessage());
+            model.addAttribute("evenement", evenement);
+            model.addAttribute("club", clubOptional.get());
+            return "gestion-club/modifier-evenement";
+        }
+        
+        return "redirect:/gestion-club/evenements?error=invalid-action";
+    }
+
+    // NOUVELLE MÉTHODE pour publier/dépublier un événement
+    @PostMapping("/evenements/{id}/toggle-status")
+    public String toggleEventStatus(@PathVariable UUID id) {
+        Utilisateur chefDeClub = getCurrentUser();
+        
+        Optional<Evenement> evenementOptional = evenementService.findByIdWithClub(id);
+        
+        if (evenementOptional.isEmpty()) {
+            return "redirect:/gestion-club/evenements?error=event-not-found";
+        }
+        
+        Evenement evenement = evenementOptional.get();
+        
+        // Vérifier que l'événement appartient au club du chef
+        Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(chefDeClub.getId());
+        if (clubOptional.isEmpty()) {
+            return "redirect:/gestion-club/evenements?error=club-not-found";
+        }
+        
+        Club club = clubOptional.get();
+        boolean eventBelongsToClub = evenement.getClub() != null && 
+                                   evenement.getClub().getId().equals(club.getId());
+        
+        if (!eventBelongsToClub) {
+            return "redirect:/gestion-club/evenements?error=unauthorized";
+        }
+        
+        // Changer le statut
+        StatutEvenement newStatus = (evenement.getStatut() == StatutEvenement.BROUILLON) 
+            ? StatutEvenement.PUBLIE 
+            : StatutEvenement.BROUILLON;
+        
+        evenementService.updateEventStatus(id, newStatus);
+        
+        // Si on publie, envoyer les emails
+        if (newStatus == StatutEvenement.PUBLIE) {
+            emailNotificationService.notifyClubMembersAboutNewEvent(evenement, clubOptional.get());
+            return "redirect:/gestion-club/evenements?success=event-published";
+        } else {
+            return "redirect:/gestion-club/evenements?success=event-unpublished";
+        }
+    }
+
+    // NOUVELLE MÉTHODE pour supprimer un événement
+    @PostMapping("/evenements/{id}/supprimer")
+    public String deleteEvent(@PathVariable UUID id) {
+        Utilisateur chefDeClub = getCurrentUser();
+        
+        Optional<Evenement> evenementOptional = evenementService.findByIdWithClub(id);
+        
+        if (evenementOptional.isEmpty()) {
+            return "redirect:/gestion-club/evenements?error=event-not-found";
+        }
+        
+        Evenement evenement = evenementOptional.get();
+        
+        // Vérifier que l'événement appartient au club du chef
+        Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(chefDeClub.getId());
+        if (clubOptional.isEmpty()) {
+            return "redirect:/gestion-club/evenements?error=club-not-found";
+        }
+        
+        Club club = clubOptional.get();
+        boolean eventBelongsToClub = evenement.getClub() != null && 
+                                   evenement.getClub().getId().equals(club.getId());
+        
+        if (!eventBelongsToClub) {
+            return "redirect:/gestion-club/evenements?error=unauthorized";
+        }
+        
+        evenementService.deleteEvent(id);
+        return "redirect:/gestion-club/evenements?success=event-deleted";
+    }
+
+    // MÉTHODE DE DÉBOGAGE TEMPORAIRE
+    @GetMapping("/debug/evenements")
+    public String debugEvents(@ModelAttribute("utilisateurConnecte") Utilisateur chefDeClub, Model model) {
+        logger.info("=== DÉBOGAGE ÉVÉNEMENTS ===");
+        logger.info("Chef de club: {} (ID: {})", chefDeClub.getEmail(), chefDeClub.getId());
+        
+        // Récupérer le club du chef
+        Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(chefDeClub.getId());
+        
+        if (clubOptional.isEmpty()) {
+            logger.warn("AUCUN CLUB TROUVÉ pour le chef: {}", chefDeClub.getId());
+            model.addAttribute("error", "Aucun club trouvé pour ce chef");
+            return "error-page";
+        }
+        
+        Club club = clubOptional.get();
+        logger.info("Club trouvé: {} (ID: {})", club.getNom(), club.getId());
+        logger.info("Nombre d'événements dans le club: {}", club.getEvenementsOrganises().size());
+        
+        // Lister tous les événements du club
+        for (Evenement event : club.getEvenementsOrganises()) {
+            logger.info("Événement: {} (ID: {}) - Statut: {} - Club associé: {}", 
+                       event.getTitre(), 
+                       event.getId(), 
+                       event.getStatut(),
+                       event.getClub() != null ? event.getClub().getNom() : "NULL");
+        }
+        
+        // Essayer de récupérer tous les événements de la base
+        List<Evenement> allEvents = evenementService.findAllUpcomingEvents();
+        logger.info("Nombre total d'événements dans la base: {}", allEvents.size());
+        
+        for (Evenement event : allEvents) {
+            logger.info("Événement global: {} (ID: {}) - Club: {}", 
+                       event.getTitre(), 
+                       event.getId(),
+                       event.getClub() != null ? event.getClub().getNom() : "NULL");
+        }
+        
+        model.addAttribute("club", club);
+        model.addAttribute("allEvents", allEvents);
+        return "gestion-club/debug-evenements";
+    }
+
+    // MÉTHODE DE TEST POUR CRÉER UN ÉVÉNEMENT DE TEST
+    @PostMapping("/debug/creer-evenement-test")
+    public String createTestEvent(@ModelAttribute("utilisateurConnecte") Utilisateur chefDeClub) {
+        logger.info("=== CRÉATION D'UN ÉVÉNEMENT DE TEST ===");
+        
+        // Récupérer le club du chef
+        Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(chefDeClub.getId());
+        
+        if (clubOptional.isEmpty()) {
+            logger.warn("AUCUN CLUB TROUVÉ pour créer l'événement de test");
+            return "redirect:/gestion-club/debug/evenements?error=no-club";
+        }
+        
+        Club club = clubOptional.get();
+        logger.info("Création d'un événement de test pour le club: {}", club.getNom());
+        
+        try {
+            // Créer un événement de test
+            Evenement evenement = new Evenement();
+            evenement.setTitre("Événement de Test - " + java.time.LocalDateTime.now().toString());
+            evenement.setDescription("Ceci est un événement de test créé automatiquement");
+            evenement.setLieu("Salle de test");
+            evenement.setDateHeureDebut(java.time.LocalDateTime.now().plusDays(1));
+            evenement.setStatut(StatutEvenement.BROUILLON);
+            evenement.setClub(club);
+            
+            // Sauvegarder l'événement
+            Evenement savedEvent = evenementService.saveEvent(evenement);
+            logger.info("Événement de test créé avec succès: {} (ID: {})", savedEvent.getTitre(), savedEvent.getId());
+            
+            return "redirect:/gestion-club/debug/evenements?success=test-event-created";
+            
+        } catch (Exception e) {
+            logger.error("Erreur lors de la création de l'événement de test: {}", e.getMessage(), e);
+            return "redirect:/gestion-club/debug/evenements?error=creation-failed";
+        }
     }
 
 }

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="'Détails - ' + ${evenement.titre}">Détails de l'événement</title>
+</head>
+<body>
+<section>
+    <div class="container-fluid">
+        <!-- En-tête de la page -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 th:text="${evenement.titre}">Titre de l'événement</h1>
+                <p class="text-muted" th:text="'Club : ' + ${club.nom}">Club : Nom du Club</p>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a th:href="@{/gestion-club}">Accueil</a></li>
+                        <li class="breadcrumb-item"><a th:href="@{/gestion-club/evenements}">Gestion des Événements</a></li>
+                        <li class="breadcrumb-item active" aria-current="page" th:text="${evenement.titre}">Détails</li>
+                    </ol>
+                </nav>
+            </div>
+            <div>
+                <a th:href="@{/gestion-club/evenements/{id}/modifier(id=${evenement.id})}" class="btn btn-primary me-2">
+                    <i class="fas fa-edit"></i> Modifier
+                </a>
+                <a th:href="@{/gestion-club/evenements}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour à la liste
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Informations principales de l'événement -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-info-circle"></i> Informations de l'événement
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-primary">
+                                    <i class="fas fa-heading me-2"></i>Titre
+                                </h6>
+                                <p th:text="${evenement.titre}" class="mb-3"></p>
+                                
+                                <h6 class="text-primary">
+                                    <i class="fas fa-calendar me-2"></i>Date et heure
+                                </h6>
+                                <p class="mb-3">
+                                    <i class="fas fa-calendar text-primary me-1"></i>
+                                    <span th:text="${#temporals.format(evenement.dateHeureDebut, 'dd MMMM yyyy')}"></span>
+                                    <br>
+                                    <i class="fas fa-clock text-secondary me-1"></i>
+                                    <span th:text="${#temporals.format(evenement.dateHeureDebut, 'HH:mm')}"></span>
+                                </p>
+                                
+                                <h6 class="text-primary">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Lieu
+                                </h6>
+                                <p th:if="${evenement.lieu != null}" th:text="${evenement.lieu}" class="mb-3"></p>
+                                <p th:if="${evenement.lieu == null}" class="text-muted mb-3">Non spécifié</p>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h6 class="text-primary">
+                                    <i class="fas fa-tag me-2"></i>Statut
+                                </h6>
+                                <p class="mb-3">
+                                    <span th:if="${evenement.statut.name() == 'BROUILLON'}" 
+                                          class="badge bg-warning text-dark fs-6">
+                                        <i class="fas fa-edit me-1"></i>Brouillon
+                                    </span>
+                                    <span th:if="${evenement.statut.name() == 'PUBLIE'}" 
+                                          class="badge bg-success fs-6">
+                                        <i class="fas fa-check me-1"></i>Publié
+                                    </span>
+                                </p>
+                                
+                                <h6 class="text-primary">
+                                    <i class="fas fa-users me-2"></i>Capacité maximale
+                                </h6>
+                                <p th:if="${evenement.capaciteMax != null}" th:text="${evenement.capaciteMax}" class="mb-3"></p>
+                                <p th:if="${evenement.capaciteMax == null}" class="text-muted mb-3">Non limitée</p>
+                                
+                                <h6 class="text-primary">
+                                    <i class="fas fa-calendar-plus me-2"></i>Date de création
+                                </h6>
+                                <p th:text="${#temporals.format(evenement.datePublication, 'dd MMMM yyyy à HH:mm')}" class="mb-3"></p>
+                            </div>
+                        </div>
+                        
+                        <!-- Description -->
+                        <div th:if="${evenement.description != null && !evenement.description.isEmpty()}">
+                            <hr>
+                            <h6 class="text-primary">
+                                <i class="fas fa-align-left me-2"></i>Description
+                            </h6>
+                            <div class="bg-light p-3 rounded">
+                                <p th:text="${evenement.description}" style="white-space: pre-wrap;"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions rapides -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-tools"></i> Actions rapides
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            <a th:href="@{/gestion-club/evenements/{id}/modifier(id=${evenement.id})}" 
+                               class="btn btn-primary">
+                                <i class="fas fa-edit me-2"></i>Modifier l'événement
+                            </a>
+                            
+                            <form th:if="${evenement.statut.name() == 'BROUILLON'}" 
+                                  th:action="@{/gestion-club/evenements/{id}/toggle-status(id=${evenement.id})}" 
+                                  method="post" class="d-inline">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-bullhorn me-2"></i>Publier l'événement
+                                </button>
+                            </form>
+                            
+                            <form th:if="${evenement.statut.name() == 'PUBLIE'}" 
+                                  th:action="@{/gestion-club/evenements/{id}/toggle-status(id=${evenement.id})}" 
+                                  method="post" class="d-inline">
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-eye-slash me-2"></i>Mettre en brouillon
+                                </button>
+                            </form>
+                            
+                            <form th:action="@{/gestion-club/evenements/{id}/supprimer(id=${evenement.id})}" 
+                                  method="post" class="d-inline">
+                                <button type="submit" class="btn btn-danger" 
+                                        onclick="return confirmDeleteEvent('[[${evenement.titre}]]')">
+                                    <i class="fas fa-trash me-2"></i>Supprimer l'événement
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panneau latéral -->
+            <div class="col-md-4">
+                <!-- Informations du club -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-users"></i> Club organisateur
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img th:src="${club.logo != null ? club.logo : '/images/default-club.png'}" 
+                             class="img-thumbnail mb-3" 
+                             style="width: 100px; height: 100px; object-fit: cover;" 
+                             alt="Logo du club">
+                        <h6 th:text="${club.nom}"></h6>
+                        <p class="text-muted small" th:text="${club.description}"></p>
+                    </div>
+                </div>
+
+                <!-- Statistiques -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar"></i> Statistiques
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h6 class="text-primary">Membres</h6>
+                                <p class="h4 mb-0" th:text="${club.inscriptions.?[statut.name() == 'ACCEPTE'].size()}">0</p>
+                            </div>
+                            <div class="col-6">
+                                <h6 class="text-info">Événements</h6>
+                                <p class="h4 mb-0" th:text="${club.evenementsOrganises.size()}">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Ajout des icônes Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<!-- Styles personnalisés -->
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .badge {
+        font-size: 0.875rem;
+        padding: 0.5em 0.75em;
+    }
+    
+    .btn {
+        font-weight: 500;
+    }
+</style>
+
+<!-- Script pour les confirmations -->
+<script>
+    function confirmDeleteEvent(eventTitle) {
+        return confirm('Êtes-vous sûr de vouloir supprimer l\'événement "' + eventTitle + '" ? Cette action est irréversible.');
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="'Modifier - ' + ${evenement.titre}">Modifier l'événement</title>
+</head>
+<body>
+<section>
+    <div class="container-fluid">
+        <!-- En-tête de la page -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1>Modifier l'événement</h1>
+                <p class="text-muted" th:text="'Club : ' + ${club.nom}">Club : Nom du Club</p>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a th:href="@{/gestion-club}">Accueil</a></li>
+                        <li class="breadcrumb-item"><a th:href="@{/gestion-club/evenements}">Gestion des Événements</a></li>
+                        <li class="breadcrumb-item"><a th:href="@{/gestion-club/evenements/{id}(id=${evenement.id})}" th:text="${evenement.titre}">Événement</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Modifier</li>
+                    </ol>
+                </nav>
+            </div>
+            <div>
+                <a th:href="@{/gestion-club/evenements/{id}(id=${evenement.id})}" class="btn btn-info me-2">
+                    <i class="fas fa-eye"></i> Voir les détails
+                </a>
+                <a th:href="@{/gestion-club/evenements}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour à la liste
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Formulaire de modification d'événement -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-edit"></i> Modifier les informations de l'événement
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/gestion-club/evenements/{id}/modifier(id=${evenement.id})}" method="post" id="eventForm">
+                            <!-- Titre -->
+                            <div class="mb-3">
+                                <label for="titre" class="form-label">
+                                    <i class="fas fa-heading text-primary me-1"></i>Titre de l'événement <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="titre" 
+                                       name="titre" 
+                                       th:value="${evenement.titre}"
+                                       placeholder="Ex: Réunion mensuelle du club"
+                                       required>
+                                <div class="form-text">Choisissez un titre clair et attractif pour votre événement.</div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mb-3">
+                                <label for="description" class="form-label">
+                                    <i class="fas fa-align-left text-primary me-1"></i>Description
+                                </label>
+                                <textarea class="form-control" 
+                                          id="description" 
+                                          name="description" 
+                                          rows="4" 
+                                          th:text="${evenement.description}"
+                                          placeholder="Décrivez votre événement, son programme, les objectifs..."></textarea>
+                                <div class="form-text">Fournissez des détails sur le contenu et les objectifs de votre événement.</div>
+                            </div>
+
+                            <!-- Lieu -->
+                            <div class="mb-3">
+                                <label for="lieu" class="form-label">
+                                    <i class="fas fa-map-marker-alt text-primary me-1"></i>Lieu
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="lieu" 
+                                       name="lieu" 
+                                       th:value="${evenement.lieu}"
+                                       placeholder="Ex: Salle de conférence A, Campus principal">
+                                <div class="form-text">Indiquez où se déroulera l'événement.</div>
+                            </div>
+
+                            <!-- Date et heure -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="dateEvenement" class="form-label">
+                                        <i class="fas fa-calendar text-primary me-1"></i>Date <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="date" 
+                                           class="form-control" 
+                                           id="dateEvenement" 
+                                           name="dateEvenement" 
+                                           th:value="${#temporals.format(evenement.dateHeureDebut, 'yyyy-MM-dd')}"
+                                           required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="heureEvenement" class="form-label">
+                                        <i class="fas fa-clock text-primary me-1"></i>Heure <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="time" 
+                                           class="form-control" 
+                                           id="heureEvenement" 
+                                           name="heureEvenement" 
+                                           th:value="${#temporals.format(evenement.dateHeureDebut, 'HH:mm')}"
+                                           required>
+                                </div>
+                            </div>
+
+                            <!-- Capacité maximale (optionnel) -->
+                            <div class="mb-4">
+                                <label for="capaciteMax" class="form-label">
+                                    <i class="fas fa-users text-primary me-1"></i>Capacité maximale
+                                </label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="capaciteMax" 
+                                       name="capaciteMax" 
+                                       th:value="${evenement.capaciteMax}"
+                                       placeholder="Ex: 50"
+                                       min="1">
+                                <div class="form-text">Nombre maximum de participants (optionnel).</div>
+                            </div>
+
+                            <!-- Statut actuel -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-tag text-primary me-1"></i>Statut actuel
+                                </label>
+                                <div>
+                                    <span th:if="${evenement.statut.name() == 'BROUILLON'}" 
+                                          class="badge bg-warning text-dark fs-6">
+                                        <i class="fas fa-edit me-1"></i>Brouillon
+                                    </span>
+                                    <span th:if="${evenement.statut.name() == 'PUBLIE'}" 
+                                          class="badge bg-success fs-6">
+                                        <i class="fas fa-check me-1"></i>Publié
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Boutons d'action -->
+                            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                                <div class="text-muted">
+                                    <small>
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Les champs marqués d'un <span class="text-danger">*</span> sont obligatoires.
+                                    </small>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" 
+                                            name="action" 
+                                            value="draft" 
+                                            class="btn btn-warning btn-lg">
+                                        <i class="fas fa-save me-2"></i>Enregistrer en brouillon
+                                    </button>
+                                    <button type="submit" 
+                                            name="action" 
+                                            value="publish" 
+                                            class="btn btn-success btn-lg">
+                                        <i class="fas fa-bullhorn me-2"></i>Publier l'événement
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panneau d'information -->
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle"></i> Informations importantes
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6 class="text-warning">
+                                <i class="fas fa-edit me-1"></i>Enregistrer en brouillon
+                            </h6>
+                            <p class="small text-muted mb-0">
+                                L'événement sera sauvegardé mais ne sera pas visible par les membres du club. 
+                                Vous pourrez le modifier et le publier plus tard.
+                            </p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="text-success">
+                                <i class="fas fa-bullhorn me-1"></i>Publier l'événement
+                            </h6>
+                            <p class="small text-muted mb-0">
+                                L'événement sera immédiatement visible par tous les membres du club 
+                                et un email de notification sera envoyé automatiquement.
+                            </p>
+                        </div>
+
+                        <hr>
+
+                        <div class="mb-3">
+                            <h6 class="text-primary">
+                                <i class="fas fa-users me-1"></i>Membres du club
+                            </h6>
+                            <p class="small text-muted mb-0">
+                                <strong th:text="${club.inscriptions.?[statut.name() == 'ACCEPTE'].size()}">0</strong> 
+                                membres actifs recevront la notification.
+                            </p>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <small>
+                                <i class="fas fa-lightbulb me-1"></i>
+                                <strong>Conseil :</strong> Si l'événement était déjà publié et que vous le republiez, 
+                                tous les membres recevront une nouvelle notification.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Ajout des icônes Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<!-- Styles personnalisés -->
+<style>
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+    }
+    
+    .card {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .text-danger {
+        color: #dc3545 !important;
+    }
+    
+    .badge {
+        font-size: 0.875rem;
+        padding: 0.5em 0.75em;
+    }
+</style>
+
+<!-- Script pour la validation du formulaire -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('eventForm');
+        const dateInput = document.getElementById('dateEvenement');
+        const timeInput = document.getElementById('heureEvenement');
+        
+        // Définir la date minimum à aujourd'hui
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.setAttribute('min', today);
+        
+        // Validation en temps réel
+        form.addEventListener('submit', function(e) {
+            const titre = document.getElementById('titre').value.trim();
+            const date = dateInput.value;
+            const time = timeInput.value;
+            
+            if (!titre) {
+                e.preventDefault();
+                alert('Le titre de l\'événement est obligatoire.');
+                return false;
+            }
+            
+            if (!date) {
+                e.preventDefault();
+                alert('La date de l\'événement est obligatoire.');
+                return false;
+            }
+            
+            if (!time) {
+                e.preventDefault();
+                alert('L\'heure de l\'événement est obligatoire.');
+                return false;
+            }
+            
+            // Vérifier que la date n'est pas dans le passé
+            const eventDateTime = new Date(date + 'T' + time);
+            const now = new Date();
+            
+            if (eventDateTime <= now) {
+                e.preventDefault();
+                alert('La date et l\'heure de l\'événement doivent être dans le futur.');
+                return false;
+            }
+        });
+        
+        // Confirmation pour la publication
+        const publishButton = document.querySelector('button[value="publish"]');
+        publishButton.addEventListener('click', function(e) {
+            const titre = document.getElementById('titre').value.trim();
+            if (titre) {
+                const confirmed = confirm('Êtes-vous sûr de vouloir publier l\'événement "' + titre + '" ?\n\nUn email sera envoyé à tous les membres du club.');
+                if (!confirmed) {
+                    e.preventDefault();
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

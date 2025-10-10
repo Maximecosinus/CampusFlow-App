@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import org.springframework.data.domain.Pageable; // <-- IMPORTER
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.List;
 
@@ -17,7 +18,15 @@ public interface EvenementRepository extends JpaRepository<Evenement, UUID> {
 
     @Query("SELECT e FROM Evenement e LEFT JOIN FETCH e.club " +
             "WHERE e.dateHeureDebut > :maintenant " +
+            "AND e.statut = 'PUBLIE' " +
             "ORDER BY e.dateHeureDebut ASC")
     List<Evenement> findUpcomingEventsWithClub(@Param("maintenant") LocalDateTime maintenant, Pageable pageable);
-    List<Evenement> findAllByDateHeureDebutAfterOrderByDateHeureDebutAsc(LocalDateTime maintenant);
+    @Query("SELECT e FROM Evenement e " +
+            "WHERE e.dateHeureDebut > :maintenant " +
+            "AND e.statut = 'PUBLIE' " +
+            "ORDER BY e.dateHeureDebut ASC")
+    List<Evenement> findAllByDateHeureDebutAfterOrderByDateHeureDebutAsc(@Param("maintenant") LocalDateTime maintenant);
+    
+    @Query("SELECT e FROM Evenement e LEFT JOIN FETCH e.club WHERE e.id = :id")
+    Optional<Evenement> findByIdWithClub(@Param("id") UUID id);
 }
