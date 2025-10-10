@@ -6,6 +6,129 @@
     <title>Calendrier du Club - CampusFlow</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+    
+    <style>
+        .calendar-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .calendar-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            margin-bottom: 0;
+        }
+        
+        .calendar-toolbar {
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 0.75rem 1rem;
+        }
+        
+        .calendar-view-buttons {
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .calendar-view-buttons .btn {
+            font-size: 0.875rem;
+            padding: 0.375rem 0.75rem;
+        }
+        
+        .calendar-view-buttons .btn.active {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        .calendar-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .calendar-stats {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        /* FullCalendar personnalisation */
+        .fc {
+            font-family: inherit;
+        }
+        
+        .fc-toolbar-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .fc-button-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        .fc-button-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+        
+        .fc-event {
+            border-radius: 4px;
+            border: none;
+            font-size: 0.875rem;
+        }
+        
+        .fc-event-title {
+            font-weight: 500;
+        }
+        
+        .fc-daygrid-event {
+            margin: 1px 2px;
+        }
+        
+        .fc-timegrid-event {
+            margin: 1px 0;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .calendar-toolbar {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .calendar-view-buttons {
+                justify-content: center;
+            }
+            
+            .calendar-actions {
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
     <div th:replace="~{fragments/layout :: layout}">
@@ -34,125 +157,259 @@
                 </div>
             </div>
 
-            <!-- Section d'information sur le calendrier -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <i class="fas fa-info-circle text-info me-2"></i>
-                                Informations sur le Calendrier
-                            </h5>
-                            <p class="card-text">
-                                Cette page vous permet de visualiser et gérer le calendrier de votre club. 
-                                Vous pouvez synchroniser les événements avec vos applications de calendrier préférées.
-                            </p>
-                            
-                            <!-- Lien de synchronisation -->
-                            <div class="mt-3">
-                                <h6 class="text-muted mb-2">Synchronisation avec votre calendrier :</h6>
-                                <div class="d-flex flex-wrap gap-2">
-                                    <a th:href="@{/gestion-club/calendrier/export/ics}" 
-                                       class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-download me-2"></i>
-                                        Télécharger (.ics)
-                                    </a>
-                                    <button class="btn btn-outline-success btn-sm" 
-                                            onclick="copyCalendarUrl()">
-                                        <i class="fas fa-copy me-2"></i>
-                                        Copier le lien
-                                    </button>
-                                </div>
-                                <small class="text-muted d-block mt-2">
-                                    Utilisez ce lien pour synchroniser automatiquement les événements de votre club 
-                                    avec Google Calendar, Outlook, Apple Calendar, etc.
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Statistiques des événements -->
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <i class="fas fa-calendar-check text-success fa-2x mb-2"></i>
-                            <h4 class="text-success mb-1" th:text="${club.evenementsOrganises.size()}">0</h4>
-                            <p class="text-muted mb-0">Événements Total</p>
+            <div class="calendar-stats">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="stat-item">
+                            <div class="stat-number text-success" th:text="${club.evenementsOrganises.size()}">0</div>
+                            <div class="stat-label">Événements Total</div>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <i class="fas fa-eye text-primary fa-2x mb-2"></i>
-                            <h4 class="text-primary mb-1" th:text="${club.evenementsOrganises.?[statut.name() == 'PUBLIE'].size()}">0</h4>
-                            <p class="text-muted mb-0">Événements Publiés</p>
+                    <div class="col-md-4">
+                        <div class="stat-item">
+                            <div class="stat-number text-primary" th:text="${club.evenementsOrganises.?[statut.name() == 'PUBLIE'].size()}">0</div>
+                            <div class="stat-label">Événements Publiés</div>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <i class="fas fa-edit text-warning fa-2x mb-2"></i>
-                            <h4 class="text-warning mb-1" th:text="${club.evenementsOrganises.?[statut.name() == 'BROUILLON'].size()}">0</h4>
-                            <p class="text-muted mb-0">Brouillons</p>
+                    <div class="col-md-4">
+                        <div class="stat-item">
+                            <div class="stat-number text-warning" th:text="${club.evenementsOrganises.?[statut.name() == 'BROUILLON'].size()}">0</div>
+                            <div class="stat-label">Brouillons</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Actions rapides -->
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <i class="fas fa-bolt text-warning me-2"></i>
-                                Actions Rapides
-                            </h5>
-                            <div class="d-flex flex-wrap gap-2">
-                                <a th:href="@{/gestion-club/evenements/creer}" class="btn btn-primary">
-                                    <i class="fas fa-plus me-2"></i>Créer un Événement
-                                </a>
-                                <a th:href="@{/gestion-club/evenements}" class="btn btn-outline-primary">
-                                    <i class="fas fa-list me-2"></i>Gérer les Événements
-                                </a>
-                                <a th:href="@{/calendrier}" class="btn btn-outline-info">
-                                    <i class="fas fa-calendar-week me-2"></i>Voir le Calendrier Public
-                                </a>
-                            </div>
+            <!-- Calendrier interactif -->
+            <div class="calendar-container">
+                <!-- En-tête du calendrier -->
+                <div class="calendar-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-0">
+                                <i class="fas fa-calendar-week me-2"></i>
+                                Calendrier Interactif
+                            </h4>
+                            <small class="opacity-75">Visualisez et gérez vos événements</small>
+                        </div>
+                        <div class="calendar-actions">
+                            <a th:href="@{/gestion-club/evenements/creer}" class="btn btn-light btn-sm">
+                                <i class="fas fa-plus me-1"></i>Nouvel Événement
+                            </a>
+                            <a th:href="@{/gestion-club/evenements}" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-list me-1"></i>Gérer
+                            </a>
                         </div>
                     </div>
                 </div>
+
+                <!-- Barre d'outils du calendrier -->
+                <div class="calendar-toolbar d-flex justify-content-between align-items-center">
+                    <div class="calendar-view-buttons">
+                        <button type="button" class="btn btn-outline-primary active" id="view-month">
+                            <i class="fas fa-calendar-alt me-1"></i>Mois
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" id="view-week">
+                            <i class="fas fa-calendar-week me-1"></i>Semaine
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" id="view-day">
+                            <i class="fas fa-calendar-day me-1"></i>Jour
+                        </button>
+                    </div>
+                    
+                    <div class="calendar-actions">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="prev-btn">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="today-btn">
+                                Aujourd'hui
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="next-btn">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-download me-1"></i>Export
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" th:href="@{/gestion-club/calendrier/export/ics}">
+                                        <i class="fas fa-file-export me-2"></i>Télécharger (.ics)
+                                    </a>
+                                </li>
+                                <li>
+                                    <button class="dropdown-item" onclick="copyCalendarUrl()">
+                                        <i class="fas fa-copy me-2"></i>Copier le lien
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendrier FullCalendar -->
+                <div id="calendar" style="padding: 1rem;"></div>
             </div>
         </div>
     </div>
 
-    <!-- Script pour copier l'URL du calendrier -->
+    <!-- FullCalendar JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales/fr.global.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
-        function copyCalendarUrl() {
-            const calendarUrl = window.location.origin + '/gestion-club/calendrier/export/ics';
-            navigator.clipboard.writeText(calendarUrl).then(function() {
-                // Créer une notification temporaire
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuration du calendrier
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                // Configuration de base
+                locale: 'fr',
+                firstDay: 1, // Lundi comme premier jour
+                height: 'auto',
+                
+                // Vues disponibles
+                headerToolbar: false, // On utilise notre propre toolbar
+                views: {
+                    dayGridMonth: {
+                        titleFormat: { year: 'numeric', month: 'long' }
+                    },
+                    timeGridWeek: {
+                        titleFormat: { year: 'numeric', month: 'short', day: 'numeric' }
+                    },
+                    timeGridDay: {
+                        titleFormat: { year: 'numeric', month: 'long', day: 'numeric' }
+                    }
+                },
+                
+                // Vue par défaut
+                initialView: 'dayGridMonth',
+                
+                // Source de données
+                events: {
+                    url: '/gestion-club/calendrier/api/events',
+                    method: 'GET',
+                    failure: function() {
+                        console.error('Erreur lors du chargement des événements');
+                        showNotification('Erreur lors du chargement des événements', 'error');
+                    }
+                },
+                
+                // Personnalisation des événements
+                eventDisplay: 'block',
+                eventTextColor: '#ffffff',
+                eventBackgroundColor: '#0d6efd',
+                eventBorderColor: '#0d6efd',
+                
+                // Interactions
+                selectable: false,
+                selectMirror: true,
+                dayMaxEvents: true,
+                moreLinkClick: 'popover',
+                
+                // Gestion des clics
+                eventClick: function(info) {
+                    // Ouvrir les détails de l'événement
+                    const eventId = info.event.id;
+                    window.location.href = '/gestion-club/evenements/' + eventId;
+                },
+                
+                // Dates et heures
+                slotMinTime: '08:00:00',
+                slotMaxTime: '22:00:00',
+                slotDuration: '01:00:00',
+                slotLabelInterval: '01:00:00',
+                
+                // Responsive
+                aspectRatio: 1.8,
+                
+                // Callbacks
+                loading: function(bool) {
+                    if (bool) {
+                        console.log('Chargement des événements...');
+                    } else {
+                        console.log('Événements chargés');
+                    }
+                }
+            });
+
+            // Initialisation du calendrier
+            calendar.render();
+
+            // Gestion des boutons de vue
+            document.getElementById('view-month').addEventListener('click', function() {
+                calendar.changeView('dayGridMonth');
+                updateViewButtons('month');
+            });
+            
+            document.getElementById('view-week').addEventListener('click', function() {
+                calendar.changeView('timeGridWeek');
+                updateViewButtons('week');
+            });
+            
+            document.getElementById('view-day').addEventListener('click', function() {
+                calendar.changeView('timeGridDay');
+                updateViewButtons('day');
+            });
+
+            // Gestion de la navigation
+            document.getElementById('prev-btn').addEventListener('click', function() {
+                calendar.prev();
+            });
+            
+            document.getElementById('next-btn').addEventListener('click', function() {
+                calendar.next();
+            });
+            
+            document.getElementById('today-btn').addEventListener('click', function() {
+                calendar.today();
+            });
+
+            // Fonction pour mettre à jour les boutons de vue
+            function updateViewButtons(activeView) {
+                document.querySelectorAll('.calendar-view-buttons .btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                if (activeView === 'month') {
+                    document.getElementById('view-month').classList.add('active');
+                } else if (activeView === 'week') {
+                    document.getElementById('view-week').classList.add('active');
+                } else if (activeView === 'day') {
+                    document.getElementById('view-day').classList.add('active');
+                }
+            }
+
+            // Fonction pour afficher les notifications
+            function showNotification(message, type = 'info') {
+                const alertClass = type === 'error' ? 'alert-danger' : 'alert-info';
                 const notification = document.createElement('div');
-                notification.className = 'alert alert-success position-fixed';
-                notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999;';
-                notification.innerHTML = '<i class="fas fa-check me-2"></i>Lien copié dans le presse-papiers !';
+                notification.className = `alert ${alertClass} position-fixed`;
+                notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
+                notification.innerHTML = `<i class="fas fa-info-circle me-2"></i>${message}`;
                 document.body.appendChild(notification);
                 
                 setTimeout(() => {
                     notification.remove();
-                }, 3000);
-            }).catch(function(err) {
-                console.error('Erreur lors de la copie: ', err);
-                alert('Impossible de copier le lien. Veuillez le copier manuellement.');
-            });
-        }
-    </script>
+                }, 5000);
+            }
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            // Fonction pour copier l'URL du calendrier
+            window.copyCalendarUrl = function() {
+                const calendarUrl = window.location.origin + '/gestion-club/calendrier/export/ics';
+                navigator.clipboard.writeText(calendarUrl).then(function() {
+                    showNotification('Lien copié dans le presse-papiers !', 'success');
+                }).catch(function(err) {
+                    console.error('Erreur lors de la copie: ', err);
+                    showNotification('Impossible de copier le lien', 'error');
+                });
+            };
+        });
+    </script>
 </body>
 </html>

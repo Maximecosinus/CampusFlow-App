@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -30,6 +32,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -665,6 +668,122 @@ public class ClubManagementController {
             logger.error("Erreur lors de l'export ICS: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    /**
+     * API endpoint pour récupérer les événements au format JSON pour FullCalendar
+     */
+    @GetMapping("/calendrier/api/events")
+    @ResponseBody
+    public ResponseEntity<List<CalendarEventDto>> getCalendarEvents() {
+        logger.info("=== API CALENDRIER EVENTS ===");
+        
+        try {
+            Utilisateur chefDeClub = getCurrentUser();
+            logger.info("Chef de club connecté: {} (ID: {})", chefDeClub.getEmail(), chefDeClub.getId());
+            
+            // Récupérer le club avec tous ses détails
+            Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(chefDeClub.getId());
+            
+            if (clubOptional.isEmpty()) {
+                logger.error("Club non trouvé pour le chef ID: {}", chefDeClub.getId());
+                return ResponseEntity.notFound().build();
+            }
+            
+            Club club = clubOptional.get();
+            logger.info("Club trouvé: {} (ID: {})", club.getNom(), club.getId());
+            
+            // Convertir les événements en DTOs pour FullCalendar
+            List<CalendarEventDto> events = new ArrayList<>();
+            if (club.getEvenementsOrganises() != null) {
+                for (Evenement evenement : club.getEvenementsOrganises()) {
+                    // Ne récupérer que les événements publiés
+                    if (evenement.getStatut() != null && 
+                        evenement.getStatut().name().equals("PUBLIE")) {
+                        
+                        CalendarEventDto eventDto = new CalendarEventDto();
+                        eventDto.setId(evenement.getId().toString());
+                        eventDto.setTitle(evenement.getTitre());
+                        eventDto.setStart(evenement.getDateHeureDebut());
+                        
+                        // Date de fin (2 heures par défaut si pas spécifiée)
+                        LocalDateTime endTime = evenement.getDateHeureDebut().plusHours(2);
+                        eventDto.setEnd(endTime);
+                        
+                        // Description et lieu
+                        if (evenement.getDescription() != null && !evenement.getDescription().trim().isEmpty()) {
+                            eventDto.setDescription(evenement.getDescription());
+                        }
+                        
+                        if (evenement.getLieu() != null && !evenement.getLieu().trim().isEmpty()) {
+                            eventDto.setLocation(evenement.getLieu());
+                        }
+                        
+                        // Couleur selon le statut
+                        eventDto.setColor("#0d6efd"); // Bleu pour publié
+                        
+                        // URL pour les détails
+                        eventDto.setUrl("/gestion-club/evenements/" + evenement.getId().toString());
+                        
+                        events.add(eventDto);
+                    }
+                }
+            }
+            
+            logger.info("{} événements trouvés pour le calendrier", events.size());
+            
+            return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(events);
+                
+        } catch (Exception e) {
+            logger.error("Erreur lors de la récupération des événements calendrier: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * DTO pour les événements du calendrier
+     */
+    public static class CalendarEventDto {
+        private String id;
+        private String title;
+        
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        private LocalDateTime start;
+        
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        private LocalDateTime end;
+        
+        private String description;
+        private String location;
+        private String color;
+        private String url;
+        
+        // Getters et setters
+        public String getId() { return id; }
+        public void setId(String id) { this.id = id; }
+        
+        public String getTitle() { return title; }
+        public void setTitle(String title) { this.title = title; }
+        
+        public LocalDateTime getStart() { return start; }
+        public void setStart(LocalDateTime start) { this.start = start; }
+        
+        public LocalDateTime getEnd() { return end; }
+        public void setEnd(LocalDateTime end) { this.end = end; }
+        
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
+        
+        public String getLocation() { return location; }
+        public void setLocation(String location) { this.location = location; }
+        
+        public String getColor() { return color; }
+        public void setColor(String color) { this.color = color; }
+        
+        public String getUrl() { return url; }
+        public void setUrl(String url) { this.url = url; }
     }
 
 }
