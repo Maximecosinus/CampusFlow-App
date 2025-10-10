@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="'Ajouter un membre - ' + ${club.nom}">Ajouter un membre</title>
+</head>
+<body>
+<section>
+    <div class="container-fluid">
+        <!-- En-tête de la page -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1>Ajouter un membre</h1>
+                <p class="text-muted" th:text="'Club : ' + ${club.nom}">Club : Nom du Club</p>
+            </div>
+            <a th:href="@{/gestion-club/membres}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la gestion des membres
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Formulaire d'ajout de membre -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-user-plus"></i> Inviter un nouvel utilisateur
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/gestion-club/membres/ajouter}" method="post">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email de l'utilisateur</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       placeholder="exemple@universite.com" required>
+                                <div class="form-text">
+                                    Entrez l'adresse email de l'utilisateur que vous souhaitez inviter dans votre club.
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Message d'invitation (optionnel)</label>
+                                <textarea class="form-control" id="message" name="message" rows="3" 
+                                          placeholder="Bonjour, je vous invite à rejoindre notre club..."></textarea>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a th:href="@{/gestion-club/membres}" class="btn btn-secondary me-md-2">Annuler</a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Envoyer l'invitation
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <!-- Informations sur le processus -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle"></i> Comment ça marche ?
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <ol class="mb-0">
+                            <li class="mb-2">
+                                <strong>Invitation envoyée</strong><br>
+                                <small class="text-muted">L'utilisateur recevra une notification par email.</small>
+                            </li>
+                            <li class="mb-2">
+                                <strong>Demande en attente</strong><br>
+                                <small class="text-muted">La demande apparaîtra dans la section "En attente".</small>
+                            </li>
+                            <li class="mb-2">
+                                <strong>Validation</strong><br>
+                                <small class="text-muted">Vous pourrez approuver ou refuser la demande.</small>
+                            </li>
+                            <li>
+                                <strong>Membre actif</strong><br>
+                                <small class="text-muted">Une fois approuvé, il devient membre du club.</small>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Statistiques du club -->
+                <div class="card shadow-sm mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar"></i> Statistiques du club
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border-end">
+                                    <h4 class="text-primary mb-0" th:text="${club.inscriptions.?[statut.name() == 'ACCEPTE'].size()}">0</h4>
+                                    <small class="text-muted">Membres actifs</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <h4 class="text-warning mb-0" th:text="${club.inscriptions.?[statut.name() == 'EN_ATTENTE'].size()}">0</h4>
+                                <small class="text-muted">En attente</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Ajout des icônes Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</body>
+</html>
+

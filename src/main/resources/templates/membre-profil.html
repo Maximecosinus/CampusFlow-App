@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="'Profil de ' + ${membre.prenom} + ' ' + ${membre.nom} + ' - CampusFlow'">Profil Membre - CampusFlow</title>
+</head>
+<body>
+<section>
+    <div class="container-fluid">
+        <!-- Vérification de sécurité -->
+        <div th:if="${membre == null}" class="alert alert-danger">
+            <h4>Erreur</h4>
+            <p>Le membre demandé n'a pas été trouvé.</p>
+            <a th:href="@{/gestion-club/membres}" class="btn btn-primary">Retour aux Membres</a>
+        </div>
+        
+        <!-- Contenu principal -->
+        <div th:if="${membre != null}">
+            <!-- En-tête de la page -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1>Profil du Membre</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a th:href="@{/gestion-club}">Accueil</a></li>
+                            <li class="breadcrumb-item"><a th:href="@{/gestion-club/membres}">Gestion Membres</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Profil Membre</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <a th:href="@{/gestion-club/membres}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour aux Membres
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Photo et informations principales -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body text-center">
+                            <img th:src="${membre.photoProfil != null ? membre.photoProfil : '/images/default-avatar.png'}" 
+                                 alt="Photo de profil" 
+                                 class="img-fluid rounded-circle mb-3"
+                                 style="width: 200px; height: 200px; object-fit: cover;">
+                            
+                            <h3 th:text="${membre.prenom} + ' ' + ${membre.nom}">Nom Prénom</h3>
+                            <p class="text-muted mb-2" th:text="${membre.email}">email@example.com</p>
+                            
+                            <div class="mb-3">
+                                <span class="badge bg-primary fs-6" th:text="${membre.role.name()}">Rôle</span>
+                            </div>
+                            
+                            <!-- Informations supplémentaires -->
+                            <div class="mt-4">
+                                <h5>Informations</h5>
+                                <hr>
+                                <div class="row text-start">
+                                    <div class="col-6">
+                                        <strong>Email:</strong>
+                                    </div>
+                                    <div class="col-6" th:text="${membre.email}">
+                                        email@example.com
+                                    </div>
+                                </div>
+                                <div class="row text-start mt-2">
+                                    <div class="col-6">
+                                        <strong>Rôle:</strong>
+                                    </div>
+                                    <div class="col-6" th:text="${membre.role.name()}">
+                                        Étudiant
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Biographie et détails -->
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h4 class="mb-0">
+                                <i class="fas fa-user"></i> À propos
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${membre.bio != null and !membre.bio.isEmpty()}">
+                                <p class="lead" th:text="${membre.bio}">Biographie de l'utilisateur...</p>
+                            </div>
+                            <div th:unless="${membre.bio != null and !membre.bio.isEmpty()}">
+                                <p class="text-muted">
+                                    <i class="fas fa-info-circle"></i> 
+                                    Ce membre n'a pas encore ajouté de biographie.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Clubs du membre - Version simplifiée -->
+                    <div class="card shadow-sm mt-4">
+                        <div class="card-header">
+                            <h4 class="mb-0">
+                                <i class="fas fa-users"></i> Clubs
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${membre.inscriptions != null}">
+                                <div th:if="${#lists.isEmpty(membre.inscriptions)}">
+                                    <div class="text-center">
+                                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                        <p class="text-muted">Ce membre n'est inscrit dans aucun club pour le moment.</p>
+                                    </div>
+                                </div>
+                                <div th:unless="${#lists.isEmpty(membre.inscriptions)}">
+                                    <div class="row">
+                                        <div th:each="inscription : ${membre.inscriptions}" class="col-md-6 mb-3">
+                                            <div class="card border">
+                                                <div class="card-body">
+                                                    <h6 th:text="${inscription.club.nom}">Nom du Club</h6>
+                                                    <p class="text-muted mb-2" th:text="${inscription.club.description}">Description du club</p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="badge" 
+                                                              th:classappend="${inscription.statut.name() == 'ACCEPTE'} ? 'bg-success' : 
+                                                                              ${inscription.statut.name() == 'EN_ATTENTE'} ? 'bg-warning' : 'bg-danger'"
+                                                              th:text="${inscription.statut.name()}">Statut</span>
+                                                        <small class="text-muted" th:text="${#temporals.format(inscription.dateDemande, 'dd MMM yyyy')}">Date</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div th:unless="${membre.inscriptions != null}">
+                                <div class="text-center">
+                                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">Informations sur les clubs non disponibles.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- Fermeture de la div th:if="${membre != null}" -->
+    </div>
+</section>
+
+<!-- Ajout des icônes Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<!-- Styles personnalisés -->
+<style>
+    .card {
+        border-radius: 10px;
+    }
+    
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .badge {
+        font-size: 0.9em;
+    }
+    
+    .lead {
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+    
+    .border {
+        border-color: #e9ecef !important;
+    }
+    
+    .border:hover {
+        border-color: #007bff !important;
+        transition: border-color 0.2s ease;
+    }
+</style>
+</body>
+</html>

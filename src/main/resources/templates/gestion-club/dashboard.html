@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="'Accueil - ' + ${club.nom}">Accueil - Gestion de Club</title>
+</head>
+<body>
+<section>
+    <div class="container-fluid">
+        <!-- En-tête de la page -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 th:text="'Accueil - ' + ${club.nom}">Accueil - Nom du Club</h1>
+                <p class="lead text-muted">Vue d'ensemble de votre club et de ses activités</p>
+            </div>
+            <div>
+                <span class="badge bg-primary fs-6" th:text="'Chef de club'"></span>
+            </div>
+        </div>
+
+        <!-- Statistiques principales -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center border-primary">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                        <h5 class="card-title">Membres Actifs</h5>
+                        <p class="display-4 text-primary mb-0" th:text="${club.inscriptions.?[statut.name() == 'ACCEPTE'].size()}">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-center border-warning">
+                    <div class="card-body">
+                        <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                        <h5 class="card-title">En Attente</h5>
+                        <p class="display-4 text-warning mb-0" th:text="${club.inscriptions.?[statut.name() == 'EN_ATTENTE'].size()}">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-center border-info">
+                    <div class="card-body">
+                        <i class="fas fa-calendar fa-2x text-info mb-2"></i>
+                        <h5 class="card-title">Événements</h5>
+                        <p class="display-4 text-info mb-0">0</p>
+                        <small class="text-muted">À venir</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-center border-success">
+                    <div class="card-body">
+                        <i class="fas fa-chart-line fa-2x text-success mb-2"></i>
+                        <h5 class="card-title">Activité</h5>
+                        <p class="display-4 text-success mb-0">85%</p>
+                        <small class="text-muted">Ce mois</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informations du club -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-info-circle"></i> Informations du Club
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Nom du Club</h6>
+                                <p th:text="${club.nom}" class="text-muted"></p>
+                                
+                                <h6>Description</h6>
+                                <p th:text="${club.description}" class="text-muted"></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Date de création</h6>
+                                <p th:text="${#temporals.format(club.dateCreation, 'dd MMMM yyyy')}" class="text-muted"></p>
+                                
+                                <h6>Logo</h6>
+                                <img th:src="${club.logo != null ? club.logo : '/images/default-club.png'}" 
+                                     class="img-thumbnail" 
+                                     style="width: 80px; height: 80px; object-fit: cover;" 
+                                     alt="Logo du club">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-tasks"></i> Actions Rapides
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/gestion-club/membres}" class="btn btn-primary">
+                                <i class="fas fa-users"></i> Gérer les Membres
+                            </a>
+                            <a href="#" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Créer un Événement
+                            </a>
+                            <a href="#" class="btn btn-info">
+                                <i class="fas fa-bullhorn"></i> Annoncer
+                            </a>
+                            <a href="#" class="btn btn-warning">
+                                <i class="fas fa-cog"></i> Paramètres
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dernières activités -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-history"></i> Dernières Demandes
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(club.inscriptions.?[statut.name() == 'EN_ATTENTE'])}">
+                            <p class="text-center text-muted">Aucune demande récente</p>
+                        </div>
+                        <div th:unless="${#lists.isEmpty(club.inscriptions.?[statut.name() == 'EN_ATTENTE'])}">
+                            <div th:each="inscription : ${club.inscriptions.?[statut.name() == 'EN_ATTENTE']}" class="d-flex align-items-center mb-2">
+                                <img th:src="${inscription.utilisateur.photoProfil != null ? inscription.utilisateur.photoProfil : '/images/default-avatar.png'}" 
+                                     class="rounded-circle me-3" 
+                                     style="width: 40px; height: 40px; object-fit: cover;" 
+                                     alt="Photo de profil">
+                                <div class="flex-grow-1">
+                                    <strong th:text="${inscription.utilisateur.prenom} + ' ' + ${inscription.utilisateur.nom}"></strong>
+                                    <br>
+                                    <small class="text-muted" th:text="${#temporals.format(inscription.dateDemande, 'dd MMM à HH:mm')}"></small>
+                                </div>
+                                <span class="badge bg-warning">En attente</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-star"></i> Membres Récents
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(club.inscriptions.?[statut.name() == 'ACCEPTE'])}">
+                            <p class="text-center text-muted">Aucun membre actif</p>
+                        </div>
+                        <div th:unless="${#lists.isEmpty(club.inscriptions.?[statut.name() == 'ACCEPTE'])}">
+                            <div th:each="inscription : ${club.inscriptions.?[statut.name() == 'ACCEPTE']}" class="d-flex align-items-center mb-2">
+                                <img th:src="${inscription.utilisateur.photoProfil != null ? inscription.utilisateur.photoProfil : '/images/default-avatar.png'}" 
+                                     class="rounded-circle me-3" 
+                                     style="width: 40px; height: 40px; object-fit: cover;" 
+                                     alt="Photo de profil">
+                                <div class="flex-grow-1">
+                                    <strong th:text="${inscription.utilisateur.prenom} + ' ' + ${inscription.utilisateur.nom}"></strong>
+                                    <br>
+                                    <small class="text-muted" th:text="${inscription.utilisateur.email}"></small>
+                                </div>
+                                <span class="badge bg-success">Actif</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Ajout des icônes Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</body>
+</html>

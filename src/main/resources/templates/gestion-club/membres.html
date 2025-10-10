@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="'Gestion des Membres - ' + ${club.nom}">Gestion des Membres</title>
+</head>
+<body>
+<section>
+    <div class="container-fluid">
+        <!-- En-tête de la page -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1>Gestion des Membres</h1>
+                <p class="text-muted" th:text="'Club : ' + ${club.nom}">Club : Nom du Club</p>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a th:href="@{/gestion-club}">Accueil</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Gestion Membres</li>
+                    </ol>
+                </nav>
+            </div>
+            <div>
+                <a th:href="@{/gestion-club/membres/ajouter}" class="btn btn-primary me-2">
+                    <i class="fas fa-plus"></i> Ajouter un membre
+                </a>
+                <a th:href="@{/gestion-club}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour à l'Accueil
+                </a>
+            </div>
+        </div>
+
+        <!-- SECTION DES DEMANDES EN ATTENTE -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">
+                    <i class="fas fa-clock"></i> Demandes d'adhésion en attente
+                    <span class="badge bg-dark ms-2" th:text="${club.inscriptions.?[statut.name() == 'EN_ATTENTE'].size()}">0</span>
+                </h4>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(club.inscriptions.?[statut.name() == 'EN_ATTENTE'])}">
+                    <div class="text-center py-4">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Aucune demande en attente pour le moment.</p>
+                    </div>
+                </div>
+                
+                <div th:unless="${#lists.isEmpty(club.inscriptions.?[statut.name() == 'EN_ATTENTE'])}">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Photo</th>
+                                    <th>Nom complet</th>
+                                    <th>Email</th>
+                                    <th>Date de demande</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="inscription : ${club.inscriptions.?[statut.name() == 'EN_ATTENTE']}">
+                                    <td>
+                                        <img th:src="${inscription.utilisateur.photoProfil != null ? inscription.utilisateur.photoProfil : '/images/default-avatar.png'}" 
+                                             class="rounded-circle" 
+                                             style="width: 40px; height: 40px; object-fit: cover;" 
+                                             alt="Photo de profil">
+                                    </td>
+                                    <td th:text="${inscription.utilisateur.prenom} + ' ' + ${inscription.utilisateur.nom}"></td>
+                                    <td th:text="${inscription.utilisateur.email}"></td>
+                                    <td th:text="${#temporals.format(inscription.dateDemande, 'dd MMM yyyy à HH:mm')}"></td>
+                                    <td>
+                                        <div class="action-buttons d-flex gap-2">
+                                            <form th:action="@{/gestion-club/membres/approuver/{inscriptionId}(inscriptionId=${inscription.id})}" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-success btn-sm px-3" title="Approuver cette demande">
+                                                    <i class="fas fa-check me-1"></i>Approuver
+                                                </button>
+                                            </form>
+                                            <form th:action="@{/gestion-club/membres/refuser/{inscriptionId}(inscriptionId=${inscription.id})}" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-danger btn-sm px-3" title="Refuser cette demande">
+                                                    <i class="fas fa-times me-1"></i>Refuser
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION DES MEMBRES ACTIFS -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-users"></i> Membres actifs
+                    <span class="badge bg-primary ms-2" th:text="${club.inscriptions.?[statut.name() == 'ACCEPTE'].size()}">0</span>
+                </h4>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(club.inscriptions.?[statut.name() == 'ACCEPTE'])}">
+                    <div class="text-center py-4">
+                        <i class="fas fa-user-friends fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Votre club n'a pas encore de membres actifs.</p>
+                        <a th:href="@{/gestion-club/membres/ajouter}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Inviter le premier membre
+                        </a>
+                    </div>
+                </div>
+                
+                <div th:unless="${#lists.isEmpty(club.inscriptions.?[statut.name() == 'ACCEPTE'])}">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Photo</th>
+                                    <th>Nom</th>
+                                    <th>Email</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="inscription : ${club.inscriptions.?[statut.name() == 'ACCEPTE']}">
+                                    <td>
+                                        <img th:src="${inscription.utilisateur.photoProfil != null ? inscription.utilisateur.photoProfil : '/images/default-avatar.png'}" 
+                                             class="rounded-circle" 
+                                             style="width: 40px; height: 40px; object-fit: cover;" 
+                                             alt="Photo de profil">
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong th:text="${inscription.utilisateur.prenom} + ' ' + ${inscription.utilisateur.nom}"></strong>
+                                            <br>
+                                            <small class="text-muted" th:text="${inscription.utilisateur.role.name()}"></small>
+                                        </div>
+                                    </td>
+                                    <td th:text="${inscription.utilisateur.email}"></td>
+                                    <td>
+                                        <div class="action-buttons d-flex flex-wrap gap-1">
+                                            <!-- Bouton Voir les détails -->
+                                            <a th:href="@{/profil/membre/{id}(id=${inscription.utilisateur.id})}" 
+                                               class="btn btn-info btn-sm px-2 py-1" 
+                                               title="Voir le profil de ce membre">
+                                                <i class="fas fa-eye me-1"></i>Voir
+                                            </a>
+                                            
+                                            <!-- Bouton Promouvoir membre -->
+                                            <a th:href="@{/gestion-club/membres/promouvoir/{id}(id=${inscription.utilisateur.id})}" 
+                                               class="btn btn-warning btn-sm px-2 py-1" 
+                                               title="Promouvoir ce membre">
+                                                <i class="fas fa-star me-1"></i>Promouvoir
+                                            </a>
+                                            
+                                            <!-- Bouton Supprimer du club -->
+                                            <form th:action="@{/gestion-club/membres/supprimer/{id}(id=${inscription.utilisateur.id})}" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-danger btn-sm px-2 py-1" 
+                                                        title="Supprimer ce membre du club"
+                                                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce membre du club ?')">
+                                                    <i class="fas fa-trash me-1"></i>Supprimer
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION DES MEMBRES REFUSÉS (optionnel) -->
+        <div class="card shadow-sm mt-4" th:if="${!#lists.isEmpty(club.inscriptions.?[statut.name() == 'REFUSE'])}">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-times"></i> Membres refusés
+                    <span class="badge bg-light text-dark ms-2" th:text="${club.inscriptions.?[statut.name() == 'REFUSE'].size()}">0</span>
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Photo</th>
+                                <th>Nom complet</th>
+                                <th>Email</th>
+                                <th>Date de refus</th>
+                                <th>Motif</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="inscription : ${club.inscriptions.?[statut.name() == 'REFUSE']}">
+                                <td>
+                                    <img th:src="${inscription.utilisateur.photoProfil != null ? inscription.utilisateur.photoProfil : '/images/default-avatar.png'}" 
+                                         class="rounded-circle" 
+                                         style="width: 40px; height: 40px; object-fit: cover;" 
+                                         alt="Photo de profil">
+                                </td>
+                                <td th:text="${inscription.utilisateur.prenom} + ' ' + ${inscription.utilisateur.nom}"></td>
+                                <td th:text="${inscription.utilisateur.email}"></td>
+                                <td th:text="${#temporals.format(inscription.dateDemande, 'dd MMM yyyy')}"></td>
+                                <td>
+                                    <small class="text-muted" th:text="${inscription.motifRefus != null ? inscription.motifRefus : 'Aucun motif spécifié'}"></small>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Ajout des icônes Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<!-- Styles personnalisés pour améliorer la visibilité des boutons -->
+<style>
+    .action-buttons .btn {
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .action-buttons .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .action-buttons .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    
+    .action-buttons .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+    
+    .action-buttons .btn-info {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+    }
+    
+    .action-buttons .btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #212529;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .action-buttons {
+        min-width: 200px;
+    }
+</style>
+
+<!-- Script pour les confirmations -->
+<script>
+    // Confirmation avant suppression
+    function confirmDelete(memberName) {
+        return confirm('Êtes-vous sûr de vouloir supprimer ' + memberName + ' du club ?');
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<!-- On utilise notre layout de base -->
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Calendrier - CampusFlow</title>
+</head>
+<body>
+<section>
+    <div class="container-fluid">
+        <h1 class="mb-4">Calendrier des Événements</h1>
+        <p class="lead">Voici la liste de tous les événements prévus sur le campus.</p>
+
+        <!-- On utilise un tableau Bootstrap pour afficher la liste -->
+        <table class="table table-hover mt-4">
+            <thead class="table-light">
+            <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Événement</th>
+                <th scope="col">Lieu</th>
+                <th scope="col">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- On boucle sur la liste "evenements" fournie par le contrôleur -->
+            <tr th:each="event : ${evenements}">
+                <!-- Utilisation de l'utilitaire de date de Thymeleaf pour un formatage propre -->
+                <td th:text="${#temporals.format(event.dateHeureDebut, 'dd MMM yyyy, HH:mm')}">01 Jan 2025, 18:00</td>
+                <td th:text="${event.titre}">Titre de l'événement</td>
+                <td th:text="${event.lieu}">Lieu de l'événement</td>
+                <td>
+                    <!-- Lien vers une future page de détail de l'événement -->
+                    <a href="#" class="btn btn-sm btn-info">Voir détails</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- Message affiché si aucun événement n'est prévu -->
+        <div th:if="${evenements.isEmpty()}" class="alert alert-info mt-4">
+            Aucun événement n'est programmé pour le moment.
+        </div>
+    </div>
+</section>
+</body>
+</html>
