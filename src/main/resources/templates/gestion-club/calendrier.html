@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendrier du Club - CampusFlow</title>
+    <title th:text="'Calendrier du Club - ' + ${club.nom}">Calendrier du Club - CampusFlow</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
@@ -131,11 +130,7 @@
     </style>
 </head>
 <body>
-    <div th:replace="~{fragments/layout :: layout}">
-        <!-- Le contenu sera remplacé par le layout -->
-    </div>
-
-    <div th:fragment="content">
+<section>
         <div class="container-fluid mt-4">
             <!-- En-tête de la page -->
             <div class="row mb-4">
@@ -157,25 +152,43 @@
                 </div>
             </div>
 
-            <!-- Statistiques des événements -->
-            <div class="calendar-stats">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="stat-item">
-                            <div class="stat-number text-success" th:text="${club.evenementsOrganises.size()}">0</div>
-                            <div class="stat-label">Événements Total</div>
+            <!-- Filtres et Statistiques -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <!-- Filtres de statut -->
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title mb-3">Filtrer les événements</h6>
+                            <div class="btn-group" role="group" aria-label="Filtres d'événements">
+                                <button type="button" class="btn btn-outline-primary filter-btn active" data-filter="all">
+                                    <i class="fas fa-calendar-alt me-1"></i>Tous
+                                </button>
+                                <button type="button" class="btn btn-outline-success filter-btn" data-filter="upcoming">
+                                    <i class="fas fa-clock me-1"></i>À venir
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary filter-btn" data-filter="past">
+                                    <i class="fas fa-history me-1"></i>Passés
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="stat-item">
-                            <div class="stat-number text-primary" th:text="${club.evenementsOrganises.?[statut.name() == 'PUBLIE'].size()}">0</div>
-                            <div class="stat-label">Événements Publiés</div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="stat-item">
-                            <div class="stat-number text-warning" th:text="${club.evenementsOrganises.?[statut.name() == 'BROUILLON'].size()}">0</div>
-                            <div class="stat-label">Brouillons</div>
+                </div>
+                <div class="col-md-4">
+                    <!-- Statistiques rapides -->
+                    <div class="calendar-stats">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="stat-item">
+                                    <div class="stat-number text-primary" id="total-events">0</div>
+                                    <div class="stat-label">Total</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-item">
+                                    <div class="stat-number text-success" id="upcoming-events">0</div>
+                                    <div class="stat-label">À venir</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -257,6 +270,44 @@
         </div>
     </div>
 
+    <!-- Popup pour les détails d'événement -->
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalLabel">Détails de l'événement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <h6 class="text-primary" id="eventTitle">Titre de l'événement</h6>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Date et heure :</strong>
+                        <span id="eventDateTime">Non spécifié</span>
+                    </div>
+                    <div class="mb-3" id="eventLocationDiv" style="display: none;">
+                        <strong>Lieu :</strong>
+                        <span id="eventLocation">Non spécifié</span>
+                    </div>
+                    <div class="mb-3" id="eventDescriptionDiv" style="display: none;">
+                        <strong>Description :</strong>
+                        <p id="eventDescription" class="text-muted">Aucune description</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <a href="#" class="btn btn-warning" id="editEventBtn">
+                        <i class="fas fa-edit me-1"></i>Modifier
+                    </a>
+                    <button type="button" class="btn btn-danger" id="deleteEventBtn">
+                        <i class="fas fa-trash me-1"></i>Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- FullCalendar JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales/fr.global.min.js"></script>
@@ -291,13 +342,19 @@
                 initialView: 'dayGridMonth',
                 
                 // Source de données
-                events: {
-                    url: '/gestion-club/calendrier/api/events',
-                    method: 'GET',
-                    failure: function() {
-                        console.error('Erreur lors du chargement des événements');
-                        showNotification('Erreur lors du chargement des événements', 'error');
-                    }
+                events: function(info, successCallback, failureCallback) {
+                    const activeFilter = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
+                    fetch('/gestion-club/calendrier/api/events?filter=' + activeFilter)
+                        .then(response => response.json())
+                        .then(data => {
+                            successCallback(data);
+                            updateStatistics(data);
+                        })
+                        .catch(error => {
+                            console.error('Erreur lors du chargement des événements:', error);
+                            failureCallback(error);
+                            showNotification('Erreur lors du chargement des événements', 'error');
+                        });
                 },
                 
                 // Personnalisation des événements
@@ -314,9 +371,8 @@
                 
                 // Gestion des clics
                 eventClick: function(info) {
-                    // Ouvrir les détails de l'événement
-                    const eventId = info.event.id;
-                    window.location.href = '/gestion-club/evenements/' + eventId;
+                    // Afficher la popup avec les détails de l'événement
+                    showEventModal(info.event);
                 },
                 
                 // Dates et heures
@@ -385,6 +441,92 @@
                 }
             }
 
+            // Gestion des filtres
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const filter = this.dataset.filter;
+                    
+                    // Mettre à jour les classes actives
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Recharger les événements avec le nouveau filtre
+                    calendar.refetchEvents();
+                });
+            });
+            
+            // Fonction pour afficher la popup d'événement
+            function showEventModal(event) {
+                const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+                
+                // Remplir les informations de l'événement
+                document.getElementById('eventTitle').textContent = event.title;
+                
+                // Formater la date et l'heure
+                const startDate = new Date(event.start);
+                const endDate = event.end ? new Date(event.end) : null;
+                
+                let dateTimeText = startDate.toLocaleDateString('fr-FR', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                if (endDate) {
+                    dateTimeText += ' - ' + endDate.toLocaleTimeString('fr-FR', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+                
+                document.getElementById('eventDateTime').textContent = dateTimeText;
+                
+                // Afficher le lieu si disponible
+                if (event.extendedProps.location) {
+                    document.getElementById('eventLocation').textContent = event.extendedProps.location;
+                    document.getElementById('eventLocationDiv').style.display = 'block';
+                } else {
+                    document.getElementById('eventLocationDiv').style.display = 'none';
+                }
+                
+                // Afficher la description si disponible
+                if (event.extendedProps.description) {
+                    document.getElementById('eventDescription').textContent = event.extendedProps.description;
+                    document.getElementById('eventDescriptionDiv').style.display = 'block';
+                } else {
+                    document.getElementById('eventDescriptionDiv').style.display = 'none';
+                }
+                
+                // Configurer les boutons d'action
+                document.getElementById('editEventBtn').href = '/gestion-club/evenements/' + event.id + '/modifier';
+                
+                document.getElementById('deleteEventBtn').onclick = function() {
+                    if (confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) {
+                        window.location.href = '/gestion-club/evenements/' + event.id + '/supprimer';
+                    }
+                };
+                
+                // Afficher la popup
+                modal.show();
+            }
+            
+            // Fonction pour mettre à jour les statistiques
+            function updateStatistics(events) {
+                const totalEvents = events.length;
+                const now = new Date();
+                const upcomingEvents = events.filter(event => {
+                    const eventDate = new Date(event.start);
+                    return eventDate > now;
+                }).length;
+                
+                document.getElementById('total-events').textContent = totalEvents;
+                document.getElementById('upcoming-events').textContent = upcomingEvents;
+            }
+            
             // Fonction pour afficher les notifications
             function showNotification(message, type = 'info') {
                 const alertClass = type === 'error' ? 'alert-danger' : 'alert-info';
@@ -411,5 +553,4 @@
             };
         });
     </script>
-</body>
-</html>
+</section>

@@ -6,6 +6,7 @@ import com.universite.UniClubs.entities.Evenement;
 import com.universite.UniClubs.entities.StatutEvenement;
 import com.universite.UniClubs.entities.Utilisateur;
 import com.universite.UniClubs.repositories.ClubRepository;
+import com.universite.UniClubs.repositories.UtilisateurRepository;
 import com.universite.UniClubs.services.EvenementService;
 import com.universite.UniClubs.services.EmailNotificationService;
 import com.universite.UniClubs.services.CalendarService;
@@ -58,16 +59,46 @@ public class ClubManagementController {
 
     @Autowired
     private CalendarService calendarService;
+    
+    @Autowired
+    private UtilisateurRepository utilisateurRepository;
 
     // Méthode utilitaire pour récupérer l'utilisateur connecté de manière sécurisée
     private Utilisateur getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        logger.info("=== GET CURRENT USER DEBUG ===");
+        logger.info("Authentication: {}", authentication);
+        logger.info("Principal: {}", authentication != null ? authentication.getPrincipal() : "NULL");
+        logger.info("Principal class: {}", authentication != null && authentication.getPrincipal() != null ? 
+                   authentication.getPrincipal().getClass().getName() : "NULL");
+        
         if (authentication != null && authentication.getPrincipal() instanceof com.universite.UniClubs.services.CustomUserDetails) {
             com.universite.UniClubs.services.CustomUserDetails userDetails = 
                 (com.universite.UniClubs.services.CustomUserDetails) authentication.getPrincipal();
+            logger.info("CustomUserDetails trouvé: {}", userDetails);
             return userDetails.getUtilisateur();
         }
-        throw new RuntimeException("Utilisateur non authentifié");
+        
+        // Si le principal est une String (nom d'utilisateur), on doit récupérer l'utilisateur depuis la base
+        if (authentication != null && authentication.getPrincipal() instanceof String) {
+            String email = (String) authentication.getPrincipal();
+            logger.info("Principal est une String (email): {}", email);
+            
+            // Récupérer l'utilisateur depuis la base de données
+            Optional<Utilisateur> utilisateurOptional = utilisateurRepository.findByEmail(email);
+            if (utilisateurOptional.isPresent()) {
+                logger.info("Utilisateur trouvé par email: {}", email);
+                return utilisateurOptional.get();
+            } else {
+                logger.error("Utilisateur non trouvé pour l'email: {}", email);
+                throw new RuntimeException("Utilisateur non trouvé pour l'email: " + email);
+            }
+        }
+        
+        logger.error("Type de principal non supporté: {}", 
+                    authentication != null && authentication.getPrincipal() != null ? 
+                    authentication.getPrincipal().getClass().getName() : "NULL");
+        throw new RuntimeException("Utilisateur non authentifié - Type de principal non supporté");
     }
 
     @GetMapping
@@ -590,6 +621,117 @@ public class ClubManagementController {
     // ===== MÉTHODES POUR LE CALENDRIER =====
     
     /**
+     * Endpoint de test pour diagnostiquer les problèmes d'accès
+     */
+    @GetMapping("/calendrier/test")
+    @ResponseBody
+    public ResponseEntity<String> testCalendarAccess() {
+        logger.info("=== TEST ACCÈS CALENDRIER ===");
+        
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            logger.info("Authentication: {}", auth);
+            logger.info("Principal: {}", auth.getPrincipal());
+            logger.info("Authorities: {}", auth.getAuthorities());
+            
+            Utilisateur chefDeClub = getCurrentUser();
+            logger.info("Chef de club: {} (ID: {})", chefDeClub.getEmail(), chefDeClub.getId());
+            
+            return ResponseEntity.ok("Test réussi - Utilisateur: " + chefDeClub.getEmail());
+            
+        } catch (Exception e) {
+            logger.error("Erreur lors du test: {}", e.getMessage(), e);
+            return ResponseEntity.ok("Erreur: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Endpoint de test simple pour diagnostiquer les problèmes
+     */
+    @GetMapping("/calendrier/debug")
+    @ResponseBody
+    public ResponseEntity<String> debugCalendarAccess() {
+        logger.info("=== DEBUG CALENDRIER SIMPLE ===");
+        
+        try {
+            // Test 1: Authentication
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            logger.info("✓ Authentication: {}", auth != null ? "OK" : "NULL");
+            
+            if (auth == null) {
+                return ResponseEntity.ok("ERREUR: Authentication est null");
+            }
+            
+            // Test 2: Principal
+            Object principal = auth.getPrincipal();
+            logger.info("✓ Principal: {}", principal != null ? principal.getClass().getSimpleName() : "NULL");
+            
+            if (!(principal instanceof com.universite.UniClubs.services.CustomUserDetails)) {
+                return ResponseEntity.ok("ERREUR: Principal n'est pas CustomUserDetails: " + principal.getClass().getName());
+            }
+            
+            // Test 3: CustomUserDetails
+            com.universite.UniClubs.services.CustomUserDetails userDetails = 
+                (com.universite.UniClubs.services.CustomUserDetails) principal;
+            logger.info("✓ CustomUserDetails: OK");
+            
+            // Test 4: Utilisateur
+            Utilisateur utilisateur = userDetails.getUtilisateur();
+            logger.info("✓ Utilisateur: {} (ID: {})", utilisateur.getEmail(), utilisateur.getId());
+            
+            // Test 5: Repository
+            Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(utilisateur.getId());
+            logger.info("✓ Repository query: {}", clubOptional.isPresent() ? "Club trouvé" : "Club non trouvé");
+            
+            if (clubOptional.isPresent()) {
+                Club club = clubOptional.get();
+                logger.info("✓ Club: {} (ID: {})", club.getNom(), club.getId());
+                return ResponseEntity.ok("SUCCESS: " + club.getNom() + " - " + club.getEvenementsOrganises().size() + " événements");
+            } else {
+                return ResponseEntity.ok("ERREUR: Aucun club trouvé pour l'utilisateur " + utilisateur.getEmail());
+            }
+            
+        } catch (Exception e) {
+            logger.error("ERREUR dans debug: {}", e.getMessage(), e);
+            return ResponseEntity.ok("ERREUR: " + e.getMessage() + " - " + e.getClass().getSimpleName());
+        }
+    }
+    
+    /**
+     * Endpoint de test simple pour le calendrier
+     */
+    @GetMapping("/calendrier/test-simple")
+    public String testSimpleCalendar(Model model) {
+        logger.info("=== TEST CALENDRIER SIMPLE ===");
+        
+        try {
+            Utilisateur chefDeClub = getCurrentUser();
+            logger.info("Chef de club: {} (ID: {})", chefDeClub.getEmail(), chefDeClub.getId());
+            
+            Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(chefDeClub.getId());
+            
+            if (clubOptional.isPresent()) {
+                Club club = clubOptional.get();
+                logger.info("Club trouvé: {} (ID: {})", club.getNom(), club.getId());
+                
+                model.addAttribute("club", club);
+                model.addAttribute("utilisateurConnecte", chefDeClub);
+                
+                return "gestion-club/calendrier-test";
+            } else {
+                logger.error("Club non trouvé pour le chef ID: {}", chefDeClub.getId());
+                model.addAttribute("error", "Club non trouvé");
+                return "error-page";
+            }
+            
+        } catch (Exception e) {
+            logger.error("Erreur dans test simple: {}", e.getMessage(), e);
+            model.addAttribute("error", "Erreur: " + e.getMessage());
+            return "error-page";
+        }
+    }
+    
+    /**
      * Affiche la page de gestion du calendrier du club
      */
     @GetMapping("/calendrier")
@@ -675,7 +817,8 @@ public class ClubManagementController {
      */
     @GetMapping("/calendrier/api/events")
     @ResponseBody
-    public ResponseEntity<List<CalendarEventDto>> getCalendarEvents() {
+    public ResponseEntity<List<CalendarEventDto>> getCalendarEvents(
+            @RequestParam(value = "filter", defaultValue = "all") String filter) {
         logger.info("=== API CALENDRIER EVENTS ===");
         
         try {
@@ -695,11 +838,30 @@ public class ClubManagementController {
             
             // Convertir les événements en DTOs pour FullCalendar
             List<CalendarEventDto> events = new ArrayList<>();
+            LocalDateTime maintenant = LocalDateTime.now();
+            
             if (club.getEvenementsOrganises() != null) {
                 for (Evenement evenement : club.getEvenementsOrganises()) {
-                    // Ne récupérer que les événements publiés
-                    if (evenement.getStatut() != null && 
-                        evenement.getStatut().name().equals("PUBLIE")) {
+                    // Appliquer le filtre selon le paramètre
+                    boolean shouldInclude = false;
+                    
+                    if ("all".equals(filter)) {
+                        // Tous les événements publiés
+                        shouldInclude = evenement.getStatut() != null && 
+                                      evenement.getStatut().name().equals("PUBLIE");
+                    } else if ("upcoming".equals(filter)) {
+                        // Seulement les événements à venir
+                        shouldInclude = evenement.getStatut() != null && 
+                                      evenement.getStatut().name().equals("PUBLIE") &&
+                                      evenement.getDateHeureDebut().isAfter(maintenant);
+                    } else if ("past".equals(filter)) {
+                        // Seulement les événements passés
+                        shouldInclude = evenement.getStatut() != null && 
+                                      evenement.getStatut().name().equals("PUBLIE") &&
+                                      evenement.getDateHeureDebut().isBefore(maintenant);
+                    }
+                    
+                    if (shouldInclude) {
                         
                         CalendarEventDto eventDto = new CalendarEventDto();
                         eventDto.setId(evenement.getId().toString());
