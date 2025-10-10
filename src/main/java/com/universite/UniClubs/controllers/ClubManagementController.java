@@ -8,6 +8,7 @@ import com.universite.UniClubs.entities.Utilisateur;
 import com.universite.UniClubs.repositories.ClubRepository;
 import com.universite.UniClubs.services.EvenementService;
 import com.universite.UniClubs.services.EmailNotificationService;
+import com.universite.UniClubs.services.CalendarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -19,6 +20,9 @@ import com.universite.UniClubs.services.InscriptionService;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -48,6 +52,9 @@ public class ClubManagementController {
 
     @Autowired
     private EmailNotificationService emailNotificationService;
+
+    @Autowired
+    private CalendarService calendarService;
 
     // Méthode utilitaire pour récupérer l'utilisateur connecté de manière sécurisée
     private Utilisateur getCurrentUser() {
@@ -574,6 +581,89 @@ public class ClubManagementController {
         } catch (Exception e) {
             logger.error("Erreur lors de la création de l'événement de test: {}", e.getMessage(), e);
             return "redirect:/gestion-club/debug/evenements?error=creation-failed";
+        }
+    }
+
+    // ===== MÉTHODES POUR LE CALENDRIER =====
+    
+    /**
+     * Affiche la page de gestion du calendrier du club
+     */
+    @GetMapping("/calendrier")
+    public String showCalendarPage(Model model) {
+        logger.info("=== AFFICHAGE PAGE CALENDRIER ===");
+        
+        try {
+            Utilisateur chefDeClub = getCurrentUser();
+            logger.info("Chef de club connecté: {} (ID: {})", chefDeClub.getEmail(), chefDeClub.getId());
+            
+            // Récupérer le club avec tous ses détails
+            Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(chefDeClub.getId());
+            
+            if (clubOptional.isEmpty()) {
+                logger.error("Club non trouvé pour le chef ID: {}", chefDeClub.getId());
+                return "redirect:/gestion-club?error=club-not-found";
+            }
+            
+            Club club = clubOptional.get();
+            logger.info("Club trouvé: {} (ID: {})", club.getNom(), club.getId());
+            logger.info("Nombre d'événements dans le club: {}", club.getEvenementsOrganises().size());
+            
+            model.addAttribute("club", club);
+            model.addAttribute("utilisateurConnecte", chefDeClub);
+            
+            logger.info("Page calendrier affichée avec succès");
+            return "gestion-club/calendrier";
+            
+        } catch (Exception e) {
+            logger.error("Erreur lors de l'affichage de la page calendrier: {}", e.getMessage(), e);
+            return "redirect:/gestion-club?error=calendar-page-error";
+        }
+    }
+
+    /**
+     * Exporte les événements du club au format ICS pour synchronisation avec les calendriers
+     */
+    @GetMapping("/calendrier/export/ics")
+    public ResponseEntity<String> exportCalendarICS() {
+        logger.info("=== EXPORT CALENDRIER ICS ===");
+        
+        try {
+            Utilisateur chefDeClub = getCurrentUser();
+            logger.info("Chef de club connecté: {} (ID: {})", chefDeClub.getEmail(), chefDeClub.getId());
+            
+            // Récupérer le club avec tous ses détails
+            Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(chefDeClub.getId());
+            
+            if (clubOptional.isEmpty()) {
+                logger.error("Club non trouvé pour le chef ID: {}", chefDeClub.getId());
+                return ResponseEntity.notFound().build();
+            }
+            
+            Club club = clubOptional.get();
+            logger.info("Club trouvé: {} (ID: {})", club.getNom(), club.getId());
+            
+            // Générer le contenu ICS
+            String icsContent = calendarService.generateICSContent(club);
+            String fileName = calendarService.generateICSFileName(club);
+            
+            logger.info("Contenu ICS généré avec succès ({} caractères)", icsContent.length());
+            
+            // Configurer les headers pour le téléchargement
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType("text/calendar; charset=utf-8"));
+            headers.setContentDispositionFormData("attachment", fileName);
+            headers.setCacheControl("no-cache, no-store, must-revalidate");
+            headers.setPragma("no-cache");
+            headers.setExpires(0);
+            
+            return ResponseEntity.ok()
+                .headers(headers)
+                .body(icsContent);
+                
+        } catch (Exception e) {
+            logger.error("Erreur lors de l'export ICS: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
         }
     }
 
