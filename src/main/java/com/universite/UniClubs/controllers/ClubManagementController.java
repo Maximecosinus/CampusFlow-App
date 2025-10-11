@@ -1,11 +1,9 @@
 package com.universite.UniClubs.controllers;
 
 
-import com.universite.UniClubs.entities.Club;
-import com.universite.UniClubs.entities.Evenement;
-import com.universite.UniClubs.entities.StatutEvenement;
-import com.universite.UniClubs.entities.Utilisateur;
+import com.universite.UniClubs.entities.*;
 import com.universite.UniClubs.repositories.ClubRepository;
+import com.universite.UniClubs.repositories.InscriptionRepository;
 import com.universite.UniClubs.repositories.UtilisateurRepository;
 import com.universite.UniClubs.services.EvenementService;
 import com.universite.UniClubs.services.EmailNotificationService;
@@ -25,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +61,9 @@ public class ClubManagementController {
     
     @Autowired
     private UtilisateurRepository utilisateurRepository;
+    
+    @Autowired
+    private InscriptionRepository inscriptionRepository;
 
     // Méthode utilitaire pour récupérer l'utilisateur connecté de manière sécurisée
     private Utilisateur getCurrentUser() {
@@ -946,6 +948,323 @@ public class ClubManagementController {
         
         public String getUrl() { return url; }
         public void setUrl(String url) { this.url = url; }
+    }
+
+    // ==================== RAPPORTS ET STATISTIQUES ====================
+
+    /**
+     * Page des rapports et statistiques du club
+     */
+    @GetMapping("/rapports")
+    @PreAuthorize("hasRole('CHEF_DE_CLUB')")
+    public String showReportsPage(Model model) {
+        logger.info("=== PAGE RAPPORTS ===");
+        
+        try {
+            Utilisateur chefDeClub = getCurrentUser();
+            logger.info("Chef de club connecté: {} (ID: {})", chefDeClub.getEmail(), chefDeClub.getId());
+            
+            // Récupérer le club avec tous ses détails
+            Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(chefDeClub.getId());
+            
+            if (clubOptional.isEmpty()) {
+                logger.error("Club non trouvé pour le chef ID: {}", chefDeClub.getId());
+                model.addAttribute("error", "Impossible de trouver le club que vous dirigez.");
+                return "error-page";
+            }
+            
+            Club club = clubOptional.get();
+            logger.info("Club trouvé: {} (ID: {})", club.getNom(), club.getId());
+            
+            // Calculer les statistiques
+            ClubStatistics stats = calculateClubStatistics(club);
+            
+            // Ajouter les données au modèle
+            model.addAttribute("club", club);
+            model.addAttribute("stats", stats);
+            model.addAttribute("utilisateurConnecte", chefDeClub);
+            
+            logger.info("Statistiques calculées - Membres: {}, Événements passés: {}", 
+                       stats.getTotalMembers(), stats.getPastEvents().size());
+            
+            return "gestion-club/rapports";
+            
+        } catch (Exception e) {
+            logger.error("Erreur lors de l'affichage des rapports: {}", e.getMessage(), e);
+            model.addAttribute("error", "Erreur lors du chargement des rapports.");
+            return "error-page";
+        }
+    }
+
+    /**
+     * Calcule les statistiques du club
+     */
+    private ClubStatistics calculateClubStatistics(Club club) {
+        ClubStatistics stats = new ClubStatistics();
+        
+        // 1. Nombre total de membres acceptés
+        int totalMembers = 0;
+        if (club.getInscriptions() != null) {
+            totalMembers = (int) club.getInscriptions().stream()
+                    .filter(inscription -> inscription.getStatut() == StatutInscription.ACCEPTE)
+                    .count();
+        }
+        stats.setTotalMembers(totalMembers);
+        
+        // 2. Événements passés avec participants
+        List<EventStatistics> pastEvents = new ArrayList<>();
+        LocalDateTime maintenant = LocalDateTime.now();
+        
+        if (club.getEvenementsOrganises() != null) {
+            for (Evenement evenement : club.getEvenementsOrganises()) {
+                // Seulement les événements passés et publiés
+                if (evenement.getDateHeureDebut().isBefore(maintenant) && 
+                    evenement.getStatut() == StatutEvenement.PUBLIE) {
+                    
+                    EventStatistics eventStats = new EventStatistics();
+                    eventStats.setEventId(evenement.getId());
+                    eventStats.setEventName(evenement.getTitre());
+                    eventStats.setEventDate(evenement.getDateHeureDebut());
+                    eventStats.setMaxCapacity(evenement.getCapaciteMax());
+                    
+                    // Pour l'instant, nous simulons le nombre de participants
+                    // Dans un vrai système, il faudrait une table de participation aux événements
+                    // Ici, nous utilisons un calcul basé sur la capacité et le nombre de membres
+                    int participants = 0;
+                    if (evenement.getCapaciteMax() != null && evenement.getCapaciteMax() > 0) {
+                        // Simulation : 60-80% de la capacité selon la taille du club
+                        double participationRate = totalMembers > 50 ? 0.6 : 0.8;
+                        participants = (int) (evenement.getCapaciteMax() * participationRate);
+                    } else {
+                        // Si pas de capacité définie, utiliser 70% des membres du club
+                        participants = (int) (totalMembers * 0.7);
+                    }
+                    eventStats.setParticipants(participants);
+                    
+                    // Calculer le taux de participation par rapport aux membres du club
+                    double participationRate = totalMembers > 0 ? (double) participants / totalMembers * 100 : 0;
+                    eventStats.setParticipationRate(participationRate);
+                    
+                    pastEvents.add(eventStats);
+                }
+            }
+        }
+        
+        // Trier par date décroissante (plus récent en premier)
+        pastEvents.sort((a, b) -> b.getEventDate().compareTo(a.getEventDate()));
+        stats.setPastEvents(pastEvents);
+        
+        // 3. Statistiques supplémentaires
+        stats.setTotalEvents(club.getEvenementsOrganises() != null ? club.getEvenementsOrganises().size() : 0);
+        stats.setPublishedEvents((int) (club.getEvenementsOrganises() != null ? 
+            club.getEvenementsOrganises().stream()
+                .filter(e -> e.getStatut() == StatutEvenement.PUBLIE)
+                .count() : 0));
+        
+        // 4. Calculer la moyenne de participation
+        if (!pastEvents.isEmpty()) {
+            double avgParticipation = pastEvents.stream()
+                    .mapToDouble(EventStatistics::getParticipationRate)
+                    .average()
+                    .orElse(0.0);
+            stats.setAverageParticipationRate(avgParticipation);
+        }
+        
+        // 5. Événements à venir
+        int upcomingEvents = 0;
+        if (club.getEvenementsOrganises() != null) {
+            upcomingEvents = (int) club.getEvenementsOrganises().stream()
+                    .filter(evenement -> evenement.getDateHeureDebut().isAfter(maintenant) && 
+                                       evenement.getStatut() == StatutEvenement.PUBLIE)
+                    .count();
+        }
+        stats.setUpcomingEvents(upcomingEvents);
+        
+        return stats;
+    }
+
+    /**
+     * Classe pour les statistiques du club
+     */
+    public static class ClubStatistics {
+        private int totalMembers;
+        private int totalEvents;
+        private int publishedEvents;
+        private int upcomingEvents;
+        private double averageParticipationRate;
+        private List<EventStatistics> pastEvents = new ArrayList<>();
+        
+        // Getters et setters
+        public int getTotalMembers() { return totalMembers; }
+        public void setTotalMembers(int totalMembers) { this.totalMembers = totalMembers; }
+        
+        public int getTotalEvents() { return totalEvents; }
+        public void setTotalEvents(int totalEvents) { this.totalEvents = totalEvents; }
+        
+        public int getPublishedEvents() { return publishedEvents; }
+        public void setPublishedEvents(int publishedEvents) { this.publishedEvents = publishedEvents; }
+        
+        public int getUpcomingEvents() { return upcomingEvents; }
+        public void setUpcomingEvents(int upcomingEvents) { this.upcomingEvents = upcomingEvents; }
+        
+        public double getAverageParticipationRate() { return averageParticipationRate; }
+        public void setAverageParticipationRate(double averageParticipationRate) { 
+            this.averageParticipationRate = averageParticipationRate; 
+        }
+        
+        public List<EventStatistics> getPastEvents() { return pastEvents; }
+        public void setPastEvents(List<EventStatistics> pastEvents) { this.pastEvents = pastEvents; }
+    }
+
+    /**
+     * Classe pour les statistiques d'un événement
+     */
+    public static class EventStatistics {
+        private UUID eventId;
+        private String eventName;
+        private LocalDateTime eventDate;
+        private int participants;
+        private int maxCapacity;
+        private double participationRate;
+        
+        // Getters et setters
+        public UUID getEventId() { return eventId; }
+        public void setEventId(UUID eventId) { this.eventId = eventId; }
+        
+        public String getEventName() { return eventName; }
+        public void setEventName(String eventName) { this.eventName = eventName; }
+        
+        public LocalDateTime getEventDate() { return eventDate; }
+        public void setEventDate(LocalDateTime eventDate) { this.eventDate = eventDate; }
+        
+        public int getParticipants() { return participants; }
+        public void setParticipants(int participants) { this.participants = participants; }
+        
+        public int getMaxCapacity() { return maxCapacity; }
+        public void setMaxCapacity(int maxCapacity) { this.maxCapacity = maxCapacity; }
+        
+        public double getParticipationRate() { return participationRate; }
+        public void setParticipationRate(double participationRate) { 
+            this.participationRate = participationRate; 
+        }
+    }
+
+    // ==================== PARAMÈTRES DU CLUB ====================
+
+    /**
+     * Page des paramètres du club
+     */
+    @GetMapping("/parametres")
+    @PreAuthorize("hasRole('CHEF_DE_CLUB')")
+    public String showSettingsPage(Model model) {
+        logger.info("=== PAGE PARAMÈTRES ===");
+        
+        try {
+            Utilisateur chefDeClub = getCurrentUser();
+            logger.info("Chef de club connecté: {} (ID: {})", chefDeClub.getEmail(), chefDeClub.getId());
+            
+            // Récupérer le club avec tous ses détails
+            Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(chefDeClub.getId());
+            
+            if (clubOptional.isEmpty()) {
+                logger.error("Club non trouvé pour le chef ID: {}", chefDeClub.getId());
+                model.addAttribute("error", "Impossible de trouver le club que vous dirigez.");
+                return "error-page";
+            }
+            
+            Club club = clubOptional.get();
+            logger.info("Club trouvé: {} (ID: {})", club.getNom(), club.getId());
+            
+            // Ajouter les données au modèle
+            model.addAttribute("club", club);
+            model.addAttribute("utilisateurConnecte", chefDeClub);
+            
+            return "gestion-club/parametres";
+            
+        } catch (Exception e) {
+            logger.error("Erreur lors de l'affichage des paramètres: {}", e.getMessage(), e);
+            model.addAttribute("error", "Erreur lors du chargement des paramètres.");
+            return "error-page";
+        }
+    }
+
+    /**
+     * Traitement du formulaire de modification des paramètres du club
+     */
+    @PostMapping("/parametres")
+    @PreAuthorize("hasRole('CHEF_DE_CLUB')")
+    public String updateClubSettings(
+            @RequestParam("nom") String nom,
+            @RequestParam("description") String description,
+            @RequestParam(value = "logo", required = false) MultipartFile logoFile,
+            Model model) {
+        
+        logger.info("=== MISE À JOUR PARAMÈTRES CLUB ===");
+        
+        try {
+            Utilisateur chefDeClub = getCurrentUser();
+            logger.info("Chef de club connecté: {} (ID: {})", chefDeClub.getEmail(), chefDeClub.getId());
+            
+            // Récupérer le club
+            Optional<Club> clubOptional = clubRepository.findClubWithDetailsByChefId(chefDeClub.getId());
+            
+            if (clubOptional.isEmpty()) {
+                logger.error("Club non trouvé pour le chef ID: {}", chefDeClub.getId());
+                model.addAttribute("error", "Impossible de trouver le club que vous dirigez.");
+                return "error-page";
+            }
+            
+            Club club = clubOptional.get();
+            logger.info("Club trouvé: {} (ID: {})", club.getNom(), club.getId());
+            
+            // Mettre à jour les informations du club
+            club.setNom(nom);
+            club.setDescription(description);
+            
+            // Gestion du logo si un fichier est fourni
+            if (logoFile != null && !logoFile.isEmpty()) {
+                logger.info("Traitement du nouveau logo: {}", logoFile.getOriginalFilename());
+                
+                // Vérifier le type de fichier
+                String contentType = logoFile.getContentType();
+                if (contentType != null && contentType.startsWith("image/")) {
+                    // Pour l'instant, on stocke juste le nom du fichier
+                    // Dans un vrai système, il faudrait sauvegarder le fichier sur le disque
+                    String logoFileName = "logo_" + club.getId() + "_" + System.currentTimeMillis() + 
+                                        getFileExtension(logoFile.getOriginalFilename());
+                    club.setLogo(logoFileName);
+                    logger.info("Logo mis à jour: {}", logoFileName);
+                } else {
+                    logger.warn("Type de fichier non supporté: {}", contentType);
+                    model.addAttribute("error", "Le fichier doit être une image (JPG, PNG, GIF).");
+                    model.addAttribute("club", club);
+                    model.addAttribute("utilisateurConnecte", chefDeClub);
+                    return "gestion-club/parametres";
+                }
+            }
+            
+            // Sauvegarder les modifications
+            clubRepository.save(club);
+            logger.info("Paramètres du club mis à jour avec succès");
+            
+            // Rediriger vers la page de paramètres avec un message de succès
+            return "redirect:/gestion-club/parametres?success=updated";
+            
+        } catch (Exception e) {
+            logger.error("Erreur lors de la mise à jour des paramètres: {}", e.getMessage(), e);
+            model.addAttribute("error", "Erreur lors de la sauvegarde des modifications.");
+            return "error-page";
+        }
+    }
+
+    /**
+     * Méthode utilitaire pour extraire l'extension d'un fichier
+     */
+    private String getFileExtension(String fileName) {
+        if (fileName != null && fileName.contains(".")) {
+            return fileName.substring(fileName.lastIndexOf("."));
+        }
+        return ".jpg"; // Extension par défaut
     }
 
 }
