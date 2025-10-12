@@ -54,6 +54,7 @@
                                             <th>Chef de Club</th>
                                             <th>Nombre de Membres</th>
                                             <th>Statut</th>
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -94,6 +95,18 @@
                                             <td>
                                                 <span th:if="${club.chefClub != null}" class="badge bg-success">Actif</span>
                                                 <span th:if="${club.chefClub == null}" class="badge bg-warning">En attente</span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a th:if="${club.chefClub == null}" 
+                                                       th:href="@{/admin/clubs/{clubId}/assign-chef(clubId=${club.id})}" 
+                                                       class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-person-plus"></i> Assigner Chef
+                                                    </a>
+                                                    <span th:if="${club.chefClub != null}" class="text-muted">
+                                                        <i class="bi bi-check-circle text-success"></i> Chef assigné
+                                                    </span>
+                                                </div>
                                             </td>
                                         </tr>
                                     </tbody>

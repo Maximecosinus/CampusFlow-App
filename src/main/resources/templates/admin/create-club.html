@@ -228,6 +228,7 @@
 
             // Sélectionner un étudiant
             function selectStudent(student) {
+                // Sélectionner directement l'étudiant (validation côté serveur)
                 selectedStudentData = student;
                 selectedStudentName.textContent = `${student.prenom} ${student.nom}`;
                 selectedStudentEmail.textContent = student.email;
@@ -236,6 +237,9 @@
                 searchResults.style.display = 'none';
                 searchInput.value = '';
                 noChefCheckbox.checked = false;
+                
+                console.log('Étudiant sélectionné:', student);
+                console.log('ChefId défini:', chefIdInput.value);
             }
 
             // Supprimer la sélection
@@ -276,6 +280,20 @@
             document.addEventListener('click', (e) => {
                 if (!searchResults.contains(e.target) && !searchInput.contains(e.target) && !searchBtn.contains(e.target)) {
                     searchResults.style.display = 'none';
+                }
+            });
+
+            // Debug pour la soumission du formulaire
+            document.querySelector('form').addEventListener('submit', function(e) {
+                console.log('=== DEBUG FORM SUBMISSION ===');
+                console.log('ChefId avant soumission:', chefIdInput.value);
+                console.log('Étudiant sélectionné:', selectedStudentData);
+                
+                // Vérifier si un chef a été sélectionné
+                if (chefIdInput.value && chefIdInput.value.trim() !== '') {
+                    console.log('Chef sélectionné, soumission du formulaire');
+                } else {
+                    console.log('Aucun chef sélectionné');
                 }
             });
         });

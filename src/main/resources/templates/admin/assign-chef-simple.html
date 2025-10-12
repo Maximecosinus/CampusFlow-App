@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assigner un Chef de Club - CampusFlow</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .admin-card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            margin-bottom: 1.5rem;
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0 !important;
+        }
+        .card-body {
+            padding: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <!-- En-tête -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex align-items-center">
+                    <a th:href="@{/admin/clubs}" class="btn btn-outline-secondary me-3">
+                        <i class="bi bi-arrow-left"></i> Retour
+                    </a>
+                    <div>
+                        <h4 class="mb-1"><i class="bi bi-person-gear"></i> Assigner un Chef de Club</h4>
+                        <p class="text-muted mb-0">Assignez un chef de club au club : <strong th:text="${club.nom}">Nom du Club</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages d'erreur -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Informations du club -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-info-circle"></i> Informations du Club</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Nom du Club</h6>
+                                <p th:text="${club.nom}" class="text-primary fw-bold"></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Description</h6>
+                                <p th:text="${club.description}" class="text-muted"></p>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <h6>Chef de Club Actuel</h6>
+                                <div th:if="${club.chefClub != null}" class="alert alert-success">
+                                    <i class="bi bi-person-check"></i>
+                                    <strong th:text="${club.chefClub.prenom + ' ' + club.chefClub.nom}">Nom du Chef</strong>
+                                    <br>
+                                    <small th:text="${club.chefClub.email}" class="text-muted"></small>
+                                </div>
+                                <div th:if="${club.chefClub == null}" class="alert alert-warning">
+                                    <i class="bi bi-person-x"></i>
+                                    Aucun chef de club assigné
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Nombre de Membres</h6>
+                                <p th:text="${club.inscriptions != null ? club.inscriptions.size() : 0}" class="text-info fw-bold"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulaire d'assignation -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-person-plus"></i> Assigner un Chef de Club</h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/admin/clubs/{clubId}/assign-chef(clubId=${club.id})}" method="post">
+                            <!-- Email du chef -->
+                            <div class="mb-3">
+                                <label for="chefEmail" class="form-label">
+                                    <i class="bi bi-envelope"></i> Email de l'Étudiant <span class="text-danger">*</span>
+                                </label>
+                                <input type="email" class="form-control" id="chefEmail" name="chefEmail" 
+                                       placeholder="exemple@etudiant.univ.edu" required>
+                                <div class="form-text">Saisissez l'email de l'étudiant à assigner comme chef de club</div>
+                                
+                                <!-- Message de validation -->
+                                <div id="validationMessage" class="mt-2" style="display: none;"></div>
+                            </div>
+
+                            <!-- Informations de l'étudiant trouvé -->
+                            <div id="studentInfo" class="alert alert-info" style="display: none;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-person-check"></i>
+                                        <strong id="studentName">Nom de l'étudiant</strong>
+                                        <br>
+                                        <small id="studentEmail" class="text-muted">email@example.com</small>
+                                    </div>
+                                    <span id="studentStatus" class="badge bg-success">Valide</span>
+                                </div>
+                            </div>
+
+                            <!-- Boutons -->
+                            <div class="d-flex justify-content-between">
+                                <a th:href="@{/admin/clubs}" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Annuler
+                                </a>
+                                <button type="submit" class="btn btn-primary" id="assignBtn" disabled>
+                                    <i class="bi bi-check-circle"></i> Assigner comme Chef de Club
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panneau d'aide -->
+            <div class="col-lg-4">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-question-circle"></i> Aide</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6><i class="bi bi-info-circle"></i> Critères de validation</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check text-success"></i> L'email doit exister dans le système</li>
+                            <li><i class="bi bi-check text-success"></i> L'utilisateur doit être un étudiant</li>
+                            <li><i class="bi bi-check text-success"></i> L'étudiant ne doit pas déjà diriger un club</li>
+                        </ul>
+
+                        <hr>
+
+                        <h6><i class="bi bi-lightbulb"></i> Conseils</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-arrow-right text-primary"></i> Vérifiez que l'email est correct</li>
+                            <li><i class="bi bi-arrow-right text-primary"></i> L'étudiant recevra automatiquement le rôle de chef de club</li>
+                            <li><i class="bi bi-arrow-right text-primary"></i> Il aura accès au tableau de bord de gestion du club</li>
+                        </ul>
+
+                        <hr>
+
+                        <h6><i class="bi bi-shield-check"></i> Permissions</h6>
+                        <p class="small text-muted">
+                            En tant qu'administrateur, vous pouvez assigner des chefs de club.
+                            Cette action est irréversible et donnera des privilèges élevés à l'étudiant.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript pour la validation en temps réel -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailInput = document.getElementById('chefEmail');
+            const validationMessage = document.getElementById('validationMessage');
+            const studentInfo = document.getElementById('studentInfo');
+            const studentName = document.getElementById('studentName');
+            const studentEmail = document.getElementById('studentEmail');
+            const studentStatus = document.getElementById('studentStatus');
+            const assignBtn = document.getElementById('assignBtn');
+
+            let isValidStudent = false;
+
+            // Fonction de validation
+            function validateEmail(email) {
+                if (email.length < 5) {
+                    hideValidation();
+                    return;
+                }
+
+                fetch(`/admin/clubs/validate-chef-email?email=${encodeURIComponent(email)}`)
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        return response.json();
+                    })
+                    .then(result => {
+                        console.log('Validation result:', result);
+                        displayValidation(result);
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la validation:', error);
+                        showError('Erreur lors de la validation de l\'email');
+                    });
+            }
+
+            // Afficher le résultat de validation
+            function displayValidation(result) {
+                console.log('displayValidation called with:', result);
+                console.log('result.valid:', result.valid);
+                console.log('result.message:', result.message);
+                console.log('result.userEmail:', result.userEmail);
+                console.log('result.userPrenom:', result.userPrenom);
+                console.log('result.userNom:', result.userNom);
+                
+                validationMessage.style.display = 'block';
+                studentInfo.style.display = 'block';
+                
+                if (result.valid) {
+                    // Validation réussie
+                    validationMessage.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle"></i> ${result.message}
+                        </div>
+                    `;
+                    
+                    studentName.textContent = `${result.userPrenom} ${result.userNom}`;
+                    studentEmail.textContent = result.userEmail;
+                    studentStatus.textContent = 'Valide';
+                    studentStatus.className = 'badge bg-success';
+                    
+                    assignBtn.disabled = false;
+                    isValidStudent = true;
+                } else {
+                    // Validation échouée
+                    validationMessage.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle"></i> ${result.message}
+                        </div>
+                    `;
+                    
+                    studentName.textContent = 'Étudiant non valide';
+                    studentEmail.textContent = emailInput.value;
+                    studentStatus.textContent = 'Non valide';
+                    studentStatus.className = 'badge bg-danger';
+                    
+                    assignBtn.disabled = true;
+                    isValidStudent = false;
+                }
+            }
+
+            // Afficher une erreur
+            function showError(message) {
+                validationMessage.style.display = 'block';
+                validationMessage.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle"></i> ${message}
+                    </div>
+                `;
+                studentInfo.style.display = 'none';
+                assignBtn.disabled = true;
+                isValidStudent = false;
+            }
+
+            // Masquer la validation
+            function hideValidation() {
+                validationMessage.style.display = 'none';
+                studentInfo.style.display = 'none';
+                assignBtn.disabled = true;
+                isValidStudent = false;
+            }
+
+            // Événements
+            emailInput.addEventListener('input', (e) => {
+                validateEmail(e.target.value);
+            });
+
+            // Confirmation avant soumission
+            document.querySelector('form').addEventListener('submit', function(e) {
+                if (!isValidStudent) {
+                    e.preventDefault();
+                    alert('Veuillez saisir un email d\'étudiant valide avant de continuer.');
+                    return false;
+                }
+                
+                const confirmed = confirm(
+                    `Êtes-vous sûr de vouloir assigner ${studentName.textContent} comme chef de club du club "${document.querySelector('strong').textContent}" ?\n\n` +
+                    'Cette action donnera des privilèges élevés à l\'étudiant.'
+                );
+                
+                if (!confirmed) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

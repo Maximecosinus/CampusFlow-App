@@ -19,6 +19,8 @@ public interface ClubService {
 
     List<Club> findAllClubsWithInscriptions();
 
+    Optional<Club> findClubByIdWithInscriptions(UUID clubId);
+
     Club createClub(Club club);
 
     Club updateClub(Club club);

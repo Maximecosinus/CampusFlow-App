@@ -57,6 +57,14 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Optional<Club> findClubByIdWithInscriptions(UUID clubId) {
+        return clubRepository.findAllWithInscriptions().stream()
+            .filter(club -> club.getId().equals(clubId))
+            .findFirst();
+    }
+
+    @Override
     @Transactional
     public Club createClub(Club club) {
         return clubRepository.save(club);
