@@ -432,7 +432,10 @@
             // Bouton Voir
             document.addEventListener('click', function(e) {
                 if (e.target.closest('.view-event-btn')) {
-                    const eventId = e.target.closest('.view-event-btn').dataset.eventId;
+                    e.preventDefault();
+                    const button = e.target.closest('.view-event-btn');
+                    const eventId = button.dataset.eventId;
+                    console.log('Bouton Voir cliqué pour événement:', eventId);
                     viewEvent(eventId);
                 }
             });
@@ -440,7 +443,10 @@
             // Bouton Modifier
             document.addEventListener('click', function(e) {
                 if (e.target.closest('.edit-event-btn')) {
-                    const eventId = e.target.closest('.edit-event-btn').dataset.eventId;
+                    e.preventDefault();
+                    const button = e.target.closest('.edit-event-btn');
+                    const eventId = button.dataset.eventId;
+                    console.log('Bouton Modifier cliqué pour événement:', eventId);
                     editEvent(eventId);
                 }
             });
@@ -448,7 +454,10 @@
             // Bouton Supprimer
             document.addEventListener('click', function(e) {
                 if (e.target.closest('.delete-event-btn')) {
-                    const eventId = e.target.closest('.delete-event-btn').dataset.eventId;
+                    e.preventDefault();
+                    const button = e.target.closest('.delete-event-btn');
+                    const eventId = button.dataset.eventId;
+                    console.log('Bouton Supprimer cliqué pour événement:', eventId);
                     deleteEvent(eventId);
                 }
             });

@@ -453,7 +453,7 @@ public class AdminController {
     }
 
     /**
-     * Endpoint temporaire pour créer des événements de test
+     * Endpoint temporaire pour créer des événements de test (à supprimer après test)
      */
     @GetMapping("/create-test-events")
     public String createTestEvents(RedirectAttributes redirectAttributes) {
@@ -491,29 +491,7 @@ public class AdminController {
             event3.setClub(null); // Événement universitaire
             evenementService.saveEvent(event3);
             
-            // Événement 4: Soirée Culturelle
-            Evenement event4 = new Evenement();
-            event4.setTitre("Soirée Culturelle Internationale");
-            event4.setDescription("Découvrez les cultures du monde à travers la musique, la danse et la gastronomie.");
-            event4.setLieu("Centre Culturel");
-            event4.setDateHeureDebut(LocalDateTime.of(2024, 12, 22, 19, 0));
-            event4.setCapaciteMax(100);
-            event4.setStatut(com.universite.UniClubs.entities.StatutEvenement.PUBLIE);
-            event4.setClub(null); // Événement universitaire
-            evenementService.saveEvent(event4);
-            
-            // Événement 5: Séminaire de Recherche
-            Evenement event5 = new Evenement();
-            event5.setTitre("Séminaire de Recherche en Biologie");
-            event5.setDescription("Présentation des dernières recherches en biologie moléculaire par nos chercheurs.");
-            event5.setLieu("Laboratoire de Biologie");
-            event5.setDateHeureDebut(LocalDateTime.of(2024, 12, 25, 9, 0));
-            event5.setCapaciteMax(50);
-            event5.setStatut(com.universite.UniClubs.entities.StatutEvenement.ANNULE);
-            event5.setClub(null); // Événement universitaire
-            evenementService.saveEvent(event5);
-            
-            redirectAttributes.addFlashAttribute("success", "5 événements de test créés avec succès !");
+            redirectAttributes.addFlashAttribute("success", "3 événements de test créés avec succès !");
             
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Erreur lors de la création des événements de test : " + e.getMessage());
