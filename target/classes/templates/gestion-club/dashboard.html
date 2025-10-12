@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <!-- Le titre utilise le nom du club récupéré depuis le modèle -->
+    <title th:text="'Gestion de ' + ${club.nom}">Gestion de Club</title>
+</head>
+<body>
+<section>
+    <div class="container-fluid">
+        <!-- On affiche le nom du club pour confirmer que ça marche -->
+        <h1 th:text="'Tableau de bord du ' + ${club.nom}">Tableau de bord du Club</h1>
+        <p class="lead">Gérez les membres, les événements et les communications de votre club.</p>
+
+        <hr>
+
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <!--
+                           CORRECTION : On affiche le nombre de vrais membres.
+                           On prend la liste des inscriptions, on filtre pour ne garder que
+                           celles qui ont le statut 'ACCEPTE', puis on en prend la taille.
+                        -->
+                        <h5 class="card-title">Membres Actifs</h5>
+                        <p class="display-4" th:text="${club.inscriptions.?[statut.name() == 'ACCEPTE'].size()}">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amélioration : On peut aussi afficher les demandes en attente -->
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Demandes en Attente</h5>
+                        <p class="display-4" th:text="${club.inscriptions.?[statut.name() == 'EN_ATTENTE'].size()}">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- On ajoutera d'autres cartes pour les événements à venir, etc. -->
+        </div>
+        <div class="mt-5">
+            <h2>Actions rapides</h2>
+            <a th:href="@{/gestion-club/membres}" class="btn btn-primary">Gérer les inscriptions</a>
+            <!-- On ajoutera d'autres boutons ici (Gérer les événements, etc.) -->
+        </div>
+    </div>
+</section>
+</body>
+</html>

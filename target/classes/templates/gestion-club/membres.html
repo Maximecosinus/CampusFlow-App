@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="'Membres - ' + ${club.nom}">Gestion des Membres</title>
+</head>
+<body>
+<section>
+    <div class="container-fluid">
+        <!-- En-tête de la page -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 th:text="'Membres du ' + ${club.nom}">Membres du Club</h1>
+            <a th:href="@{/gestion-club}" class="btn btn-secondary">Retour au Dashboard</a>
+        </div>
+
+        <!-- SECTION DES DEMANDES EN ATTENTE -->
+        <div class="card shadow-sm mb-5">
+            <div class="card-header bg-warning">
+                <h3>Demandes d'adhésion en attente</h3>
+            </div>
+            <div class="card-body">
+                <!-- On utilise #lists.isEmpty() et #lists.size() de Thymeleaf pour vérifier la taille de la liste filtrée -->
+                <div th:if="${#lists.isEmpty(club.inscriptions.?[statut.name() == 'EN_ATTENTE'])}">
+                    <p class="text-center text-muted">Aucune demande en attente.</p>
+                </div>
+                <table class="table table-hover" th:unless="${#lists.isEmpty(club.inscriptions.?[statut.name() == 'EN_ATTENTE'])}">
+                    <thead>
+                    <tr>
+                        <th>Demandeur</th>
+                        <th>Date de la demande</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- On boucle uniquement sur les inscriptions avec le statut EN_ATTENTE -->
+                    <tr th:each="inscription : ${club.inscriptions.?[statut.name() == 'EN_ATTENTE']}">
+                        <td th:text="${inscription.utilisateur.prenom} + ' ' + ${inscription.utilisateur.nom}"></td>
+                        <td th:text="${#temporals.format(inscription.dateDemande, 'dd MMM yyyy')}"></td>
+                        <td>
+                            <!-- Formulaire pour ACCEPTER -->
+                            <form th:action="@{/gestion-club/membres/approuver/{inscriptionId}(inscriptionId=${inscription.id})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success">Approuver</button>
+                            </form>
+                            <!-- Formulaire pour REFUSER -->
+                            <form th:action="@{/gestion-club/membres/refuser/{inscriptionId}(inscriptionId=${inscription.id})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-danger">Refuser</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SECTION DES MEMBRES ACTIFS -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h3>Liste des Membres Actifs</h3>
+            </div>
+            <div class="card-body">
+                <!-- Même logique de filtrage pour les membres ACCEPTES -->
+                <div th:if="${#lists.isEmpty(club.inscriptions.?[statut.name() == 'ACCEPTE'])}">
+                    <p class="text-center text-muted">Votre club n'a pas encore de membres actifs.</p>
+                </div>
+                <table class="table table-hover" th:unless="${#lists.isEmpty(club.inscriptions.?[statut.name() == 'ACCEPTE'])}">
+                    <!-- ... (le tableau des membres que nous avions avant, mais qui boucle sur les inscriptions acceptées) ... -->
+                    <tbody>
+                    <tr th:each="inscription : ${club.inscriptions.?[statut.name() == 'ACCEPTE']}">
+                        <!-- ... (afficher les colonnes via inscription.utilisateur) ... -->
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>
