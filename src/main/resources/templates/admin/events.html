@@ -156,8 +156,8 @@
                             <div class="card h-100 event-card" th:data-status="${event.statut}" th:data-type="${event.club != null ? 'CLUB' : 'UNIVERSITAIRE'}">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <h6 class="mb-0" th:text="${event.titre}">Titre de l'événement</h6>
-                                    <span class="badge" th:classappend="${event.statut == T(com.universite.UniClubs.entities.Evenement.StatutEvenement).PUBLIE} ? 'bg-success' : 'bg-warning'" 
-                                          th:text="${event.statut == T(com.universite.UniClubs.entities.Evenement.StatutEvenement).PUBLIE} ? 'Publié' : 'Brouillon'">
+                                    <span class="badge" th:classappend="${event.statut == T(com.universite.UniClubs.entities.StatutEvenement).PUBLIE} ? 'bg-success' : 'bg-warning'" 
+                                          th:text="${event.statut == T(com.universite.UniClubs.entities.StatutEvenement).PUBLIE} ? 'Publié' : 'Brouillon'">
                                         Statut
                                     </span>
                                 </div>
