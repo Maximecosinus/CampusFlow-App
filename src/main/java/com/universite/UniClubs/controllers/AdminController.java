@@ -481,6 +481,76 @@ public class AdminController {
     }
 
     /**
+     * Affiche la page de profil de l'administrateur
+     */
+    @GetMapping("/profile")
+    public String adminProfile(Model model) {
+        Utilisateur admin = getCurrentUser();
+        model.addAttribute("admin", admin);
+        return "admin/profile";
+    }
+
+    /**
+     * Met à jour le profil de l'administrateur
+     */
+    @PostMapping("/profile/update")
+    public String updateProfile(@RequestParam String prenom, 
+                               @RequestParam String nom, 
+                               @RequestParam(required = false) String bio,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            Utilisateur admin = getCurrentUser();
+            admin.setPrenom(prenom);
+            admin.setNom(nom);
+            if (bio != null) {
+                admin.setBio(bio);
+            }
+            
+            utilisateurService.save(admin);
+            redirectAttributes.addFlashAttribute("success", "Profil mis à jour avec succès");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Erreur lors de la mise à jour du profil");
+        }
+        
+        return "redirect:/admin/profile";
+    }
+
+    /**
+     * Change le mot de passe de l'administrateur
+     */
+    @PostMapping("/profile/change-password")
+    public String changePassword(@RequestParam String currentPassword,
+                               @RequestParam String newPassword,
+                               @RequestParam String confirmPassword,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            Utilisateur admin = getCurrentUser();
+            
+            // Vérifier que le mot de passe actuel est correct
+            if (!passwordEncoder.matches(currentPassword, admin.getMotDePasse())) {
+                redirectAttributes.addFlashAttribute("error", "Mot de passe actuel incorrect");
+                return "redirect:/admin/profile";
+            }
+            
+            // Vérifier que les nouveaux mots de passe correspondent
+            if (!newPassword.equals(confirmPassword)) {
+                redirectAttributes.addFlashAttribute("error", "Les nouveaux mots de passe ne correspondent pas");
+                return "redirect:/admin/profile";
+            }
+            
+            // Encoder et sauvegarder le nouveau mot de passe
+            admin.setMotDePasse(passwordEncoder.encode(newPassword));
+            utilisateurService.save(admin);
+            
+            redirectAttributes.addFlashAttribute("success", "Mot de passe changé avec succès");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Erreur lors du changement de mot de passe");
+        }
+        
+        return "redirect:/admin/profile";
+    }
+
+    /**
      * DTO simple pour la réponse de validation (évite les problèmes de sérialisation JSON)
      */
     public static class ValidationResponseDto {
