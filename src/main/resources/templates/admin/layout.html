@@ -205,31 +205,31 @@
         
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link" th:href="@{/admin}" th:classappend="${#httpServletRequest.requestURI == '/admin'} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/admin}" data-page="admin">
                     <i class="bi bi-house-door"></i>
                     Accueil
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" th:href="@{/admin/clubs}" th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/admin/clubs')} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/admin/clubs}" data-page="clubs">
                     <i class="bi bi-people"></i>
                     Clubs
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" th:href="@{/admin/events}" th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/admin/events')} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/admin/events}" data-page="events">
                     <i class="bi bi-calendar-event"></i>
                     Événements
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" th:href="@{/admin/users}" th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/admin/users')} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/admin/users}" data-page="users">
                     <i class="bi bi-person-gear"></i>
                     Utilisateurs
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" th:href="@{/admin/communication}" th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/admin/communication')} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/admin/communication}" data-page="communication">
                     <i class="bi bi-megaphone"></i>
                     Communication
                 </a>
@@ -284,7 +284,7 @@
 
         <!-- Contenu de la page -->
         <div class="admin-content">
-            <div th:replace="${content}">
+            <div th:insert="${content}">
                 <!-- Le contenu spécifique de chaque page sera inséré ici -->
             </div>
         </div>
@@ -297,6 +297,23 @@
         function toggleSidebar() {
             const sidebar = document.querySelector('.admin-sidebar');
             sidebar.classList.toggle('show');
+        }
+
+        // Gérer l'état actif des liens de navigation
+        function setActiveNavLink() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link[data-page]');
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                const page = link.getAttribute('data-page');
+                
+                if (page === 'admin' && currentPath === '/admin') {
+                    link.classList.add('active');
+                } else if (page !== 'admin' && currentPath.startsWith('/admin/' + page)) {
+                    link.classList.add('active');
+                }
+            });
         }
 
         // Fermer la sidebar sur mobile quand on clique à l'extérieur
@@ -318,6 +335,9 @@
                 sidebar.classList.remove('show');
             }
         });
+
+        // Initialiser l'état actif au chargement de la page
+        document.addEventListener('DOMContentLoaded', setActiveNavLink);
     </script>
 </body>
 </html>

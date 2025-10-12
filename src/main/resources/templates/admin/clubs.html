@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout('Gestion des Clubs', ~{::content})}">
 <head>
     <meta charset="UTF-8">
     <title>Gestion des Clubs</title>
 </head>
 <body>
-    <div th:replace="~{admin/layout :: layout('Gestion des Clubs', ~{::content})}">
-        <div th:fragment="content">
+    <div th:fragment="content">
         <!-- En-tête avec bouton de création -->
         <div class="row mb-4">
             <div class="col-12">
@@ -89,7 +88,7 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <span class="badge bg-info" th:text="${club.membres != null ? club.membres.size() : 0}">0</span>
+                                                <span class="badge bg-info" th:text="${club.inscriptions != null ? club.inscriptions.size() : 0}">0</span>
                                                 <small class="text-muted ms-1">membre(s)</small>
                                             </td>
                                             <td>
@@ -146,7 +145,6 @@
                     <div class="stats-label">Sans Chef</div>
                 </div>
             </div>
-        </div>
         </div>
     </div>
 </body>

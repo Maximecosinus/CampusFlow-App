@@ -37,9 +37,9 @@ public class Club {
     @Column(nullable = false, updatable = false)
     private LocalDateTime dateCreation;
 
-    @Column(nullable = false, updatable = false)
+    @PrePersist
     protected void onCreate(){
-        this.dateCreation= LocalDateTime.now();
+        this.dateCreation = LocalDateTime.now();
     }
 
     /*@ManyToMany(mappedBy = "clubsInscrits")

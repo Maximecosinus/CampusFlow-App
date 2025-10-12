@@ -43,4 +43,10 @@ public interface ClubRepository extends JpaRepository<Club, UUID> {
             "WHERE c.chefClub.id = :chefId")
     Optional<Club> findClubWithDetailsByChefId(@Param("chefId") UUID chefId);
 
+    // NOUVELLE REQUÊTE POUR CHARGER TOUS LES CLUBS AVEC LEURS INSCRIPTIONS
+    @Query("SELECT DISTINCT c FROM Club c " +
+            "LEFT JOIN FETCH c.chefClub " +
+            "LEFT JOIN FETCH c.inscriptions")
+    List<Club> findAllWithInscriptions();
+
 }

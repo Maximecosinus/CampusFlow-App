@@ -17,6 +17,8 @@ public interface ClubService {
     // Nouvelles méthodes pour l'administration
     List<Club> findAllClubs();
 
+    List<Club> findAllClubsWithInscriptions();
+
     Club createClub(Club club);
 
     Club updateClub(Club club);

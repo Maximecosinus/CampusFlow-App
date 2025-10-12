@@ -56,8 +56,8 @@ public class AdminController {
         Utilisateur admin = getCurrentUser();
         model.addAttribute("admin", admin);
         
-        // Récupérer tous les clubs avec leurs détails
-        List<Club> clubs = clubService.findAllClubs();
+        // Récupérer tous les clubs avec leurs inscriptions
+        List<Club> clubs = clubService.findAllClubsWithInscriptions();
         model.addAttribute("clubs", clubs);
         
         return "admin/clubs";
