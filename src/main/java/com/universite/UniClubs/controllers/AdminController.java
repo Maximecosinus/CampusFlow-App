@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -43,6 +44,9 @@ public class AdminController {
     
     @Autowired
     private EvenementService evenementService;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     /**
      * Page d'accueil du tableau de bord administrateur
@@ -506,7 +510,7 @@ public class AdminController {
                 admin.setBio(bio);
             }
             
-            utilisateurService.save(admin);
+               utilisateurService.updateUser(admin);
             redirectAttributes.addFlashAttribute("success", "Profil mis à jour avec succès");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Erreur lors de la mise à jour du profil");
@@ -540,7 +544,7 @@ public class AdminController {
             
             // Encoder et sauvegarder le nouveau mot de passe
             admin.setMotDePasse(passwordEncoder.encode(newPassword));
-            utilisateurService.save(admin);
+               utilisateurService.updateUser(admin);
             
             redirectAttributes.addFlashAttribute("success", "Mot de passe changé avec succès");
         } catch (Exception e) {
