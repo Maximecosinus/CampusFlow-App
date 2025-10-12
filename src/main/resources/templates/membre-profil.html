@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+      th:replace="~{fragments/layout :: layout('Profil de ' + ${membre.prenom} + ' ' + ${membre.nom} + ' - CampusFlow', ~{::section})}">
 <head>
-    <title th:text="'Profil de ' + ${membre.prenom} + ' ' + ${membre.nom} + ' - CampusFlow'">Profil Membre - CampusFlow</title>
+    <title>Profil Membre - CampusFlow</title>
 </head>
 <body>
 <section>
@@ -45,7 +45,7 @@
                                  class="img-fluid rounded-circle mb-3"
                                  style="width: 200px; height: 200px; object-fit: cover;">
                             
-                            <h3 th:text="${membre.prenom} + ' ' + ${membre.nom}">Nom Prénom</h3>
+                            <h3 th:text="${membre.prenom + ' ' + membre.nom}">Nom Prénom</h3>
                             <p class="text-muted mb-2" th:text="${membre.email}">email@example.com</p>
                             
                             <div class="mb-3">

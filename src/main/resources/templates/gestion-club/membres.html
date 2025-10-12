@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+      th:replace="~{fragments/layout :: layout('Gestion des Membres - ' + ${club.nom}, ~{::section})}">
 <head>
-    <title th:text="'Gestion des Membres - ' + ${club.nom}">Gestion des Membres</title>
+    <title>Gestion des Membres</title>
 </head>
 <body>
 <section>
@@ -65,7 +65,7 @@
                                              style="width: 40px; height: 40px; object-fit: cover;" 
                                              alt="Photo de profil">
                                     </td>
-                                    <td th:text="${inscription.utilisateur.prenom} + ' ' + ${inscription.utilisateur.nom}"></td>
+                                    <td th:text="${inscription.utilisateur.prenom + ' ' + inscription.utilisateur.nom}"></td>
                                     <td th:text="${inscription.utilisateur.email}"></td>
                                     <td th:text="${#temporals.format(inscription.dateDemande, 'dd MMM yyyy à HH:mm')}"></td>
                                     <td>
@@ -130,7 +130,7 @@
                                     </td>
                                     <td>
                                         <div>
-                                            <strong th:text="${inscription.utilisateur.prenom} + ' ' + ${inscription.utilisateur.nom}"></strong>
+                                            <strong th:text="${inscription.utilisateur.prenom + ' ' + inscription.utilisateur.nom}"></strong>
                                             <br>
                                             <small class="text-muted" th:text="${inscription.utilisateur.role.name()}"></small>
                                         </div>

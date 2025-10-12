@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+      th:replace="~{fragments/layout :: layout('Dashboard - ' + ${club.nom}, ~{::section})}">
 <head>
-    <title th:text="'Dashboard - ' + ${club.nom}">Dashboard - Gestion de Club</title>
+    <title>Dashboard - Gestion de Club</title>
     <style>
         .dashboard-card {
             background: white;
@@ -319,7 +319,7 @@
 
         <!-- Contenu principal -->
         <div class="row">
-            <!-- Informations du club -->
+        <!-- Informations du club -->
             <div class="col-lg-8 mb-4">
                 <div class="dashboard-card">
                     <div class="card-header">
@@ -339,7 +339,7 @@
                                 <div class="col-md-9">
                                     <h5 class="mb-2" th:text="${club.nom}">Nom du Club</h5>
                                     <p class="text-muted mb-3" th:text="${club.description}">Description du club</p>
-                                    <div class="row">
+                        <div class="row">
                                         <div class="col-sm-6">
                                             <small class="text-muted">Date de création</small>
                                             <div class="fw-semibold" th:text="${#temporals.format(club.dateCreation, 'dd MMMM yyyy')}">01 Janvier 2024</div>
@@ -349,7 +349,7 @@
                                             <div class="fw-semibold" th:text="${utilisateurConnecte.prenom + ' ' + utilisateurConnecte.nom}">Prénom Nom</div>
                                         </div>
                                     </div>
-                                </div>
+                            </div>
                             </div>
                         </div>
                     </div>

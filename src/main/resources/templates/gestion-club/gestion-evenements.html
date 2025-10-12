@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+      th:replace="~{fragments/layout :: layout('Gestion des Événements - ' + ${club.nom}, ~{::section})}">
 <head>
-    <title th:text="'Gestion des Événements - ' + ${club.nom}">Gestion des Événements</title>
+    <title>Gestion des Événements</title>
 </head>
 <body>
 <section>
