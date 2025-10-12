@@ -33,6 +33,11 @@ public class EvenementServiceImp implements EvenementService {
     }
 
     @Override
+    public List<Evenement> findAllEvents() {
+        return evenementRepository.findAllWithClub();
+    }
+
+    @Override
     @Transactional
     public Evenement saveEvent(Evenement evenement) {
         // S'assurer que l'événement est ajouté à la collection du club

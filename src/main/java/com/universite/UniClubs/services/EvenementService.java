@@ -8,6 +8,7 @@ import java.util.UUID;
 public interface EvenementService {
     List<Evenement> findUpcomingEvents();
     List<Evenement> findAllUpcomingEvents();
+    List<Evenement> findAllEvents();
     Evenement saveEvent(Evenement evenement);
     Optional<Evenement> findById(UUID id);
     Optional<Evenement> findByIdWithClub(UUID id);

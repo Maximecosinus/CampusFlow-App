@@ -25,12 +25,12 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/login", "/register", "/css/**",
-                                "/js/**", "/test-users", "/test-validate-email").permitAll()
+                                "/js/**", "/test-users", "/test-validate-email", "/login-success").permitAll()
                 .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/accueil",true)
+                .defaultSuccessUrl("/login-success",true)
                 .permitAll()
                 )
                 .logout(logout ->logout

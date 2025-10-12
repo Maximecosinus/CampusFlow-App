@@ -1,55 +1,425 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{admin/layout :: layout('Gestion des Événements', ~{::content})}">
+<html lang="fr" th:replace="~{admin/layout :: layout('Gestion des Événements', ~{::content})}">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion des Événements</title>
 </head>
 <body>
     <div th:fragment="content">
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="admin-card">
-                    <div class="card-header">
-                        <h5><i class="bi bi-calendar-event"></i> Gestion des Événements</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="alert alert-info admin-alert">
-                            <i class="bi bi-info-circle"></i>
-                            <strong>Section en développement</strong><br>
-                            Cette section permettra de gérer tous les événements de l'université.
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6>Fonctionnalités prévues :</h6>
-                                <ul>
-                                    <li>Liste de tous les événements</li>
-                                    <li>Validation des événements</li>
-                                    <li>Modération du contenu</li>
-                                    <li>Statistiques de participation</li>
-                                    <li>Gestion des conflits de dates</li>
-                                </ul>
+        <div class="container-fluid">
+            <!-- Header avec bouton de création -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0 text-gray-800">
+                        <i class="fas fa-calendar-alt text-primary me-2"></i>
+                        Gestion des Événements
+                    </h1>
+                    <p class="text-muted">Gérez tous les événements de l'université</p>
+                </div>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createEventModal">
+                    <i class="fas fa-plus me-2"></i>
+                    Créer un Événement Universitaire
+                </button>
+            </div>
+
+            <!-- Statistiques rapides -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Total Événements
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalEvents}">0</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <h6>Actions disponibles :</h6>
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-primary" disabled>
-                                        <i class="bi bi-eye"></i> Voir tous les Événements
-                                    </button>
-                                    <button class="btn btn-success" disabled>
-                                        <i class="bi bi-check-circle"></i> Valider
-                                    </button>
-                                    <button class="btn btn-warning" disabled>
-                                        <i class="bi bi-graph-up"></i> Statistiques
-                                    </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Événements Publiés
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${publishedEvents}">0</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Événements à Venir
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${upcomingEvents}">0</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-clock fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Événements Universitaires
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${universityEvents}">0</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-university fa-2x text-gray-300"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Filtres -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Filtres</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="statusFilter" class="form-label">Statut</label>
+                            <select class="form-select" id="statusFilter">
+                                <option value="">Tous les statuts</option>
+                                <option value="PUBLIE">Publié</option>
+                                <option value="BROUILLON">Brouillon</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="typeFilter" class="form-label">Type</label>
+                            <select class="form-select" id="typeFilter">
+                                <option value="">Tous les types</option>
+                                <option value="UNIVERSITAIRE">Universitaire</option>
+                                <option value="CLUB">Club</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="dateFilter" class="form-label">Période</label>
+                            <select class="form-select" id="dateFilter">
+                                <option value="">Toutes les périodes</option>
+                                <option value="upcoming">À venir</option>
+                                <option value="past">Passés</option>
+                                <option value="today">Aujourd'hui</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-outline-primary me-2" onclick="applyFilters()">
+                                <i class="fas fa-filter me-1"></i>
+                                Appliquer
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                                <i class="fas fa-times me-1"></i>
+                                Effacer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des événements -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Liste des Événements</h6>
+                </div>
+                <div class="card-body">
+                    <div id="eventsContainer" class="row">
+                        <!-- Les événements seront chargés ici via JavaScript -->
+                        <div th:each="event : ${events}" class="col-lg-4 col-md-6 mb-4">
+                            <div class="card h-100 event-card" th:data-status="${event.statut}" th:data-type="${event.club != null ? 'CLUB' : 'UNIVERSITAIRE'}">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0" th:text="${event.titre}">Titre de l'événement</h6>
+                                    <span class="badge" th:classappend="${event.statut == T(com.universite.UniClubs.entities.Evenement.StatutEvenement).PUBLIE} ? 'bg-success' : 'bg-warning'" 
+                                          th:text="${event.statut == T(com.universite.UniClubs.entities.Evenement.StatutEvenement).PUBLIE} ? 'Publié' : 'Brouillon'">
+                                        Statut
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text text-muted small mb-2">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        <span th:text="${#temporals.format(event.dateHeureDebut, 'dd/MM/yyyy HH:mm')}">Date</span>
+                                    </p>
+                                    <p class="card-text text-muted small mb-2" th:if="${event.lieu}">
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        <span th:text="${event.lieu}">Lieu</span>
+                                    </p>
+                                    <p class="card-text text-muted small mb-2" th:if="${event.club}">
+                                        <i class="fas fa-users me-1"></i>
+                                        <span th:text="${event.club.nom}">Club</span>
+                                    </p>
+                                    <p class="card-text text-muted small mb-2" th:unless="${event.club}">
+                                        <i class="fas fa-university me-1"></i>
+                                        <span>Événement Universitaire</span>
+                                    </p>
+                                    <p class="card-text" th:text="${#strings.abbreviate(event.description, 100)}">Description...</p>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <div class="btn-group w-100" role="group">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" 
+                                                th:onclick="'viewEvent(\'' + ${event.id} + '\')'">
+                                            <i class="fas fa-eye me-1"></i>
+                                            Voir
+                                        </button>
+                                        <button type="button" class="btn btn-outline-warning btn-sm" 
+                                                th:onclick="'editEvent(\'' + ${event.id} + '\')'">
+                                            <i class="fas fa-edit me-1"></i>
+                                            Modifier
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                th:onclick="'deleteEvent(\'' + ${event.id} + '\')'">
+                                            <i class="fas fa-trash me-1"></i>
+                                            Supprimer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Message si aucun événement -->
+                    <div th:if="${#lists.isEmpty(events)}" class="text-center py-5">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Aucun événement trouvé</h5>
+                        <p class="text-muted">Commencez par créer votre premier événement universitaire.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de création d'événement -->
+        <div class="modal fade" id="createEventModal" tabindex="-1" aria-labelledby="createEventModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createEventModalLabel">
+                            <i class="fas fa-plus me-2"></i>
+                            Créer un Événement Universitaire
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form th:action="@{/admin/events/create}" method="post" enctype="multipart/form-data">
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="titre" class="form-label">Titre *</label>
+                                        <input type="text" class="form-control" id="titre" name="titre" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="lieu" class="form-label">Lieu</label>
+                                        <input type="text" class="form-control" id="lieu" name="lieu">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="dateDebut" class="form-label">Date de début *</label>
+                                        <input type="date" class="form-control" id="dateDebut" name="dateDebut" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="heureDebut" class="form-label">Heure de début *</label>
+                                        <input type="time" class="form-control" id="heureDebut" name="heureDebut" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Note: Les champs de fin sont désactivés car l'entité Evenement n'a pas de champ dateHeureFin -->
+                            <!-- 
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="dateFin" class="form-label">Date de fin</label>
+                                        <input type="date" class="form-control" id="dateFin" name="dateFin" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="heureFin" class="form-label">Heure de fin</label>
+                                        <input type="time" class="form-control" id="heureFin" name="heureFin" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                            -->
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description *</label>
+                                <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="capaciteMax" class="form-label">Capacité maximale</label>
+                                        <input type="number" class="form-control" id="capaciteMax" name="capaciteMax" min="1">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="statut" class="form-label">Statut</label>
+                                        <select class="form-select" id="statut" name="statut">
+                                            <option value="BROUILLON">Brouillon</option>
+                                            <option value="PUBLIE">Publié</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                Créer l'Événement
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de modification d'événement -->
+        <div class="modal fade" id="editEventModal" tabindex="-1" aria-labelledby="editEventModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editEventModalLabel">
+                            <i class="fas fa-edit me-2"></i>
+                            Modifier l'Événement
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="editEventForm" method="post" enctype="multipart/form-data">
+                        <div class="modal-body">
+                            <!-- Le contenu sera rempli par JavaScript -->
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save me-2"></i>
+                                Modifier l'Événement
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        // Filtrage des événements
+        function applyFilters() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+            
+            const eventCards = document.querySelectorAll('.event-card');
+            
+            eventCards.forEach(card => {
+                let show = true;
+                
+                // Filtre par statut
+                if (statusFilter && card.dataset.status !== statusFilter) {
+                    show = false;
+                }
+                
+                // Filtre par type
+                if (typeFilter && card.dataset.type !== typeFilter) {
+                    show = false;
+                }
+                
+                // Filtre par date (à implémenter selon les besoins)
+                if (dateFilter) {
+                    // Logique de filtrage par date
+                }
+                
+                card.parentElement.style.display = show ? 'block' : 'none';
+            });
+        }
+        
+        function clearFilters() {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('typeFilter').value = '';
+            document.getElementById('dateFilter').value = '';
+            
+            const eventCards = document.querySelectorAll('.event-card');
+            eventCards.forEach(card => {
+                card.parentElement.style.display = 'block';
+            });
+        }
+        
+        // Actions sur les événements
+        function viewEvent(eventId) {
+            window.location.href = '/admin/events/' + eventId;
+        }
+        
+        function editEvent(eventId) {
+            // Charger les données de l'événement et ouvrir le modal
+            fetch('/admin/events/' + eventId + '/edit')
+                .then(response => response.text())
+                .then(html => {
+                    document.querySelector('#editEventModal .modal-body').innerHTML = html;
+                    document.getElementById('editEventForm').action = '/admin/events/' + eventId + '/update';
+                    new bootstrap.Modal(document.getElementById('editEventModal')).show();
+                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement de l\'événement:', error);
+                    alert('Erreur lors du chargement de l\'événement');
+                });
+        }
+        
+        function deleteEvent(eventId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.')) {
+                fetch('/admin/events/' + eventId + '/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Erreur lors de la suppression de l\'événement');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur lors de la suppression de l\'événement');
+                });
+            }
+        }
+    </script>
 </body>
 </html>

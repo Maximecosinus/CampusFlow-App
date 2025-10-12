@@ -29,4 +29,7 @@ public interface EvenementRepository extends JpaRepository<Evenement, UUID> {
     
     @Query("SELECT e FROM Evenement e LEFT JOIN FETCH e.club WHERE e.id = :id")
     Optional<Evenement> findByIdWithClub(@Param("id") UUID id);
+    
+    @Query("SELECT e FROM Evenement e LEFT JOIN FETCH e.club ORDER BY e.dateHeureDebut DESC")
+    List<Evenement> findAllWithClub();
 }

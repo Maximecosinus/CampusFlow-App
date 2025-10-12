@@ -1,10 +1,12 @@
 package com.universite.UniClubs.controllers;
 
 import com.universite.UniClubs.entities.Club;
+import com.universite.UniClubs.entities.Evenement;
 import com.universite.UniClubs.entities.Utilisateur;
 import com.universite.UniClubs.services.ChefClubValidationService;
 import com.universite.UniClubs.services.ChefClubValidationService.ValidationResult;
 import com.universite.UniClubs.services.ClubService;
+import com.universite.UniClubs.services.EvenementService;
 import com.universite.UniClubs.services.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,8 +17,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -36,6 +40,9 @@ public class AdminController {
 
     @Autowired
     private ChefClubValidationService chefClubValidationService;
+    
+    @Autowired
+    private EvenementService evenementService;
 
     /**
      * Page d'accueil du tableau de bord administrateur
@@ -246,13 +253,199 @@ public class AdminController {
     }
 
     /**
-     * Section Événements (à implémenter)
+     * Section Événements - Liste de tous les événements
      */
     @GetMapping("/events")
     public String adminEvents(Model model) {
         Utilisateur admin = getCurrentUser();
         model.addAttribute("admin", admin);
+        
+        // Récupérer tous les événements
+        List<Evenement> events = evenementService.findAllEvents();
+        model.addAttribute("events", events);
+        
+        // Calculer les statistiques
+        long totalEvents = events.size();
+        long publishedEvents = events.stream()
+            .filter(e -> e.getStatut() == com.universite.UniClubs.entities.StatutEvenement.PUBLIE)
+            .count();
+        long upcomingEvents = events.stream()
+            .filter(e -> e.getDateHeureDebut().isAfter(LocalDateTime.now()))
+            .count();
+        long universityEvents = events.stream()
+            .filter(e -> e.getClub() == null)
+            .count();
+        
+        model.addAttribute("totalEvents", totalEvents);
+        model.addAttribute("publishedEvents", publishedEvents);
+        model.addAttribute("upcomingEvents", upcomingEvents);
+        model.addAttribute("universityEvents", universityEvents);
+        
         return "admin/events";
+    }
+    
+    /**
+     * Créer un événement universitaire
+     */
+    @PostMapping("/events/create")
+    public String createUniversityEvent(@RequestParam("titre") String titre,
+                                      @RequestParam("description") String description,
+                                      @RequestParam("lieu") String lieu,
+                                      @RequestParam("dateDebut") String dateDebut,
+                                      @RequestParam("heureDebut") String heureDebut,
+                                      @RequestParam(value = "dateFin", required = false) String dateFin,
+                                      @RequestParam(value = "heureFin", required = false) String heureFin,
+                                      @RequestParam(value = "capaciteMax", required = false) Integer capaciteMax,
+                                      @RequestParam("statut") String statut,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            // Créer l'événement
+            Evenement event = new Evenement();
+            event.setTitre(titre);
+            event.setDescription(description);
+            event.setLieu(lieu);
+            
+            // Parser les dates
+            LocalDate debutDate = LocalDate.parse(dateDebut);
+            LocalTime debutTime = LocalTime.parse(heureDebut);
+            event.setDateHeureDebut(LocalDateTime.of(debutDate, debutTime));
+            
+            // Note: L'entité Evenement n'a pas de champ dateHeureFin pour l'instant
+            // if (dateFin != null && !dateFin.isEmpty() && heureFin != null && !heureFin.isEmpty()) {
+            //     LocalDate finDate = LocalDate.parse(dateFin);
+            //     LocalTime finTime = LocalTime.parse(heureFin);
+            //     event.setDateHeureFin(LocalDateTime.of(finDate, finTime));
+            // }
+            
+            if (capaciteMax != null) {
+                event.setCapaciteMax(capaciteMax);
+            }
+            
+            // Définir le statut
+            event.setStatut(com.universite.UniClubs.entities.StatutEvenement.valueOf(statut));
+            
+            // Les événements universitaires n'ont pas de club associé
+            event.setClub(null);
+            
+            // Sauvegarder
+            evenementService.saveEvent(event);
+            
+            redirectAttributes.addFlashAttribute("success", 
+                "Événement universitaire créé avec succès !");
+            
+            return "redirect:/admin/events";
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", 
+                "Erreur lors de la création de l'événement : " + e.getMessage());
+            return "redirect:/admin/events";
+        }
+    }
+    
+    /**
+     * Voir les détails d'un événement
+     */
+    @GetMapping("/events/{eventId}")
+    public String viewEvent(@PathVariable UUID eventId, Model model) {
+        Evenement event = evenementService.findByIdWithClub(eventId)
+            .orElseThrow(() -> new RuntimeException("Événement non trouvé"));
+        
+        model.addAttribute("event", event);
+        return "admin/event-details";
+    }
+    
+    /**
+     * Formulaire de modification d'un événement
+     */
+    @GetMapping("/events/{eventId}/edit")
+    public String editEventForm(@PathVariable UUID eventId, Model model) {
+        Evenement event = evenementService.findByIdWithClub(eventId)
+            .orElseThrow(() -> new RuntimeException("Événement non trouvé"));
+        
+        model.addAttribute("event", event);
+        return "admin/edit-event-form";
+    }
+    
+    /**
+     * Mettre à jour un événement
+     */
+    @PostMapping("/events/{eventId}/update")
+    public String updateEvent(@PathVariable UUID eventId,
+                            @RequestParam("titre") String titre,
+                            @RequestParam("description") String description,
+                            @RequestParam("lieu") String lieu,
+                            @RequestParam("dateDebut") String dateDebut,
+                            @RequestParam("heureDebut") String heureDebut,
+                            @RequestParam(value = "dateFin", required = false) String dateFin,
+                            @RequestParam(value = "heureFin", required = false) String heureFin,
+                            @RequestParam(value = "capaciteMax", required = false) Integer capaciteMax,
+                            @RequestParam("statut") String statut,
+                            RedirectAttributes redirectAttributes) {
+        try {
+            Evenement event = evenementService.findByIdWithClub(eventId)
+                .orElseThrow(() -> new RuntimeException("Événement non trouvé"));
+            
+            // Mettre à jour les propriétés
+            event.setTitre(titre);
+            event.setDescription(description);
+            event.setLieu(lieu);
+            
+            // Parser les dates
+            LocalDate debutDate = LocalDate.parse(dateDebut);
+            LocalTime debutTime = LocalTime.parse(heureDebut);
+            event.setDateHeureDebut(LocalDateTime.of(debutDate, debutTime));
+            
+            // Note: L'entité Evenement n'a pas de champ dateHeureFin pour l'instant
+            // if (dateFin != null && !dateFin.isEmpty() && heureFin != null && !heureFin.isEmpty()) {
+            //     LocalDate finDate = LocalDate.parse(dateFin);
+            //     LocalTime finTime = LocalTime.parse(heureFin);
+            //     event.setDateHeureFin(LocalDateTime.of(finDate, finTime));
+            // } else {
+            //     event.setDateHeureFin(null);
+            // }
+            
+            if (capaciteMax != null) {
+                event.setCapaciteMax(capaciteMax);
+            } else {
+                event.setCapaciteMax(null);
+            }
+            
+            // Définir le statut
+            event.setStatut(com.universite.UniClubs.entities.StatutEvenement.valueOf(statut));
+            
+            // Sauvegarder
+            evenementService.saveEvent(event);
+            
+            redirectAttributes.addFlashAttribute("success", 
+                "Événement modifié avec succès !");
+            
+            return "redirect:/admin/events";
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", 
+                "Erreur lors de la modification de l'événement : " + e.getMessage());
+            return "redirect:/admin/events";
+        }
+    }
+    
+    /**
+     * Supprimer un événement
+     */
+    @PostMapping("/events/{eventId}/delete")
+    public String deleteEvent(@PathVariable UUID eventId, RedirectAttributes redirectAttributes) {
+        try {
+            evenementService.deleteEvent(eventId);
+            
+            redirectAttributes.addFlashAttribute("success", 
+                "Événement supprimé avec succès !");
+            
+            return "redirect:/admin/events";
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", 
+                "Erreur lors de la suppression de l'événement : " + e.getMessage());
+            return "redirect:/admin/events";
+        }
     }
 
     /**
@@ -280,9 +473,9 @@ public class AdminController {
      */
     private Utilisateur getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof org.springframework.security.core.userdetails.UserDetails) {
-            String email = authentication.getName();
-            return utilisateurService.findByEmail(email);
+        if (authentication != null && authentication.getPrincipal() instanceof com.universite.UniClubs.services.CustomUserDetails) {
+            com.universite.UniClubs.services.CustomUserDetails userDetails = (com.universite.UniClubs.services.CustomUserDetails) authentication.getPrincipal();
+            return userDetails.getUtilisateur();
         }
         return null;
     }

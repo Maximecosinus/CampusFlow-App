@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier l'Événement</title>
+</head>
+<body>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="titre" class="form-label">Titre *</label>
+                <input type="text" class="form-control" id="titre" name="titre" 
+                       th:value="${event.titre}" required>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="lieu" class="form-label">Lieu</label>
+                <input type="text" class="form-control" id="lieu" name="lieu" 
+                       th:value="${event.lieu}">
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="dateDebut" class="form-label">Date de début *</label>
+                <input type="date" class="form-control" id="dateDebut" name="dateDebut" 
+                       th:value="${#temporals.format(event.dateHeureDebut, 'yyyy-MM-dd')}" required>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="heureDebut" class="form-label">Heure de début *</label>
+                <input type="time" class="form-control" id="heureDebut" name="heureDebut" 
+                       th:value="${#temporals.format(event.dateHeureDebut, 'HH:mm')}" required>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Note: Les champs de fin sont désactivés car l'entité Evenement n'a pas de champ dateHeureFin -->
+    <!-- 
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="dateFin" class="form-label">Date de fin</label>
+                <input type="date" class="form-control" id="dateFin" name="dateFin" disabled>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="heureFin" class="form-label">Heure de fin</label>
+                <input type="time" class="form-control" id="heureFin" name="heureFin" disabled>
+            </div>
+        </div>
+    </div>
+    -->
+    
+    <div class="mb-3">
+        <label for="description" class="form-label">Description *</label>
+        <textarea class="form-control" id="description" name="description" rows="4" required
+                  th:text="${event.description}"></textarea>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="capaciteMax" class="form-label">Capacité maximale</label>
+                <input type="number" class="form-control" id="capaciteMax" name="capaciteMax" 
+                       th:value="${event.capaciteMax}" min="1">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="statut" class="form-label">Statut</label>
+                <select class="form-select" id="statut" name="statut">
+                    <option value="BROUILLON" th:selected="${event.statut == T(com.universite.UniClubs.entities.Evenement.StatutEvenement).BROUILLON}">Brouillon</option>
+                    <option value="PUBLIE" th:selected="${event.statut == T(com.universite.UniClubs.entities.Evenement.StatutEvenement).PUBLIE}">Publié</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Informations sur le type d'événement -->
+    <div class="mb-3">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Type d'événement :</strong>
+            <span th:if="${event.club != null}">
+                Événement du club <span th:text="${event.club.nom}"></span>
+            </span>
+            <span th:unless="${event.club != null}">
+                Événement universitaire
+            </span>
+        </div>
+    </div>
+</body>
+</html>
