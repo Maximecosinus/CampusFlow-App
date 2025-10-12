@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout('Communication', ~{::content})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Communication</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-megaphone"></i> Communication</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info admin-alert">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Section en développement</strong><br>
+                            Cette section permettra de gérer la communication avec tous les utilisateurs.
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Fonctionnalités prévues :</h6>
+                                <ul>
+                                    <li>Envoi d'annonces générales</li>
+                                    <li>Notifications par email</li>
+                                    <li>Messages système</li>
+                                    <li>Campagnes de communication</li>
+                                    <li>Historique des communications</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Actions disponibles :</h6>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary" disabled>
+                                        <i class="bi bi-envelope"></i> Nouvelle Annonce
+                                    </button>
+                                    <button class="btn btn-success" disabled>
+                                        <i class="bi bi-broadcast"></i> Campagne
+                                    </button>
+                                    <button class="btn btn-info" disabled>
+                                        <i class="bi bi-clock-history"></i> Historique
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

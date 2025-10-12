@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout('Gestion des Clubs', ~{::content})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des Clubs</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-people"></i> Gestion des Clubs</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info admin-alert">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Section en développement</strong><br>
+                            Cette section permettra de gérer tous les clubs de l'université.
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Fonctionnalités prévues :</h6>
+                                <ul>
+                                    <li>Liste de tous les clubs</li>
+                                    <li>Création de nouveaux clubs</li>
+                                    <li>Modification des informations</li>
+                                    <li>Suppression de clubs</li>
+                                    <li>Gestion des chefs de club</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Actions disponibles :</h6>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary" disabled>
+                                        <i class="bi bi-plus-circle"></i> Créer un Club
+                                    </button>
+                                    <button class="btn btn-secondary" disabled>
+                                        <i class="bi bi-list"></i> Voir tous les Clubs
+                                    </button>
+                                    <button class="btn btn-warning" disabled>
+                                        <i class="bi bi-gear"></i> Paramètres
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout('Gestion des Événements', ~{::content})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des Événements</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-calendar-event"></i> Gestion des Événements</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info admin-alert">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Section en développement</strong><br>
+                            Cette section permettra de gérer tous les événements de l'université.
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Fonctionnalités prévues :</h6>
+                                <ul>
+                                    <li>Liste de tous les événements</li>
+                                    <li>Validation des événements</li>
+                                    <li>Modération du contenu</li>
+                                    <li>Statistiques de participation</li>
+                                    <li>Gestion des conflits de dates</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Actions disponibles :</h6>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary" disabled>
+                                        <i class="bi bi-eye"></i> Voir tous les Événements
+                                    </button>
+                                    <button class="btn btn-success" disabled>
+                                        <i class="bi bi-check-circle"></i> Valider
+                                    </button>
+                                    <button class="btn btn-warning" disabled>
+                                        <i class="bi bi-graph-up"></i> Statistiques
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

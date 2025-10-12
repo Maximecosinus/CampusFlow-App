@@ -32,4 +32,10 @@ public interface UtilisateurService {
     
     // Méthode pour trouver un utilisateur par son ID avec ses inscriptions
     Optional<Utilisateur> findByIdWithInscriptions(UUID id);
+    
+    // Méthode pour trouver un utilisateur par email (pour l'admin)
+    Utilisateur findByEmail(String email);
+    
+    // Méthode pour compter tous les utilisateurs (pour l'admin)
+    long countAllUsers();
 }

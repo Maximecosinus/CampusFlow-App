@@ -142,4 +142,15 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     public Optional<Utilisateur> findByIdWithInscriptions(UUID id) {
         return utilisateurRepository.findByIdWithInscriptions(id);
     }
+
+    @Override
+    public Utilisateur findByEmail(String email) {
+        return utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'email: " + email));
+    }
+
+    @Override
+    public long countAllUsers() {
+        return utilisateurRepository.count();
+    }
 }
