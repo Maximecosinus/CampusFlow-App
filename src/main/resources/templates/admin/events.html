@@ -21,6 +21,12 @@
                     <i class="fas fa-plus me-2"></i>
                     Créer un Événement Universitaire
                 </button>
+                
+                <!-- Bouton temporaire pour créer des événements de test -->
+                <a href="/admin/create-test-events" class="btn btn-warning ms-2">
+                    <i class="fas fa-flask me-2"></i>
+                    Créer des événements de test
+                </a>
             </div>
 
             <!-- Statistiques rapides -->
@@ -381,10 +387,12 @@
         
         // Actions sur les événements
         function viewEvent(eventId) {
+            console.log('viewEvent appelée avec ID:', eventId);
             window.location.href = '/admin/events/' + eventId;
         }
         
         function editEvent(eventId) {
+            console.log('editEvent appelée avec ID:', eventId);
             // Charger les données de l'événement et ouvrir le modal
             fetch('/admin/events/' + eventId + '/edit')
                 .then(response => response.text())
@@ -400,6 +408,7 @@
         }
         
         function deleteEvent(eventId) {
+            console.log('deleteEvent appelée avec ID:', eventId);
             if (confirm('Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.')) {
                 fetch('/admin/events/' + eventId + '/delete', {
                     method: 'POST',
@@ -421,40 +430,49 @@
             }
         }
         
-        // Event listeners pour les boutons d'action
+        // Event listeners pour les boutons d'action - Version simplifiée
         document.addEventListener('DOMContentLoaded', function() {
-            // Bouton Voir
+            console.log('DOM chargé, initialisation des event listeners...');
+            
+            // Event listener global pour tous les boutons d'action
             document.addEventListener('click', function(e) {
+                console.log('Clic détecté sur:', e.target);
+                
+                // Vérifier si c'est un bouton Voir
                 if (e.target.closest('.view-event-btn')) {
+                    console.log('Bouton Voir détecté!');
                     e.preventDefault();
                     const button = e.target.closest('.view-event-btn');
                     const eventId = button.dataset.eventId;
-                    console.log('Bouton Voir cliqué pour événement:', eventId);
+                    console.log('Event ID pour Voir:', eventId);
                     viewEvent(eventId);
+                    return;
                 }
-            });
-            
-            // Bouton Modifier
-            document.addEventListener('click', function(e) {
+                
+                // Vérifier si c'est un bouton Modifier
                 if (e.target.closest('.edit-event-btn')) {
+                    console.log('Bouton Modifier détecté!');
                     e.preventDefault();
                     const button = e.target.closest('.edit-event-btn');
                     const eventId = button.dataset.eventId;
-                    console.log('Bouton Modifier cliqué pour événement:', eventId);
+                    console.log('Event ID pour Modifier:', eventId);
                     editEvent(eventId);
+                    return;
                 }
-            });
-            
-            // Bouton Supprimer
-            document.addEventListener('click', function(e) {
+                
+                // Vérifier si c'est un bouton Supprimer
                 if (e.target.closest('.delete-event-btn')) {
+                    console.log('Bouton Supprimer détecté!');
                     e.preventDefault();
                     const button = e.target.closest('.delete-event-btn');
                     const eventId = button.dataset.eventId;
-                    console.log('Bouton Supprimer cliqué pour événement:', eventId);
+                    console.log('Event ID pour Supprimer:', eventId);
                     deleteEvent(eventId);
+                    return;
                 }
             });
+            
+            console.log('Event listeners initialisés');
         });
     </script>
 </body>
