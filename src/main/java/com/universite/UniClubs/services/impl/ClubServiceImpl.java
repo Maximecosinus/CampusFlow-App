@@ -44,4 +44,27 @@ public class ClubServiceImpl implements ClubService {
         // Les membres et les événements seront déjà chargés. Pas besoin de .size() !
         return clubRepository.findByIdWithDetails(clubId).orElse(null);
     }
+
+    @Override
+    public List<Club> findAllClubs() {
+        return clubRepository.findAll();
+    }
+
+    @Override
+    @Transactional
+    public Club createClub(Club club) {
+        return clubRepository.save(club);
+    }
+
+    @Override
+    @Transactional
+    public Club updateClub(Club club) {
+        return clubRepository.save(club);
+    }
+
+    @Override
+    @Transactional
+    public void deleteClub(UUID clubId) {
+        clubRepository.deleteById(clubId);
+    }
 }

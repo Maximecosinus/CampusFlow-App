@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout('Créer un Nouveau Club', ~{::content})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Créer un Nouveau Club</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- En-tête -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex align-items-center">
+                    <a th:href="@{/admin/clubs}" class="btn btn-outline-secondary me-3">
+                        <i class="bi bi-arrow-left"></i> Retour
+                    </a>
+                    <div>
+                        <h4 class="mb-1"><i class="bi bi-plus-circle"></i> Créer un Nouveau Club</h4>
+                        <p class="text-muted mb-0">Remplissez les informations du nouveau club</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages d'erreur -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Formulaire de création -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-info-circle"></i> Informations du Club</h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/admin/clubs/create}" th:object="${club}" method="post">
+                            <!-- Nom du club -->
+                            <div class="mb-3">
+                                <label for="nom" class="form-label">
+                                    <i class="bi bi-tag"></i> Nom du Club <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="nom" th:field="*{nom}" 
+                                       placeholder="Ex: Club de Développement Web" required>
+                                <div class="form-text">Le nom officiel du club</div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mb-4">
+                                <label for="description" class="form-label">
+                                    <i class="bi bi-text-paragraph"></i> Description
+                                </label>
+                                <textarea class="form-control" id="description" th:field="*{description}" 
+                                          rows="4" placeholder="Décrivez les activités et objectifs du club..."></textarea>
+                                <div class="form-text">Description détaillée du club (optionnel)</div>
+                            </div>
+
+                            <!-- Chef de club -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="bi bi-person-gear"></i> Chef de Club
+                                </label>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="studentSearch" class="form-label">Rechercher un étudiant</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="studentSearch" 
+                                                       placeholder="Tapez le nom ou l'email de l'étudiant...">
+                                                <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+                                                    <i class="bi bi-search"></i>
+                                                </button>
+                                            </div>
+                                            <div class="form-text">Recherchez par nom, prénom ou email</div>
+                                        </div>
+
+                                        <!-- Résultats de recherche -->
+                                        <div id="searchResults" class="mb-3" style="display: none;">
+                                            <label class="form-label">Sélectionner un étudiant :</label>
+                                            <div id="studentsList" class="list-group">
+                                                <!-- Les résultats seront ajoutés ici par JavaScript -->
+                                            </div>
+                                        </div>
+
+                                        <!-- Étudiant sélectionné -->
+                                        <div id="selectedStudent" class="alert alert-success" style="display: none;">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <i class="bi bi-person-check"></i>
+                                                    <strong id="selectedStudentName">Nom de l'étudiant</strong>
+                                                    <br>
+                                                    <small id="selectedStudentEmail" class="text-muted">email@example.com</small>
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" id="removeStudent">
+                                                    <i class="bi bi-x"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Option sans chef -->
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="noChef" name="noChef">
+                                            <label class="form-check-label" for="noChef">
+                                                Créer le club sans chef de club (à assigner plus tard)
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Boutons -->
+                            <div class="d-flex justify-content-between">
+                                <a th:href="@{/admin/clubs}" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Annuler
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i> Créer le Club
+                                </button>
+                            </div>
+
+                            <!-- Champ caché pour l'ID du chef -->
+                            <input type="hidden" id="chefId" name="chefId">
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panneau d'aide -->
+            <div class="col-lg-4">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-question-circle"></i> Aide</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6><i class="bi bi-info-circle"></i> Informations requises</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check text-success"></i> Nom du club</li>
+                            <li><i class="bi bi-check text-success"></i> Description (optionnel)</li>
+                            <li><i class="bi bi-check text-success"></i> Chef de club (optionnel)</li>
+                        </ul>
+
+                        <hr>
+
+                        <h6><i class="bi bi-lightbulb"></i> Conseils</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-arrow-right text-primary"></i> Choisissez un nom clair et descriptif</li>
+                            <li><i class="bi bi-arrow-right text-primary"></i> La description aide les étudiants à comprendre le club</li>
+                            <li><i class="bi bi-arrow-right text-primary"></i> Vous pouvez assigner un chef plus tard</li>
+                        </ul>
+
+                        <hr>
+
+                        <h6><i class="bi bi-shield-check"></i> Permissions</h6>
+                        <p class="small text-muted">
+                            En tant qu'administrateur, vous pouvez créer des clubs et assigner des chefs de club.
+                            Les chefs de club auront accès au tableau de bord de gestion de leur club.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript pour la recherche d'étudiants -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('studentSearch');
+            const searchBtn = document.getElementById('searchBtn');
+            const searchResults = document.getElementById('searchResults');
+            const studentsList = document.getElementById('studentsList');
+            const selectedStudent = document.getElementById('selectedStudent');
+            const selectedStudentName = document.getElementById('selectedStudentName');
+            const selectedStudentEmail = document.getElementById('selectedStudentEmail');
+            const removeStudentBtn = document.getElementById('removeStudent');
+            const chefIdInput = document.getElementById('chefId');
+            const noChefCheckbox = document.getElementById('noChef');
+
+            let selectedStudentData = null;
+
+            // Fonction de recherche
+            function searchStudents(query) {
+                if (query.length < 2) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+
+                fetch(`/admin/clubs/search-students?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(students => {
+                        displaySearchResults(students);
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la recherche:', error);
+                    });
+            }
+
+            // Afficher les résultats de recherche
+            function displaySearchResults(students) {
+                studentsList.innerHTML = '';
+                
+                if (students.length === 0) {
+                    studentsList.innerHTML = '<div class="list-group-item text-muted">Aucun étudiant trouvé</div>';
+                } else {
+                    students.forEach(student => {
+                        const item = document.createElement('div');
+                        item.className = 'list-group-item list-group-item-action';
+                        item.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${student.prenom} ${student.nom}</strong>
+                                    <br>
+                                    <small class="text-muted">${student.email}</small>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-primary select-student" data-student-id="${student.id}">
+                                    Sélectionner
+                                </button>
+                            </div>
+                        `;
+                        studentsList.appendChild(item);
+                    });
+                }
+                
+                searchResults.style.display = 'block';
+            }
+
+            // Sélectionner un étudiant
+            function selectStudent(student) {
+                selectedStudentData = student;
+                selectedStudentName.textContent = `${student.prenom} ${student.nom}`;
+                selectedStudentEmail.textContent = student.email;
+                chefIdInput.value = student.id;
+                selectedStudent.style.display = 'block';
+                searchResults.style.display = 'none';
+                searchInput.value = '';
+                noChefCheckbox.checked = false;
+            }
+
+            // Supprimer la sélection
+            function removeStudent() {
+                selectedStudentData = null;
+                selectedStudent.style.display = 'none';
+                chefIdInput.value = '';
+            }
+
+            // Événements
+            searchBtn.addEventListener('click', () => searchStudents(searchInput.value));
+            searchInput.addEventListener('input', (e) => searchStudents(e.target.value));
+            
+            studentsList.addEventListener('click', (e) => {
+                if (e.target.classList.contains('select-student')) {
+                    const studentId = e.target.dataset.studentId;
+                    const studentName = e.target.closest('.list-group-item').querySelector('strong').textContent;
+                    const studentEmail = e.target.closest('.list-group-item').querySelector('small').textContent;
+                    
+                    selectStudent({
+                        id: studentId,
+                        prenom: studentName.split(' ')[0],
+                        nom: studentName.split(' ')[1],
+                        email: studentEmail
+                    });
+                }
+            });
+
+            removeStudentBtn.addEventListener('click', removeStudent);
+
+            noChefCheckbox.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    removeStudent();
+                }
+            });
+
+            // Fermer les résultats en cliquant à l'extérieur
+            document.addEventListener('click', (e) => {
+                if (!searchResults.contains(e.target) && !searchInput.contains(e.target) && !searchBtn.contains(e.target)) {
+                    searchResults.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

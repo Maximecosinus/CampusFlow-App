@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -152,5 +153,17 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     @Override
     public long countAllUsers() {
         return utilisateurRepository.count();
+    }
+
+    @Override
+    public List<Utilisateur> searchStudentsByNameOrEmail(String query) {
+        return utilisateurRepository.findByRoleAndNameOrEmailContainingIgnoreCase(
+            com.universite.UniClubs.entities.Role.ETUDIANT, query);
+    }
+
+    @Override
+    @Transactional
+    public void updateUser(Utilisateur utilisateur) {
+        utilisateurRepository.save(utilisateur);
     }
 }

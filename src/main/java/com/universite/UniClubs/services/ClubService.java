@@ -7,7 +7,19 @@ import java.util.UUID;
 
 public interface ClubService {
     List<Club> getAllClubs();
+
     List<Club> findRecentclubs();
+
     Optional<Club> findClubById(UUID id);
-    Club findClubWithDetailsById(UUID clubId); // <-- Ajoutez/Modifiez cette ligne
+
+    Club findClubWithDetailsById(UUID clubId);
+
+    // Nouvelles méthodes pour l'administration
+    List<Club> findAllClubs();
+
+    Club createClub(Club club);
+
+    Club updateClub(Club club);
+
+    void deleteClub(UUID clubId);
 }

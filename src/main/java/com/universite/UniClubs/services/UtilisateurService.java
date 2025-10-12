@@ -5,6 +5,7 @@ import com.universite.UniClubs.entities.Utilisateur;
 import com.universite.UniClubs.dto.UserProfileDto;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,4 +39,8 @@ public interface UtilisateurService {
     
     // Méthode pour compter tous les utilisateurs (pour l'admin)
     long countAllUsers();
+    
+    // Nouvelles méthodes pour l'administration
+    List<Utilisateur> searchStudentsByNameOrEmail(String query);
+    void updateUser(Utilisateur utilisateur);
 }

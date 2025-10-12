@@ -1,54 +1,152 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{admin/layout :: layout('Gestion des Clubs', ~{::content})}">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Gestion des Clubs</title>
 </head>
 <body>
-    <div th:fragment="content">
+    <div th:replace="~{admin/layout :: layout('Gestion des Clubs', ~{::content})}">
+        <div th:fragment="content">
+        <!-- En-tête avec bouton de création -->
         <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-1"><i class="bi bi-people"></i> Gestion des Clubs</h4>
+                        <p class="text-muted mb-0">Liste complète de tous les clubs de l'université</p>
+                    </div>
+                    <div>
+                        <a th:href="@{/admin/clubs/create}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Créer un nouveau club
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages de succès/erreur -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i>
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Liste des clubs -->
+        <div class="row">
             <div class="col-12">
                 <div class="admin-card">
                     <div class="card-header">
-                        <h5><i class="bi bi-people"></i> Gestion des Clubs</h5>
+                        <h5><i class="bi bi-list-ul"></i> Clubs de l'Université</h5>
                     </div>
                     <div class="card-body">
-                        <div class="alert alert-info admin-alert">
-                            <i class="bi bi-info-circle"></i>
-                            <strong>Section en développement</strong><br>
-                            Cette section permettra de gérer tous les clubs de l'université.
+                        <div th:if="${clubs != null and !clubs.empty}">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Nom du Club</th>
+                                            <th>Description</th>
+                                            <th>Chef de Club</th>
+                                            <th>Nombre de Membres</th>
+                                            <th>Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="club : ${clubs}">
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img th:src="${club.logo != null ? club.logo : '/images/default-club.png'}"
+                                                         alt="Logo" class="rounded-circle me-3" 
+                                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                                    <div>
+                                                        <strong th:text="${club.nom}">Nom du Club</strong>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span th:text="${club.description}" 
+                                                      th:if="${club.description != null and !club.description.isEmpty()}">
+                                                    Description du club...
+                                                </span>
+                                                <span class="text-muted" th:if="${club.description == null or club.description.isEmpty()}">
+                                                    Aucune description
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span th:if="${club.chefClub != null}">
+                                                    <i class="bi bi-person-check text-success"></i>
+                                                    <span th:text="${club.chefClub.prenom + ' ' + club.chefClub.nom}">Chef de Club</span>
+                                                </span>
+                                                <span th:if="${club.chefClub == null}" class="text-muted">
+                                                    <i class="bi bi-person-x text-warning"></i>
+                                                    Aucun chef assigné
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info" th:text="${club.membres != null ? club.membres.size() : 0}">0</span>
+                                                <small class="text-muted ms-1">membre(s)</small>
+                                            </td>
+                                            <td>
+                                                <span th:if="${club.chefClub != null}" class="badge bg-success">Actif</span>
+                                                <span th:if="${club.chefClub == null}" class="badge bg-warning">En attente</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                         
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6>Fonctionnalités prévues :</h6>
-                                <ul>
-                                    <li>Liste de tous les clubs</li>
-                                    <li>Création de nouveaux clubs</li>
-                                    <li>Modification des informations</li>
-                                    <li>Suppression de clubs</li>
-                                    <li>Gestion des chefs de club</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <h6>Actions disponibles :</h6>
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-primary" disabled>
-                                        <i class="bi bi-plus-circle"></i> Créer un Club
-                                    </button>
-                                    <button class="btn btn-secondary" disabled>
-                                        <i class="bi bi-list"></i> Voir tous les Clubs
-                                    </button>
-                                    <button class="btn btn-warning" disabled>
-                                        <i class="bi bi-gear"></i> Paramètres
-                                    </button>
-                                </div>
+                        <div th:if="${clubs == null or clubs.empty}" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-people" style="font-size: 3rem;"></i>
+                                <h5 class="mt-3">Aucun club trouvé</h5>
+                                <p>Il n'y a actuellement aucun club dans l'université.</p>
+                                <a th:href="@{/admin/clubs/create}" class="btn btn-primary">
+                                    <i class="bi bi-plus-circle"></i> Créer le premier club
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Statistiques rapides -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="admin-stats-card text-center">
+                    <div class="stats-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div class="stats-number" th:text="${clubs != null ? clubs.size() : 0}">0</div>
+                    <div class="stats-label">Clubs Total</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="admin-stats-card text-center">
+                    <div class="stats-icon">
+                        <i class="bi bi-person-check"></i>
+                    </div>
+                    <div class="stats-number" th:text="${clubs != null ? #lists.size(clubs.?[chefClub != null]) : 0}">0</div>
+                    <div class="stats-label">Avec Chef</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="admin-stats-card text-center">
+                    <div class="stats-icon">
+                        <i class="bi bi-person-x"></i>
+                    </div>
+                    <div class="stats-number" th:text="${clubs != null ? #lists.size(clubs.?[chefClub == null]) : 0}">0</div>
+                    <div class="stats-label">Sans Chef</div>
+                </div>
+            </div>
+        </div>
         </div>
     </div>
 </body>

@@ -1,11 +1,13 @@
 package com.universite.UniClubs.repositories;
 
 import com.universite.UniClubs.entities.Utilisateur;
+import com.universite.UniClubs.entities.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -42,4 +44,11 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, UUID> 
     // Méthode pour charger un utilisateur par ID avec ses inscriptions
     @Query("SELECT u FROM Utilisateur u LEFT JOIN FETCH u.inscriptions i LEFT JOIN FETCH i.club WHERE u.id = :id")
     Optional<Utilisateur> findByIdWithInscriptions(@Param("id") UUID id);
+    
+    // Méthode pour rechercher des étudiants par nom ou email
+    @Query("SELECT u FROM Utilisateur u WHERE u.role = :role AND " +
+           "(LOWER(u.nom) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(u.prenom) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')))")
+    List<Utilisateur> findByRoleAndNameOrEmailContainingIgnoreCase(@Param("role") Role role, @Param("query") String query);
 }
