@@ -453,54 +453,6 @@ public class AdminController {
     }
 
     /**
-     * Endpoint temporaire pour créer des événements de test (à supprimer après test)
-     */
-    @GetMapping("/create-test-events")
-    public String createTestEvents(RedirectAttributes redirectAttributes) {
-        try {
-            // Événement 1: Conférence sur l'IA
-            Evenement event1 = new Evenement();
-            event1.setTitre("Conférence sur l'Intelligence Artificielle");
-            event1.setDescription("Une conférence passionnante sur les dernières avancées en intelligence artificielle et leur impact sur notre société.");
-            event1.setLieu("Amphithéâtre A - Campus Principal");
-            event1.setDateHeureDebut(LocalDateTime.of(2024, 12, 15, 14, 0));
-            event1.setCapaciteMax(150);
-            event1.setStatut(com.universite.UniClubs.entities.StatutEvenement.PUBLIE);
-            event1.setClub(null); // Événement universitaire
-            evenementService.saveEvent(event1);
-            
-            // Événement 2: Tournoi de Football
-            Evenement event2 = new Evenement();
-            event2.setTitre("Tournoi de Football Inter-Clubs");
-            event2.setDescription("Tournoi de football entre les différents clubs de l'université. Inscriptions ouvertes à tous les étudiants.");
-            event2.setLieu("Stade Universitaire");
-            event2.setDateHeureDebut(LocalDateTime.of(2024, 12, 20, 10, 0));
-            event2.setCapaciteMax(200);
-            event2.setStatut(com.universite.UniClubs.entities.StatutEvenement.PUBLIE);
-            event2.setClub(null); // Événement universitaire
-            evenementService.saveEvent(event2);
-            
-            // Événement 3: Atelier de Programmation
-            Evenement event3 = new Evenement();
-            event3.setTitre("Atelier de Programmation Web");
-            event3.setDescription("Apprenez les bases du développement web avec HTML, CSS et JavaScript. Matériel fourni.");
-            event3.setLieu("Salle Informatique B-205");
-            event3.setDateHeureDebut(LocalDateTime.of(2024, 12, 18, 16, 0));
-            event3.setCapaciteMax(30);
-            event3.setStatut(com.universite.UniClubs.entities.StatutEvenement.BROUILLON);
-            event3.setClub(null); // Événement universitaire
-            evenementService.saveEvent(event3);
-            
-            redirectAttributes.addFlashAttribute("success", "3 événements de test créés avec succès !");
-            
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Erreur lors de la création des événements de test : " + e.getMessage());
-        }
-        
-        return "redirect:/admin/events";
-    }
-
-    /**
      * Section Communication (à implémenter)
      */
     @GetMapping("/communication")
