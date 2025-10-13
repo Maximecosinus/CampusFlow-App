@@ -344,48 +344,6 @@
     </div>
 
     <script>
-        // Filtrage des événements
-        function applyFilters() {
-            const statusFilter = document.getElementById('statusFilter').value;
-            const typeFilter = document.getElementById('typeFilter').value;
-            const dateFilter = document.getElementById('dateFilter').value;
-            
-            const eventCards = document.querySelectorAll('.event-card');
-            
-            eventCards.forEach(card => {
-                let show = true;
-                
-                // Filtre par statut
-                if (statusFilter && card.dataset.status !== statusFilter) {
-                    show = false;
-                }
-                
-                // Filtre par type
-                if (typeFilter && card.dataset.type !== typeFilter) {
-                    show = false;
-                }
-                
-                // Filtre par date (à implémenter selon les besoins)
-                if (dateFilter) {
-                    // Logique de filtrage par date
-                }
-                
-                card.parentElement.style.display = show ? 'block' : 'none';
-            });
-        }
-        
-        function clearFilters() {
-            document.getElementById('statusFilter').value = '';
-            document.getElementById('typeFilter').value = '';
-            document.getElementById('dateFilter').value = '';
-            
-            const eventCards = document.querySelectorAll('.event-card');
-            eventCards.forEach(card => {
-                card.parentElement.style.display = 'block';
-            });
-        }
-        
-        // Test ultra-simple
         alert('JavaScript fonctionne !');
     </script>
 </body>
