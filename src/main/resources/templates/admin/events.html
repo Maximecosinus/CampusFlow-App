@@ -385,58 +385,44 @@
             });
         }
         
-        // Test ultra-simple pour vérifier que le JavaScript fonctionne
-        alert('=== SCRIPT CHARGÉ ===');
-        
-        // Test simple au chargement de la page
+        // JavaScript simple et fonctionnel pour les boutons d'action
         document.addEventListener('DOMContentLoaded', function() {
-            alert('=== DOM CHARGÉ ===');
-            
-            // Compter les boutons
-            const viewButtons = document.querySelectorAll('.view-event-btn');
-            const editButtons = document.querySelectorAll('.edit-event-btn');
-            const deleteButtons = document.querySelectorAll('.delete-event-btn');
-            
-            alert('Boutons trouvés - Voir: ' + viewButtons.length + ', Modifier: ' + editButtons.length + ', Supprimer: ' + deleteButtons.length);
-            
-            // Test simple avec des alertes
+            // Event listener global pour tous les boutons d'action
             document.addEventListener('click', function(e) {
-                alert('=== CLIC DÉTECTÉ ===');
-                
+                // Bouton Voir
                 if (e.target.closest('.view-event-btn')) {
-                    alert('=== BOUTON VOIR DÉTECTÉ ===');
                     e.preventDefault();
                     const button = e.target.closest('.view-event-btn');
                     const eventId = button.dataset.eventId;
-                    alert('Event ID: ' + eventId);
                     window.location.href = '/admin/events/' + eventId;
                     return;
                 }
                 
+                // Bouton Modifier
                 if (e.target.closest('.edit-event-btn')) {
-                    alert('=== BOUTON MODIFIER DÉTECTÉ ===');
                     e.preventDefault();
                     const button = e.target.closest('.edit-event-btn');
                     const eventId = button.dataset.eventId;
-                    alert('Event ID: ' + eventId);
                     window.location.href = '/admin/events/' + eventId + '/edit';
                     return;
                 }
                 
+                // Bouton Supprimer
                 if (e.target.closest('.delete-event-btn')) {
-                    alert('=== BOUTON SUPPRIMER DÉTECTÉ ===');
                     e.preventDefault();
                     const button = e.target.closest('.delete-event-btn');
                     const eventId = button.dataset.eventId;
-                    alert('Event ID: ' + eventId);
-                    if (confirm('Supprimer cet événement ?')) {
-                        window.location.href = '/admin/events/' + eventId + '/delete';
+                    if (confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) {
+                        // Créer un formulaire pour la suppression POST
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '/admin/events/' + eventId + '/delete';
+                        document.body.appendChild(form);
+                        form.submit();
                     }
                     return;
                 }
             });
-            
-            alert('=== EVENT LISTENERS INITIALISÉS ===');
         });
     </script>
 </body>
