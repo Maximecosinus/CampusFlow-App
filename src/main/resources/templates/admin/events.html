@@ -159,7 +159,7 @@
                     <div id="eventsContainer" class="row">
                         <!-- Les événements seront chargés ici via JavaScript -->
                         <div th:each="event : ${events}" class="col-lg-4 col-md-6 mb-4">
-                            <div class="card h-100 event-card" th:data-status="${event.statut}" th:data-type="${event.club != null ? 'CLUB' : 'UNIVERSITAIRE'}">
+                            <div class="card h-100 event-card" th:data-status="${event.statut}" th:data-type="CLUB">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <h6 class="mb-0" th:text="${event.titre}">Titre de l'événement</h6>
                                     <span class="badge" th:classappend="${event.statut == T(com.universite.UniClubs.entities.StatutEvenement).PUBLIE} ? 'bg-success' : 'bg-warning'" 
