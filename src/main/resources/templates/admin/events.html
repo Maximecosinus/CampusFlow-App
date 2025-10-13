@@ -385,70 +385,58 @@
             });
         }
         
-        // Test simple pour vérifier que le JavaScript fonctionne
-        console.log('=== SCRIPT CHARGÉ ===');
-        
-        // Actions sur les événements
-        function viewEvent(eventId) {
-            console.log('viewEvent appelée avec ID:', eventId);
-            window.location.href = '/admin/events/' + eventId;
-        }
-        
-        function editEvent(eventId) {
-            console.log('editEvent appelée avec ID:', eventId);
-            alert('Modifier événement ID: ' + eventId);
-        }
-        
-        function deleteEvent(eventId) {
-            console.log('deleteEvent appelée avec ID:', eventId);
-            alert('Supprimer événement ID: ' + eventId);
-        }
+        // Test ultra-simple pour vérifier que le JavaScript fonctionne
+        alert('=== SCRIPT CHARGÉ ===');
         
         // Test simple au chargement de la page
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('=== DOM CHARGÉ ===');
-            console.log('Nombre de boutons Voir trouvés:', document.querySelectorAll('.view-event-btn').length);
-            console.log('Nombre de boutons Modifier trouvés:', document.querySelectorAll('.edit-event-btn').length);
-            console.log('Nombre de boutons Supprimer trouvés:', document.querySelectorAll('.delete-event-btn').length);
+            alert('=== DOM CHARGÉ ===');
+            
+            // Compter les boutons
+            const viewButtons = document.querySelectorAll('.view-event-btn');
+            const editButtons = document.querySelectorAll('.edit-event-btn');
+            const deleteButtons = document.querySelectorAll('.delete-event-btn');
+            
+            alert('Boutons trouvés - Voir: ' + viewButtons.length + ', Modifier: ' + editButtons.length + ', Supprimer: ' + deleteButtons.length);
             
             // Test simple avec des alertes
             document.addEventListener('click', function(e) {
-                console.log('=== CLIC DÉTECTÉ ===');
-                console.log('Élément cliqué:', e.target);
-                console.log('Classes de l\'élément:', e.target.className);
+                alert('=== CLIC DÉTECTÉ ===');
                 
                 if (e.target.closest('.view-event-btn')) {
-                    console.log('=== BOUTON VOIR DÉTECTÉ ===');
+                    alert('=== BOUTON VOIR DÉTECTÉ ===');
                     e.preventDefault();
                     const button = e.target.closest('.view-event-btn');
                     const eventId = button.dataset.eventId;
-                    console.log('Event ID:', eventId);
-                    alert('Bouton Voir cliqué pour événement: ' + eventId);
+                    alert('Event ID: ' + eventId);
+                    window.location.href = '/admin/events/' + eventId;
                     return;
                 }
                 
                 if (e.target.closest('.edit-event-btn')) {
-                    console.log('=== BOUTON MODIFIER DÉTECTÉ ===');
+                    alert('=== BOUTON MODIFIER DÉTECTÉ ===');
                     e.preventDefault();
                     const button = e.target.closest('.edit-event-btn');
                     const eventId = button.dataset.eventId;
-                    console.log('Event ID:', eventId);
-                    alert('Bouton Modifier cliqué pour événement: ' + eventId);
+                    alert('Event ID: ' + eventId);
+                    window.location.href = '/admin/events/' + eventId + '/edit';
                     return;
                 }
                 
                 if (e.target.closest('.delete-event-btn')) {
-                    console.log('=== BOUTON SUPPRIMER DÉTECTÉ ===');
+                    alert('=== BOUTON SUPPRIMER DÉTECTÉ ===');
                     e.preventDefault();
                     const button = e.target.closest('.delete-event-btn');
                     const eventId = button.dataset.eventId;
-                    console.log('Event ID:', eventId);
-                    alert('Bouton Supprimer cliqué pour événement: ' + eventId);
+                    alert('Event ID: ' + eventId);
+                    if (confirm('Supprimer cet événement ?')) {
+                        window.location.href = '/admin/events/' + eventId + '/delete';
+                    }
                     return;
                 }
             });
             
-            console.log('=== EVENT LISTENERS INITIALISÉS ===');
+            alert('=== EVENT LISTENERS INITIALISÉS ===');
         });
     </script>
 </body>
