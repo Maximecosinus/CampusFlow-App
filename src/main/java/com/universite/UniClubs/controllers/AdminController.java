@@ -261,31 +261,44 @@ public class AdminController {
      */
     @GetMapping("/events")
     public String adminEvents(Model model) {
-        Utilisateur admin = getCurrentUser();
-        model.addAttribute("admin", admin);
-        
-        // Récupérer tous les événements
-        List<Evenement> events = evenementService.findAllEvents();
-        model.addAttribute("events", events);
-        
-        // Calculer les statistiques
-        long totalEvents = events.size();
-        long publishedEvents = events.stream()
-            .filter(e -> e.getStatut() == com.universite.UniClubs.entities.StatutEvenement.PUBLIE)
-            .count();
-        long upcomingEvents = events.stream()
-            .filter(e -> e.getDateHeureDebut().isAfter(LocalDateTime.now()))
-            .count();
-        long universityEvents = events.stream()
-            .filter(e -> e.getClub() == null)
-            .count();
-        
-        model.addAttribute("totalEvents", totalEvents);
-        model.addAttribute("publishedEvents", publishedEvents);
-        model.addAttribute("upcomingEvents", upcomingEvents);
-        model.addAttribute("universityEvents", universityEvents);
-        
-        return "admin/events";
+        try {
+            System.out.println("=== ADMIN EVENTS PAGE LOADED ===");
+            Utilisateur admin = getCurrentUser();
+            model.addAttribute("admin", admin);
+            System.out.println("Admin connecté: " + admin.getPrenom() + " " + admin.getNom());
+            
+            // Récupérer tous les événements
+            List<Evenement> events = evenementService.findAllEvents();
+            System.out.println("Nombre d'événements trouvés: " + events.size());
+            model.addAttribute("events", events);
+            
+            // Calculer les statistiques
+            long totalEvents = events.size();
+            long publishedEvents = events.stream()
+                .filter(e -> e.getStatut() == com.universite.UniClubs.entities.StatutEvenement.PUBLIE)
+                .count();
+            long upcomingEvents = events.stream()
+                .filter(e -> e.getDateHeureDebut().isAfter(LocalDateTime.now()))
+                .count();
+            long universityEvents = events.stream()
+                .filter(e -> e.getClub() == null)
+                .count();
+            
+            System.out.println("Statistiques - Total: " + totalEvents + ", Publiés: " + publishedEvents + ", À venir: " + upcomingEvents + ", Universitaires: " + universityEvents);
+            
+            model.addAttribute("totalEvents", totalEvents);
+            model.addAttribute("publishedEvents", publishedEvents);
+            model.addAttribute("upcomingEvents", upcomingEvents);
+            model.addAttribute("universityEvents", universityEvents);
+            
+            System.out.println("=== RENDU DE LA PAGE ADMIN/EVENTS ===");
+            return "admin/events";
+        } catch (Exception e) {
+            System.out.println("ERREUR lors du chargement des événements: " + e.getMessage());
+            e.printStackTrace();
+            model.addAttribute("error", "Erreur lors du chargement des événements : " + e.getMessage());
+            return "admin/events";
+        }
     }
     
     /**
@@ -351,11 +364,19 @@ public class AdminController {
      */
     @GetMapping("/events/{eventId}")
     public String viewEvent(@PathVariable UUID eventId, Model model) {
-        Evenement event = evenementService.findByIdWithClub(eventId)
-            .orElseThrow(() -> new RuntimeException("Événement non trouvé"));
-        
-        model.addAttribute("event", event);
-        return "admin/event-details";
+        try {
+            System.out.println("=== BOUTON VOIR CLIQUE - ID: " + eventId + " ===");
+            Evenement event = evenementService.findByIdWithClub(eventId)
+                .orElseThrow(() -> new RuntimeException("Événement non trouvé"));
+            
+            System.out.println("Événement trouvé: " + event.getTitre());
+            model.addAttribute("event", event);
+            return "admin/event-details";
+        } catch (Exception e) {
+            System.out.println("ERREUR lors de la vue de l'événement: " + e.getMessage());
+            e.printStackTrace();
+            return "redirect:/admin/events?error=" + e.getMessage();
+        }
     }
     
     /**
@@ -363,11 +384,19 @@ public class AdminController {
      */
     @GetMapping("/events/{eventId}/edit")
     public String editEventForm(@PathVariable UUID eventId, Model model) {
-        Evenement event = evenementService.findByIdWithClub(eventId)
-            .orElseThrow(() -> new RuntimeException("Événement non trouvé"));
-        
-        model.addAttribute("event", event);
-        return "admin/edit-event-form";
+        try {
+            System.out.println("=== BOUTON MODIFIER CLIQUE - ID: " + eventId + " ===");
+            Evenement event = evenementService.findByIdWithClub(eventId)
+                .orElseThrow(() -> new RuntimeException("Événement non trouvé"));
+            
+            System.out.println("Événement trouvé pour modification: " + event.getTitre());
+            model.addAttribute("event", event);
+            return "admin/edit-event-form";
+        } catch (Exception e) {
+            System.out.println("ERREUR lors de l'édition de l'événement: " + e.getMessage());
+            e.printStackTrace();
+            return "redirect:/admin/events?error=" + e.getMessage();
+        }
     }
     
     /**
@@ -438,14 +467,18 @@ public class AdminController {
     @PostMapping("/events/{eventId}/delete")
     public String deleteEvent(@PathVariable UUID eventId, RedirectAttributes redirectAttributes) {
         try {
+            System.out.println("=== BOUTON SUPPRIMER CLIQUE - ID: " + eventId + " ===");
             evenementService.deleteEvent(eventId);
             
+            System.out.println("Événement supprimé avec succès: " + eventId);
             redirectAttributes.addFlashAttribute("success", 
                 "Événement supprimé avec succès !");
             
             return "redirect:/admin/events";
             
         } catch (Exception e) {
+            System.out.println("ERREUR lors de la suppression de l'événement: " + e.getMessage());
+            e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", 
                 "Erreur lors de la suppression de l'événement : " + e.getMessage());
             return "redirect:/admin/events";
