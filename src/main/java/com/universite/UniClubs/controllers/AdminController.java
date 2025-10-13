@@ -486,6 +486,14 @@ public class AdminController {
     }
 
     /**
+     * Test simple pour vérifier si le JavaScript fonctionne
+     */
+    @GetMapping("/test")
+    public String test() {
+        return "test";
+    }
+
+    /**
      * Endpoint temporaire pour créer des événements de test
      */
     @GetMapping("/create-test-events")
