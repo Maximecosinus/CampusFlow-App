@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr" th:replace="~{admin/layout :: layout('Créer un Événement', ~{::content})}">
+<head>
+    <title>Créer un Événement</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <h1 class="h3 mb-4 text-gray-800">Créer un Événement Universitaire</h1>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <form th:action="@{/admin/events/create}" method="post">
+                                <div class="mb-3">
+                                    <label for="titre" class="form-label">Titre de l'événement</label>
+                                    <input type="text" class="form-control" id="titre" name="titre" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="lieu" class="form-label">Lieu</label>
+                                    <input type="text" class="form-control" id="lieu" name="lieu" required>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="date" class="form-label">Date</label>
+                                            <input type="date" class="form-control" id="date" name="date" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="heure" class="form-label">Heure</label>
+                                            <input type="time" class="form-control" id="heure" name="heure" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="capaciteMax" class="form-label">Capacité maximale</label>
+                                    <input type="number" class="form-control" id="capaciteMax" name="capaciteMax" min="1" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="statut" class="form-label">Statut</label>
+                                    <select class="form-control" id="statut" name="statut" required>
+                                        <option value="BROUILLON">Brouillon</option>
+                                        <option value="PUBLIE">Publié</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between">
+                                    <a href="/admin/events" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i>
+                                        Retour
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>
+                                        Créer l'événement
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

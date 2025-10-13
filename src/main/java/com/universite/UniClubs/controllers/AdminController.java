@@ -486,6 +486,16 @@ public class AdminController {
     }
 
     /**
+     * Formulaire de création d'événement universitaire
+     */
+    @GetMapping("/events/create")
+    public String createEventForm(Model model) {
+        Utilisateur admin = getCurrentUser();
+        model.addAttribute("admin", admin);
+        return "admin/create-event-form";
+    }
+
+    /**
      * Test simple pour vérifier si le JavaScript fonctionne
      */
     @GetMapping("/test")
