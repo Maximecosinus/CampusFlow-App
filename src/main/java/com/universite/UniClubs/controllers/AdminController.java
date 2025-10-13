@@ -292,7 +292,7 @@ public class AdminController {
             model.addAttribute("universityEvents", universityEvents);
             
             System.out.println("=== RENDU DE LA PAGE ADMIN/EVENTS ===");
-            return "admin/events";
+            return "admin/events-simple";
         } catch (Exception e) {
             System.out.println("ERREUR lors du chargement des événements: " + e.getMessage());
             e.printStackTrace();
