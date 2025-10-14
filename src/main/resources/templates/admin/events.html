@@ -23,10 +23,6 @@
                 </button>
                 
                 <!-- Bouton temporaire pour créer des événements de test -->
-                <a href="/admin/create-test-events" class="btn btn-warning ms-2">
-                    <i class="fas fa-flask me-2"></i>
-                    Créer des événements de test
-                </a>
             </div>
 
             <!-- Statistiques rapides -->
@@ -344,7 +340,54 @@
     </div>
 
     <script>
-        alert('JavaScript fonctionne !');
+        // JavaScript pour gérer les boutons d'action des événements
+        console.log('=== SCRIPT CHARGÉ IMMÉDIATEMENT ===');
+        
+        // Test immédiat - FORCER L'EXÉCUTION
+        alert('JavaScript chargé !');
+        
+        // Ajouter directement les event listeners sans attendre DOMContentLoaded
+        document.addEventListener('click', function(e) {
+            console.log('=== CLIC DÉTECTÉ ===', e.target);
+            
+            // Bouton Voir
+            if (e.target.closest('.view-event-btn')) {
+                console.log('=== BOUTON VOIR CLIQUE ===');
+                e.preventDefault();
+                const button = e.target.closest('.view-event-btn');
+                const eventId = button.dataset.eventId;
+                console.log('Event ID:', eventId);
+                window.location.href = '/admin/events/' + eventId;
+                return;
+            }
+            
+            // Bouton Modifier
+            if (e.target.closest('.edit-event-btn')) {
+                console.log('=== BOUTON MODIFIER CLIQUE ===');
+                e.preventDefault();
+                const button = e.target.closest('.edit-event-btn');
+                const eventId = button.dataset.eventId;
+                console.log('Event ID:', eventId);
+                window.location.href = '/admin/events/' + eventId + '/edit';
+                return;
+            }
+            
+            // Bouton Supprimer
+            if (e.target.closest('.delete-event-btn')) {
+                console.log('=== BOUTON SUPPRIMER CLIQUE ===');
+                e.preventDefault();
+                const button = e.target.closest('.delete-event-btn');
+                const eventId = button.dataset.eventId;
+                console.log('Event ID:', eventId);
+                
+                if (confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) {
+                    window.location.href = '/admin/events/' + eventId + '/delete';
+                }
+                return;
+            }
+        });
+        
+        console.log('=== EVENT LISTENERS INITIALISÉS ===');
     </script>
 </body>
 </html>

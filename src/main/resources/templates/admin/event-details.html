@@ -49,8 +49,8 @@
                                         <label class="form-label fw-bold">Statut :</label>
                                         <p class="form-control-plaintext">
                                             <span class="badge" 
-                                                  th:classappend="${event.statut == T(com.universite.UniClubs.entities.Evenement.StatutEvenement).PUBLIE} ? 'bg-success' : 'bg-warning'" 
-                                                  th:text="${event.statut == T(com.universite.UniClubs.entities.Evenement.StatutEvenement).PUBLIE} ? 'Publié' : 'Brouillon'">
+                                                  th:classappend="${event.statut == T(com.universite.UniClubs.entities.StatutEvenement).PUBLIE} ? 'bg-success' : 'bg-warning'" 
+                                                  th:text="${event.statut == T(com.universite.UniClubs.entities.StatutEvenement).PUBLIE} ? 'Publié' : 'Brouillon'">
                                                 Statut
                                             </span>
                                         </p>
@@ -136,10 +136,10 @@
                             <div class="d-grid gap-2">
                                 <button class="btn btn-outline-primary" onclick="toggleStatus()">
                                     <i class="fas fa-toggle-on me-2"></i>
-                                    <span th:if="${event.statut == T(com.universite.UniClubs.entities.Evenement.StatutEvenement).PUBLIE}">
+                                    <span th:if="${event.statut == T(com.universite.UniClubs.entities.StatutEvenement).PUBLIE}">
                                         Dépublier
                                     </span>
-                                    <span th:unless="${event.statut == T(com.universite.UniClubs.entities.Evenement.StatutEvenement).PUBLIE}">
+                                    <span th:unless="${event.statut == T(com.universite.UniClubs.entities.StatutEvenement).PUBLIE}">
                                         Publier
                                     </span>
                                 </button>

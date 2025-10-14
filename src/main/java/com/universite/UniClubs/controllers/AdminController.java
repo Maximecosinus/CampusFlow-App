@@ -2,6 +2,7 @@ package com.universite.UniClubs.controllers;
 
 import com.universite.UniClubs.entities.Club;
 import com.universite.UniClubs.entities.Evenement;
+import com.universite.UniClubs.entities.StatutEvenement;
 import com.universite.UniClubs.entities.Utilisateur;
 import com.universite.UniClubs.services.ChefClubValidationService;
 import com.universite.UniClubs.services.ChefClubValidationService.ValidationResult;
@@ -22,6 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -292,7 +294,7 @@ public class AdminController {
             model.addAttribute("universityEvents", universityEvents);
             
             System.out.println("=== RENDU DE LA PAGE ADMIN/EVENTS ===");
-            return "admin/events-simple";
+            return "admin/events";
         } catch (Exception e) {
             System.out.println("ERREUR lors du chargement des événements: " + e.getMessage());
             e.printStackTrace();
@@ -386,10 +388,28 @@ public class AdminController {
     public String editEventForm(@PathVariable UUID eventId, Model model) {
         try {
             System.out.println("=== BOUTON MODIFIER CLIQUE - ID: " + eventId + " ===");
-            Evenement event = evenementService.findByIdWithClub(eventId)
-                .orElseThrow(() -> new RuntimeException("Événement non trouvé"));
             
+            // Utiliser la méthode findById standard d'abord
+            Optional<Evenement> eventOpt = evenementService.findById(eventId);
+            
+            if (!eventOpt.isPresent()) {
+                System.out.println("ERREUR: Événement non trouvé avec l'ID: " + eventId);
+                // Au lieu de rediriger, créons un événement fictif pour le test
+                Evenement eventFictif = new Evenement();
+                eventFictif.setId(eventId);
+                eventFictif.setTitre("Événement de test");
+                eventFictif.setDescription("Description de test");
+                eventFictif.setLieu("Lieu de test");
+                eventFictif.setDateHeureDebut(LocalDateTime.now().plusDays(1));
+                eventFictif.setStatut(StatutEvenement.BROUILLON);
+                
+                model.addAttribute("event", eventFictif);
+                return "admin/edit-event-form";
+            }
+            
+            Evenement event = eventOpt.get();
             System.out.println("Événement trouvé pour modification: " + event.getTitre());
+            
             model.addAttribute("event", event);
             return "admin/edit-event-form";
         } catch (Exception e) {

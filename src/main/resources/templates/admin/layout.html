@@ -342,6 +342,52 @@
 
         // Initialiser l'état actif au chargement de la page
         document.addEventListener('DOMContentLoaded', setActiveNavLink);
+        
+        // JavaScript pour gérer les boutons d'action des événements
+        console.log('=== SCRIPT DES BOUTONS CHARGÉ DANS LAYOUT ===');
+        
+        // Event listener global pour tous les boutons d'action
+        document.addEventListener('click', function(e) {
+            console.log('=== CLIC DÉTECTÉ ===', e.target);
+            
+            // Bouton Voir
+            if (e.target.closest('.view-event-btn')) {
+                console.log('=== BOUTON VOIR CLIQUE ===');
+                e.preventDefault();
+                const button = e.target.closest('.view-event-btn');
+                const eventId = button.dataset.eventId;
+                console.log('Event ID:', eventId);
+                window.location.href = '/admin/events/' + eventId;
+                return;
+            }
+            
+            // Bouton Modifier
+            if (e.target.closest('.edit-event-btn')) {
+                console.log('=== BOUTON MODIFIER CLIQUE ===');
+                e.preventDefault();
+                const button = e.target.closest('.edit-event-btn');
+                const eventId = button.dataset.eventId;
+                console.log('Event ID:', eventId);
+                window.location.href = '/admin/events/' + eventId + '/edit';
+                return;
+            }
+            
+            // Bouton Supprimer
+            if (e.target.closest('.delete-event-btn')) {
+                console.log('=== BOUTON SUPPRIMER CLIQUE ===');
+                e.preventDefault();
+                const button = e.target.closest('.delete-event-btn');
+                const eventId = button.dataset.eventId;
+                console.log('Event ID:', eventId);
+                
+                if (confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) {
+                    window.location.href = '/admin/events/' + eventId + '/delete';
+                }
+                return;
+            }
+        });
+        
+        console.log('=== EVENT LISTENERS DES BOUTONS INITIALISÉS ===');
     </script>
 </body>
 </html>
