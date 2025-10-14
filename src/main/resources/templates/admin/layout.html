@@ -381,7 +381,24 @@
                 console.log('Event ID:', eventId);
                 
                 if (confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) {
-                    window.location.href = '/admin/events/' + eventId + '/delete';
+                    // Utiliser fetch avec méthode POST
+                    fetch('/admin/events/' + eventId + '/delete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        credentials: 'same-origin'
+                    }).then(response => {
+                        if (response.ok) {
+                            window.location.href = '/admin/events';
+                        } else {
+                            console.error('Erreur lors de la suppression:', response.status);
+                            alert('Erreur lors de la suppression de l\'événement');
+                        }
+                    }).catch(error => {
+                        console.error('Erreur:', error);
+                        alert('Erreur lors de la suppression de l\'événement');
+                    });
                 }
                 return;
             }
