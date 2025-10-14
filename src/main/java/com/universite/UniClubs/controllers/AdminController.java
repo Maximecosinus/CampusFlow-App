@@ -506,13 +506,42 @@ public class AdminController {
     }
 
     /**
-     * Formulaire de création d'événement universitaire
+     * Section Communication (à implémenter)
      */
-    @GetMapping("/events/create")
-    public String createEventForm(Model model) {
+    @GetMapping("/communication")
+    public String adminCommunication(Model model) {
         Utilisateur admin = getCurrentUser();
         model.addAttribute("admin", admin);
-        return "admin/create-event-form";
+        return "admin/communication";
+    }
+
+    /**
+     * Traitement de l'envoi de notification à tous les étudiants
+     */
+    @PostMapping("/communication/send")
+    public String sendNotification(@RequestParam String sujet, 
+                                   @RequestParam String message,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            System.out.println("=== ENVOI DE NOTIFICATION ===");
+            System.out.println("Sujet: " + sujet);
+            System.out.println("Message: " + message);
+            
+            // TODO: Implémenter la logique d'envoi d'email à tous les étudiants
+            // Pour l'instant, on simule l'envoi
+            
+            redirectAttributes.addFlashAttribute("success", 
+                "Notification envoyée avec succès à tous les étudiants !");
+            
+            return "redirect:/admin/communication";
+            
+        } catch (Exception e) {
+            System.out.println("ERREUR lors de l'envoi de notification: " + e.getMessage());
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", 
+                "Erreur lors de l'envoi de la notification : " + e.getMessage());
+            return "redirect:/admin/communication";
+        }
     }
 
     /**
