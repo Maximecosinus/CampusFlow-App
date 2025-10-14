@@ -19,8 +19,8 @@ public class SuperAdminInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Vérifier si un Super Admin existe déjà
-        boolean superAdminExists = utilisateurRepository.findByRole(Role.SUPER_ADMIN).size() > 0;
+        // Vérifier si un utilisateur avec l'email 'superadmin@campusflow.com' existe déjà
+        boolean superAdminExists = utilisateurRepository.findByEmail("superadmin@campusflow.com").isPresent();
         
         if (!superAdminExists) {
             System.out.println("=== CRÉATION DU SUPER ADMIN PRÉDÉFINI ===");

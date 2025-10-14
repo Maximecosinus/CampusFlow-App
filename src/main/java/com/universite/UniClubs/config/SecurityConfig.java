@@ -9,11 +9,16 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import com.universite.UniClubs.config.CustomAuthenticationSuccessHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Configuration //indique que c'est une classe de configuration Spring
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    @Autowired
+    private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
     @Bean
     public PasswordEncoder PasswordEncoder() {
@@ -32,7 +37,7 @@ public class SecurityConfig {
                 )
                 .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/login-success",true)
+                .successHandler(customAuthenticationSuccessHandler)
                 .permitAll()
                 )
                 .logout(logout -> logout

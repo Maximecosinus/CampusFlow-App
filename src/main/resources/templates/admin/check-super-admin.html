@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout('Vérification Super Admin', ~{::content})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Vérification Super Admin</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="h3 mb-4 text-gray-800"><i class="fas fa-crown"></i> Vérification Super Admin</h1>
+            </div>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Statut des Super Admins</h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h5>Nombre de Super Admins trouvés : <span th:text="${count}" class="badge bg-primary">0</span></h5>
+                </div>
+                
+                <div th:if="${count > 0}">
+                    <h6>Liste des Super Admins :</h6>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Email</th>
+                                    <th>Rôle</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="admin : ${superAdmins}">
+                                    <td th:text="${admin.prenom + ' ' + admin.nom}">Nom</td>
+                                    <td th:text="${admin.email}">Email</td>
+                                    <td>
+                                        <span class="badge bg-danger" th:text="${admin.role}">SUPER_ADMIN</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div th:if="${count == 0}" class="alert alert-warning">
+                    <h5><i class="fas fa-exclamation-triangle"></i> Aucun Super Admin trouvé !</h5>
+                    <p>Le Super Admin n'a pas été créé. Vérifiez les logs de l'application.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

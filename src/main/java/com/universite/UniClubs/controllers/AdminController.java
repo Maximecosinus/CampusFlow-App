@@ -629,6 +629,17 @@ public class AdminController {
     }
 
     /**
+     * Endpoint temporaire pour vérifier les Super Admins
+     */
+    @GetMapping("/check-super-admin")
+    public String checkSuperAdmin(Model model) {
+        var superAdmins = utilisateurService.findUsersByRole(com.universite.UniClubs.entities.Role.SUPER_ADMIN);
+        model.addAttribute("superAdmins", superAdmins);
+        model.addAttribute("count", superAdmins.size());
+        return "admin/check-super-admin";
+    }
+
+    /**
      * Récupère l'utilisateur actuellement connecté
      */
     private Utilisateur getCurrentUser() {
