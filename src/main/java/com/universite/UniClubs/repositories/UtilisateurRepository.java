@@ -51,4 +51,8 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, UUID> 
            "LOWER(u.prenom) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')))")
     List<Utilisateur> findByRoleAndNameOrEmailContainingIgnoreCase(@Param("role") Role role, @Param("query") String query);
+    
+    // Méthodes pour Super Admin
+    List<Utilisateur> findByRole(Role role);
+    long countByRole(Role role);
 }

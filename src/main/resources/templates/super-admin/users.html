@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{super-admin/layout :: layout('Gestion des Utilisateurs - Super Admin', ~{::content})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des Utilisateurs</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="h3 mb-4 text-gray-800"><i class="fas fa-users"></i> Gestion des Utilisateurs</h1>
+            </div>
+        </div>
+
+        <!-- Statistiques des utilisateurs -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div class="stats-number" th:text="${#lists.size(users)}">0</div>
+                    <div class="stats-label">Total Utilisateurs</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="bi bi-person"></i>
+                    </div>
+                    <div class="stats-number" th:text="${#lists.size(users.?[role.name() == 'ETUDIANT'])}">0</div>
+                    <div class="stats-label">Étudiants</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="bi bi-person-gear"></i>
+                    </div>
+                    <div class="stats-number" th:text="${#lists.size(users.?[role.name() == 'ADMIN'])}">0</div>
+                    <div class="stats-label">Administrateurs</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
+                    <div class="stats-number" th:text="${#lists.size(users.?[role.name() == 'CHEF_DE_CLUB'])}">0</div>
+                    <div class="stats-label">Chefs de Club</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des utilisateurs -->
+        <div class="super-admin-card">
+            <div class="card-header">
+                <h5><i class="bi bi-list"></i> Liste de tous les utilisateurs</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Nom</th>
+                                <th>Email</th>
+                                <th>Rôle</th>
+                                <th>Date d'inscription</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${users}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                            <span th:text="${user.prenom.charAt(0) + user.nom.charAt(0)}">U</span>
+                                        </div>
+                                        <div>
+                                            <strong th:text="${user.prenom + ' ' + user.nom}">Nom Utilisateur</strong>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td th:text="${user.email}">email@example.com</td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${user.role.name() == 'SUPER_ADMIN'} ? 'bg-danger' : 
+                                                         (${user.role.name() == 'ADMIN'} ? 'bg-warning' : 
+                                                          (${user.role.name() == 'CHEF_DE_CLUB'} ? 'bg-info' : 'bg-secondary'))"
+                                          th:text="${user.role.name()}">ROLE</span>
+                                </td>
+                                <td>
+                                    <small class="text-muted">Inscrit récemment</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i> Voir
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-warning">
+                                            <i class="bi bi-pencil"></i> Modifier
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                th:if="${user.role.name() != 'SUPER_ADMIN'}">
+                                            <i class="bi bi-trash"></i> Supprimer
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions en lot -->
+        <div class="super-admin-card">
+            <div class="card-header">
+                <h5><i class="bi bi-tools"></i> Actions en lot</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Filtres par rôle</h6>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-primary">Tous</button>
+                            <button type="button" class="btn btn-outline-secondary">Étudiants</button>
+                            <button type="button" class="btn btn-outline-warning">Admins</button>
+                            <button type="button" class="btn btn-outline-info">Chefs de Club</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Actions</h6>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-success">
+                                <i class="bi bi-download"></i> Exporter
+                            </button>
+                            <button type="button" class="btn btn-outline-info">
+                                <i class="bi bi-envelope"></i> Envoyer Email
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .avatar-sm {
+            width: 32px;
+            height: 32px;
+            font-size: 0.875rem;
+        }
+    </style>
+</body>
+</html>

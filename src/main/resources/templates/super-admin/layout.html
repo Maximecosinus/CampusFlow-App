@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Super Administration - CampusFlow</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --super-admin-primary: #6f42c1;
+            --super-admin-secondary: #6c757d;
+            --super-admin-success: #198754;
+            --super-admin-warning: #ffc107;
+            --super-admin-info: #0dcaf0;
+            --super-admin-light: #f8f9fa;
+            --super-admin-dark: #212529;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--super-admin-light);
+        }
+
+        .super-admin-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: linear-gradient(135deg, var(--super-admin-primary) 0%, #5a2d91 100%);
+            color: white;
+            z-index: 1000;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .super-admin-sidebar .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .super-admin-sidebar .sidebar-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .super-admin-sidebar .sidebar-header .subtitle {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-top: 0.25rem;
+        }
+
+        .super-admin-sidebar .nav {
+            padding: 1rem 0;
+        }
+
+        .super-admin-sidebar .nav-item {
+            margin: 0.25rem 0;
+        }
+
+        .super-admin-sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .super-admin-sidebar .nav-link:hover {
+            color: white;
+            background-color: rgba(255,255,255,0.1);
+            transform: translateX(5px);
+        }
+
+        .super-admin-sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255,255,255,0.2);
+            border-right: 3px solid white;
+        }
+
+        .super-admin-sidebar .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .top-navbar {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .content-wrapper {
+            padding: 2rem;
+        }
+
+        .super-admin-card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: none;
+            margin-bottom: 2rem;
+        }
+
+        .super-admin-card .card-header {
+            background: linear-gradient(135deg, var(--super-admin-primary), #5a2d91);
+            color: white;
+            border-radius: 1rem 1rem 0 0 !important;
+            padding: 1.5rem;
+            border: none;
+        }
+
+        .super-admin-card .card-body {
+            padding: 2rem;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, var(--super-admin-primary), #5a2d91);
+            color: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-card .stats-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .stats-card .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-card .stats-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .btn-super-admin {
+            background: linear-gradient(135deg, var(--super-admin-primary), #5a2d91);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-super-admin:hover {
+            background: linear-gradient(135deg, #5a2d91, var(--super-admin-primary));
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .badge-super-admin {
+            background: var(--super-admin-primary);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .super-admin-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .super-admin-sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Super Admin -->
+    <nav class="super-admin-sidebar">
+        <div class="sidebar-header">
+            <h4><i class="fas fa-crown"></i> Super Admin</h4>
+            <div class="subtitle">CampusFlow</div>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/super-admin}" data-page="dashboard">
+                    <i class="bi bi-speedometer2"></i>
+                    Tableau de Bord
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/super-admin/users}" data-page="users">
+                    <i class="bi bi-people"></i>
+                    Gestion Utilisateurs
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/super-admin/admins}" data-page="admins">
+                    <i class="bi bi-person-gear"></i>
+                    Gestion Administrateurs
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/super-admin/admin-features}" data-page="admin-features">
+                    <i class="bi bi-tools"></i>
+                    Fonctionnalités Admin
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/super-admin/system-settings}" data-page="system-settings">
+                    <i class="bi bi-gear"></i>
+                    Paramètres Système
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/super-admin/profile}" data-page="profile">
+                    <i class="bi bi-person-circle"></i>
+                    Mon Profil
+                </a>
+            </li>
+            <li class="nav-item mt-3">
+                <hr style="border-color: rgba(255,255,255,0.2);">
+            </li>
+            <li class="nav-item">
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="nav-link btn btn-link" style="color: rgba(255,255,255,0.7); border: none; background: none; padding: 0.5rem 1rem; width: 100%; text-align: left;">
+                        <i class="bi bi-box-arrow-right"></i>
+                        Déconnexion
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Contenu principal -->
+    <div class="main-content">
+        <!-- Barre de navigation supérieure -->
+        <div class="top-navbar">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-outline-secondary d-md-none me-3" onclick="toggleSidebar()">
+                    <i class="bi bi-list"></i>
+                </button>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item">
+                            <a th:href="@{/super-admin}" class="text-decoration-none">
+                                <i class="bi bi-speedometer2"></i>
+                                Super Administration
+                            </a>
+                        </li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="me-3">
+                    <i class="bi bi-person-circle"></i>
+                    <span th:text="${superAdmin.prenom + ' ' + superAdmin.nom}">Super Admin</span>
+                </span>
+                <span class="badge badge-super-admin">
+                    <i class="fas fa-crown"></i>
+                    SUPER_ADMIN
+                </span>
+            </div>
+        </div>
+
+        <!-- Contenu de la page -->
+        <div class="content-wrapper">
+            <div th:replace="${content}"></div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.super-admin-sidebar');
+            sidebar.classList.toggle('show');
+        }
+
+        // Gérer l'état actif des liens de navigation
+        function setActiveNavLink() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link[data-page]');
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                const page = link.getAttribute('data-page');
+                
+                if (page === 'dashboard' && currentPath === '/super-admin') {
+                    link.classList.add('active');
+                } else if (page !== 'dashboard' && currentPath.startsWith('/super-admin/' + page)) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // Fermer la sidebar sur mobile quand on clique à l'extérieur
+        document.addEventListener('click', function(event) {
+            const sidebar = document.querySelector('.super-admin-sidebar');
+            const toggleBtn = document.querySelector('[onclick="toggleSidebar()"]');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(event.target) && 
+                !toggleBtn.contains(event.target)) {
+                sidebar.classList.remove('show');
+            }
+        });
+
+        // Gestion du redimensionnement de la fenêtre
+        window.addEventListener('resize', function() {
+            const sidebar = document.querySelector('.super-admin-sidebar');
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('show');
+            }
+        });
+
+        // Initialiser l'état actif au chargement de la page
+        document.addEventListener('DOMContentLoaded', setActiveNavLink);
+    </script>
+</body>
+</html>

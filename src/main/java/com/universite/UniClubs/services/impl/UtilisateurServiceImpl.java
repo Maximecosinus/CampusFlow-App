@@ -166,4 +166,20 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     public void updateUser(Utilisateur utilisateur) {
         utilisateurRepository.save(utilisateur);
     }
+
+    // Méthodes pour Super Admin
+    @Override
+    public List<Utilisateur> findAllUsers() {
+        return utilisateurRepository.findAll();
+    }
+
+    @Override
+    public List<Utilisateur> findUsersByRole(com.universite.UniClubs.entities.Role role) {
+        return utilisateurRepository.findByRole(role);
+    }
+
+    @Override
+    public long countUsersByRole(com.universite.UniClubs.entities.Role role) {
+        return utilisateurRepository.countByRole(role);
+    }
 }

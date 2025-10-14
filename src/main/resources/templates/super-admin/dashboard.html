@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{super-admin/layout :: layout('Tableau de Bord Super Admin', ~{::content})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Tableau de Bord Super Admin</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Message de bienvenue -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="super-admin-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-crown"></i> Bienvenue dans la Super Administration</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h4 class="mb-2">Bonjour <span th:text="${superAdmin.prenom}">Super Admin</span> !</h4>
+                                <p class="text-muted mb-0">
+                                    Vous êtes connecté en tant que <strong>Super Administrateur</strong> de CampusFlow. 
+                                    Vous avez accès à toutes les fonctionnalités du système et pouvez gérer tous les utilisateurs et administrateurs.
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="stats-card">
+                                    <div class="stats-icon">
+                                        <i class="fas fa-crown"></i>
+                                    </div>
+                                    <div class="stats-label">Rôle</div>
+                                    <div class="stats-number" style="font-size: 1.2rem;">SUPER_ADMIN</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques générales -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h4 class="mb-3"><i class="fas fa-chart-bar"></i> Statistiques Générales</h4>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div class="stats-number" th:text="${totalUsers}">0</div>
+                    <div class="stats-label">Utilisateurs Total</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="bi bi-person-gear"></i>
+                    </div>
+                    <div class="stats-number" th:text="${totalAdmins}">0</div>
+                    <div class="stats-label">Administrateurs</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="bi bi-person"></i>
+                    </div>
+                    <div class="stats-number" th:text="${totalStudents}">0</div>
+                    <div class="stats-label">Étudiants</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
+                    <div class="stats-number" th:text="${totalClubLeaders}">0</div>
+                    <div class="stats-label">Chefs de Club</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="super-admin-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bolt"></i> Actions Rapides</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <a th:href="@{/super-admin/users}" class="btn btn-super-admin w-100 p-3">
+                                    <i class="bi bi-people d-block mb-2" style="font-size: 2rem;"></i>
+                                    <strong>Gérer les Utilisateurs</strong>
+                                    <br>
+                                    <small class="text-muted">Voir tous les utilisateurs</small>
+                                </a>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <a th:href="@{/super-admin/admins}" class="btn btn-super-admin w-100 p-3">
+                                    <i class="bi bi-person-gear d-block mb-2" style="font-size: 2rem;"></i>
+                                    <strong>Gérer les Admins</strong>
+                                    <br>
+                                    <small class="text-muted">Administrateurs système</small>
+                                </a>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <a th:href="@{/super-admin/admin-features}" class="btn btn-super-admin w-100 p-3">
+                                    <i class="bi bi-tools d-block mb-2" style="font-size: 2rem;"></i>
+                                    <strong>Fonctionnalités Admin</strong>
+                                    <br>
+                                    <small class="text-muted">Accès aux outils admin</small>
+                                </a>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <a th:href="@{/super-admin/system-settings}" class="btn btn-super-admin w-100 p-3">
+                                    <i class="bi bi-gear d-block mb-2" style="font-size: 2rem;"></i>
+                                    <strong>Paramètres Système</strong>
+                                    <br>
+                                    <small class="text-muted">Configuration globale</small>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informations système et activité récente -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="super-admin-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-info-circle"></i> Informations Système</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-primary"><i class="bi bi-server"></i> Serveur</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>Version:</strong> CampusFlow v1.0</li>
+                                    <li><strong>Statut:</strong> <span class="badge bg-success">En ligne</span></li>
+                                    <li><strong>Base de données:</strong> <span class="badge bg-success">Connectée</span></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-primary"><i class="bi bi-shield-check"></i> Sécurité</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>Authentification:</strong> <span class="badge bg-success">Active</span></li>
+                                    <li><strong>Autorisation:</strong> <span class="badge bg-success">Active</span></li>
+                                    <li><strong>Session:</strong> <span class="badge bg-success">Sécurisée</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="super-admin-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-clock"></i> Activité Récente</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Bienvenue !</strong><br>
+                            Vous venez de vous connecter au tableau de bord super administrateur.
+                        </div>
+                        <div class="text-center text-muted">
+                            <small>Les activités récentes seront affichées ici.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

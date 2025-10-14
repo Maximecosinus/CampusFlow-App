@@ -43,4 +43,9 @@ public interface UtilisateurService {
     // Nouvelles méthodes pour l'administration
     List<Utilisateur> searchStudentsByNameOrEmail(String query);
     void updateUser(Utilisateur utilisateur);
+    
+    // Méthodes pour Super Admin
+    List<Utilisateur> findAllUsers();
+    List<Utilisateur> findUsersByRole(com.universite.UniClubs.entities.Role role);
+    long countUsersByRole(com.universite.UniClubs.entities.Role role);
 }
