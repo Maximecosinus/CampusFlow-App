@@ -629,16 +629,6 @@ public class AdminController {
     }
 
     /**
-     * Section Utilisateurs (à implémenter)
-     */
-    @GetMapping("/users")
-    public String adminUsers(Model model) {
-        Utilisateur admin = getCurrentUser();
-        model.addAttribute("admin", admin);
-        return "admin/users";
-    }
-
-    /**
      * Récupère l'utilisateur actuellement connecté
      */
     private Utilisateur getCurrentUser() {
