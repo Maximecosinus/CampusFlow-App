@@ -629,16 +629,6 @@ public class AdminController {
     }
 
     /**
-     * Section Communication (à implémenter)
-     */
-    @GetMapping("/communication")
-    public String adminCommunication(Model model) {
-        Utilisateur admin = getCurrentUser();
-        model.addAttribute("admin", admin);
-        return "admin/communication";
-    }
-
-    /**
      * Section Utilisateurs (à implémenter)
      */
     @GetMapping("/users")
