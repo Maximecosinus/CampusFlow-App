@@ -28,11 +28,11 @@ import java.util.UUID;
 
 /**
  * Contrôleur pour le tableau de bord administrateur
- * Toutes les routes sont sécurisées avec @PreAuthorize("hasRole('ADMIN')")
+ * Toutes les routes sont sécurisées avec @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
  */
 @Controller
 @RequestMapping("/admin")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
 public class AdminController {
 
     @Autowired
