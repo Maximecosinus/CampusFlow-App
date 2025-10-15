@@ -83,7 +83,7 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="badge bg-info" th:text="${club.membres != null ? club.membres.size() : 0} + ' membre(s)'"></span>
+                                                <span class="badge bg-info" th:text="${club.inscriptions != null ? club.inscriptions.size() : 0} + ' membre(s)'"></span>
                                             </td>
                                             <td>
                                                 <span th:if="${club.chefClub != null}" class="badge bg-success">Actif</span>
@@ -153,7 +153,7 @@
                     <div class="stats-icon">
                         <i class="bi bi-people-fill"></i>
                     </div>
-                    <div class="stats-number" th:text="${clubs != null ? clubs.stream().mapToInt(c -> c.membres != null ? c.membres.size() : 0).sum() : 0}"></div>
+                    <div class="stats-number" th:text="${clubs != null ? clubs.stream().mapToInt(c -> c.inscriptions != null ? c.inscriptions.size() : 0).sum() : 0}"></div>
                     <div class="stats-label">Membres Total</div>
                 </div>
             </div>
