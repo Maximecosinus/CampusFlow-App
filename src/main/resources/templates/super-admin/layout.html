@@ -196,6 +196,49 @@
                 margin-left: 0;
             }
         }
+
+        /* Styles spécifiques Super Admin */
+        .btn-super-admin {
+            background-color: var(--super-admin-primary);
+            border-color: var(--super-admin-primary);
+            color: white;
+        }
+
+        .btn-super-admin:hover {
+            background-color: #5a2d91;
+            border-color: #5a2d91;
+            color: white;
+        }
+
+        .btn-super-admin:focus {
+            box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+        }
+
+        .super-admin-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .super-admin-card .card-header {
+            background: linear-gradient(135deg, var(--super-admin-primary) 0%, #5a2d91 100%);
+            color: white;
+            border-radius: 10px 10px 0 0;
+            border: none;
+            padding: 1rem 1.5rem;
+        }
+
+        .super-admin-card .card-header h5,
+        .super-admin-card .card-header h6 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .super-admin-card .card-body {
+            padding: 1.5rem;
+        }
     </style>
 </head>
 <body>
@@ -213,19 +256,19 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" th:href="@{/admin/clubs}" data-page="clubs">
+                <a class="nav-link" th:href="@{/super-admin/clubs}" data-page="clubs">
                     <i class="bi bi-people"></i>
                     Clubs
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" th:href="@{/admin/events}" data-page="events">
+                <a class="nav-link" th:href="@{/super-admin/events}" data-page="events">
                     <i class="bi bi-calendar-event"></i>
                     Événements
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" th:href="@{/admin/communication}" data-page="communication">
+                <a class="nav-link" th:href="@{/super-admin/communication}" data-page="communication">
                     <i class="bi bi-megaphone"></i>
                     Communication
                 </a>

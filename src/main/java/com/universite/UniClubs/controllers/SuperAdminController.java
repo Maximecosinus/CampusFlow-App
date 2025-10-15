@@ -2,6 +2,8 @@ package com.universite.UniClubs.controllers;
 
 import com.universite.UniClubs.entities.Utilisateur;
 import com.universite.UniClubs.services.UtilisateurService;
+import com.universite.UniClubs.services.ClubService;
+import com.universite.UniClubs.services.EvenementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -18,6 +20,12 @@ public class SuperAdminController {
 
     @Autowired
     private UtilisateurService utilisateurService;
+    
+    @Autowired
+    private ClubService clubService;
+    
+    @Autowired
+    private EvenementService evenementService;
 
     /**
      * Dashboard Super Admin
@@ -102,6 +110,47 @@ public class SuperAdminController {
         model.addAttribute("superAdmin", superAdmin);
         
         return "super-admin/profile";
+    }
+
+    /**
+     * Gestion des clubs (version Super Admin)
+     */
+    @GetMapping("/clubs")
+    public String superAdminClubs(Model model) {
+        Utilisateur superAdmin = getCurrentUser();
+        model.addAttribute("superAdmin", superAdmin);
+        
+        // Récupérer tous les clubs
+        var clubs = clubService.findAllClubs();
+        model.addAttribute("clubs", clubs);
+        
+        return "super-admin/clubs";
+    }
+
+    /**
+     * Gestion des événements (version Super Admin)
+     */
+    @GetMapping("/events")
+    public String superAdminEvents(Model model) {
+        Utilisateur superAdmin = getCurrentUser();
+        model.addAttribute("superAdmin", superAdmin);
+        
+        // Récupérer tous les événements
+        var events = evenementService.findAllEvents();
+        model.addAttribute("events", events);
+        
+        return "super-admin/events";
+    }
+
+    /**
+     * Communication (version Super Admin)
+     */
+    @GetMapping("/communication")
+    public String superAdminCommunication(Model model) {
+        Utilisateur superAdmin = getCurrentUser();
+        model.addAttribute("superAdmin", superAdmin);
+        
+        return "super-admin/communication";
     }
 
     /**
