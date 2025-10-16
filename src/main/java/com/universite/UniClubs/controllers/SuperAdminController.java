@@ -229,20 +229,6 @@ public class SuperAdminController {
         return "redirect:/super-admin/users";
     }
 
-    /**
-     * Gestion des administrateurs
-     */
-    @GetMapping("/admins")
-    public String manageAdmins(Model model) {
-        Utilisateur superAdmin = getCurrentUser();
-        model.addAttribute("superAdmin", superAdmin);
-        
-        // Récupérer tous les administrateurs
-        var admins = utilisateurService.findUsersByRole(com.universite.UniClubs.entities.Role.ADMIN);
-        model.addAttribute("admins", admins);
-        
-        return "super-admin/admins";
-    }
 
     /**
      * Accès aux fonctionnalités admin normales
