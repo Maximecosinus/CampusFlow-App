@@ -1,209 +1,96 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{super-admin/layout :: layout('Modifier un Utilisateur', ~{::content})}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modifier l'Utilisateur - Super Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <title>Modifier un Utilisateur - Super Admin</title>
 </head>
 <body>
-    <div th:replace="~{super-admin/layout :: layout('Modifier l\'Utilisateur', ~{::content})}">
-        <div th:fragment="content">
-            <!-- En-tête de la page -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h2 class="mb-0">
-                        <i class="bi bi-pencil-square text-primary me-2"></i>
-                        Modifier l'utilisateur
-                    </h2>
-                    <p class="text-muted mb-0" th:text="'Modification de ' + ${user.prenom} + ' ' + ${user.nom}"></p>
-                </div>
-                <a th:href="@{/super-admin/users}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-2"></i>
-                    Retour à la liste
-                </a>
-            </div>
-
-            <!-- Messages de succès/erreur -->
-            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle me-2"></i>
-                <span th:text="${error}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-
-            <!-- Formulaire de modification -->
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="card super-admin-card">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="bi bi-person-fill me-2"></i>
-                                Informations de l'utilisateur
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <form th:action="@{/super-admin/users/{id}/edit(id=${user.id})}" th:object="${user}" method="post">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="prenom" class="form-label">Prénom *</label>
-                                        <input type="text" class="form-control" id="prenom" th:field="*{prenom}" required>
-                                        <div class="invalid-feedback">
-                                            Le prénom est requis.
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="nom" class="form-label">Nom *</label>
-                                        <input type="text" class="form-control" id="nom" th:field="*{nom}" required>
-                                        <div class="invalid-feedback">
-                                            Le nom est requis.
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Adresse email *</label>
-                                    <input type="email" class="form-control" id="email" th:field="*{email}" required>
-                                    <div class="form-text">L'email sera utilisé pour la connexion.</div>
-                                    <div class="invalid-feedback">
-                                        Une adresse email valide est requise.
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="motDePasse" class="form-label">Nouveau mot de passe</label>
-                                    <input type="password" class="form-control" id="motDePasse" th:field="*{motDePasse}" placeholder="Laisser vide pour conserver le mot de passe actuel">
-                                    <div class="form-text">Laissez vide pour conserver le mot de passe actuel, ou saisissez un nouveau mot de passe.</div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="bio" class="form-label">Biographie</label>
-                                    <textarea class="form-control" id="bio" th:field="*{bio}" rows="3" placeholder="Description optionnelle de l'utilisateur..."></textarea>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label class="form-label">Rôle(s) *</label>
-                                    <div class="row">
-                                        <div th:each="role : ${allRoles}" class="col-md-6 mb-2">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" th:id="${role.name()}" 
-                                                       th:name="roles" th:value="${role.name()}" 
-                                                       th:checked="${user.role == role}">
-                                                <label class="form-check-label" th:for="${role.name()}">
-                                                    <span th:switch="${role}">
-                                                        <span th:case="ETUDIANT" class="badge bg-info me-2">Étudiant</span>
-                                                        <span th:case="CHEF_DE_CLUB" class="badge bg-warning me-2">Chef de Club</span>
-                                                        <span th:case="ADMIN" class="badge bg-danger me-2">Administrateur</span>
-                                                        <span th:case="SUPER_ADMIN" class="badge bg-purple me-2">Super Admin</span>
-                                                        <span th:case="*" class="badge bg-secondary me-2" th:text="${role}"></span>
-                                                    </span>
-                                                    <span th:text="${role.name()}"></span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-text">Sélectionnez au moins un rôle pour l'utilisateur.</div>
-                                </div>
-                                
-                                <div class="d-flex justify-content-between">
-                                    <a th:href="@{/super-admin/users}" class="btn btn-outline-secondary">
-                                        <i class="bi bi-x-circle me-2"></i>
-                                        Annuler
-                                    </a>
-                                    <button type="submit" class="btn btn-super-admin">
-                                        <i class="bi bi-check-circle me-2"></i>
-                                        Enregistrer les modifications
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-4">
-                    <div class="card super-admin-card">
-                        <div class="card-header">
-                            <h6 class="mb-0">
-                                <i class="bi bi-info-circle me-2"></i>
-                                Informations sur l'utilisateur
-                            </h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="text-center mb-3">
-                                <div class="avatar-lg mx-auto mb-3">
-                                    <img th:if="${user.photoProfil != null}" 
-                                         th:src="@{'/uploads/avatars/' + ${user.photoProfil}}" 
-                                         class="rounded-circle" 
-                                         style="width: 80px; height: 80px; object-fit: cover;">
-                                    <div th:unless="${user.photoProfil != null}" 
-                                         class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto" 
-                                         style="width: 80px; height: 80px;">
-                                        <i class="bi bi-person" style="font-size: 2rem;"></i>
-                                    </div>
-                                </div>
-                                <h6 th:text="${user.prenom + ' ' + user.nom}"></h6>
-                                <p class="text-muted mb-0" th:text="${user.email}"></p>
-                            </div>
-                            
-                            <div class="alert alert-info">
-                                <h6 class="alert-heading">
-                                    <i class="bi bi-lightbulb me-2"></i>
-                                    Conseils
-                                </h6>
-                                <ul class="mb-0">
-                                    <li>Les modifications sont sauvegardées immédiatement</li>
-                                    <li>Le changement de rôle prend effet immédiatement</li>
-                                    <li>Un nouveau mot de passe sera chiffré automatiquement</li>
-                                    <li>L'utilisateur sera notifié des changements</li>
-                                </ul>
-                            </div>
-                            
-                            <div class="alert alert-warning">
-                                <h6 class="alert-heading">
-                                    <i class="bi bi-exclamation-triangle me-2"></i>
-                                    Attention
-                                </h6>
-                                <ul class="mb-0">
-                                    <li>Vérifiez que le nouvel email n'existe pas déjà</li>
-                                    <li>Le changement de rôle peut affecter les permissions</li>
-                                    <li>Un Super Admin ne peut pas être rétrogradé</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0"><i class="bi bi-pencil-square me-2"></i> Modifier l'utilisateur <span th:text="${user.prenom + ' ' + user.nom}"></span></h2>
+        <a th:href="@{/super-admin/users}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i> Retour à la liste
+        </a>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Validation du formulaire
-        (function() {
-            'use strict';
-            window.addEventListener('load', function() {
-                var forms = document.getElementsByClassName('needs-validation');
-                var validation = Array.prototype.filter.call(forms, function(form) {
-                    form.addEventListener('submit', function(event) {
-                        if (form.checkValidity() === false) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                        form.classList.add('was-validated');
-                    }, false);
-                });
-            }, false);
-        })();
-        
-        // Vérification des rôles sélectionnés
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const checkboxes = document.querySelectorAll('input[name="roles"]:checked');
-            if (checkboxes.length === 0) {
-                e.preventDefault();
-                alert('Veuillez sélectionner au moins un rôle pour l\'utilisateur.');
-                return false;
-            }
-        });
-    </script>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="super-admin-card">
+        <div class="card-header">
+            <h5 class="mb-0">Informations de l'utilisateur</h5>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/super-admin/users/{id}/edit(id=${user.id})}" th:object="${user}" method="post">
+                <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="prenom" class="form-label">Prénom *</label>
+                            <input type="text" class="form-control" id="prenom" th:field="*{prenom}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="nom" class="form-label">Nom *</label>
+                            <input type="text" class="form-control" id="nom" th:field="*{nom}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email *</label>
+                    <input type="email" class="form-control" id="email" th:field="*{email}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="motDePasse" class="form-label">Nouveau mot de passe (laisser vide pour ne pas changer)</label>
+                    <input type="password" class="form-control" id="motDePasse" name="motDePasse">
+                    <div class="form-text">Si vous saisissez un nouveau mot de passe, l'utilisateur devra l'utiliser lors de sa prochaine connexion.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Rôle *</label>
+                    <div class="row">
+                        <div th:each="role : ${allRoles}" class="col-md-6 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" th:id="${'role_' + role.name()}" 
+                                       th:name="roles" th:value="${role.name()}"
+                                       th:checked="${user.role != null and user.role.name() == role.name()}"
+                                       th:disabled="${role.name() == 'SUPER_ADMIN' and user.role.name() == 'SUPER_ADMIN'}">
+                                <label class="form-check-label" th:for="${'role_' + role.name()}">
+                                    <span th:switch="${role}">
+                                        <span th:case="ETUDIANT" class="badge bg-info me-2">Étudiant</span>
+                                        <span th:case="CHEF_DE_CLUB" class="badge bg-warning me-2">Chef de Club</span>
+                                        <span th:case="ADMIN" class="badge bg-danger me-2">Administrateur</span>
+                                        <span th:case="SUPER_ADMIN" class="badge bg-purple me-2">Super Admin</span>
+                                        <span th:case="*" class="badge bg-secondary me-2" th:text="${role}"></span>
+                                    </span>
+                                    <span th:text="${role.name()}"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="bio" class="form-label">Bio (optionnel)</label>
+                    <textarea class="form-control" id="bio" th:field="*{bio}" rows="3" placeholder="Description de l'utilisateur..."></textarea>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <a th:href="@{/super-admin/users}" class="btn btn-outline-secondary me-3">Annuler</a>
+                    <button type="submit" class="btn btn-super-admin">
+                        <i class="bi bi-save me-2"></i> Enregistrer les modifications
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 </body>
 </html>
