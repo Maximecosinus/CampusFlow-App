@@ -54,7 +54,7 @@
                         <div class="stats-icon">
                             <i class="bi bi-person-check"></i>
                         </div>
-                        <div class="stats-number" th:text="${users != null ? users.stream().filter(u -> u.getRole().name() == 'ETUDIANT').count() : 0}"></div>
+                        <div class="stats-number" th:text="${users != null ? users.stream().filter(u -> u.getRole().name().equals('ETUDIANT')).count() : 0}"></div>
                         <div class="stats-label">Étudiants</div>
                     </div>
                 </div>
@@ -63,7 +63,7 @@
                         <div class="stats-icon">
                             <i class="bi bi-shield-check"></i>
                         </div>
-                        <div class="stats-number" th:text="${users != null ? users.stream().filter(u -> u.getRole().name() == 'ADMIN').count() : 0}"></div>
+                        <div class="stats-number" th:text="${users != null ? users.stream().filter(u -> u.getRole().name().equals('ADMIN')).count() : 0}"></div>
                         <div class="stats-label">Administrateurs</div>
                     </div>
                 </div>
@@ -72,7 +72,7 @@
                         <div class="stats-icon">
                             <i class="bi bi-crown"></i>
                         </div>
-                        <div class="stats-number" th:text="${users != null ? users.stream().filter(u -> u.getRole().name() == 'SUPER_ADMIN').count() : 0}"></div>
+                        <div class="stats-number" th:text="${users != null ? users.stream().filter(u -> u.getRole().name().equals('SUPER_ADMIN')).count() : 0}"></div>
                         <div class="stats-label">Super Admins</div>
                     </div>
                 </div>
@@ -125,13 +125,10 @@
                                             <span th:text="${user.email}"></span>
                                         </td>
                                         <td>
-                                            <span th:switch="${user.role}">
-                                                <span th:case="ETUDIANT" class="badge bg-info">Étudiant</span>
-                                                <span th:case="CHEF_DE_CLUB" class="badge bg-warning">Chef de Club</span>
-                                                <span th:case="ADMIN" class="badge bg-danger">Administrateur</span>
-                                                <span th:case="SUPER_ADMIN" class="badge bg-purple">Super Admin</span>
-                                                <span th:case="*" class="badge bg-secondary" th:text="${user.role}"></span>
-                                            </span>
+                                            <span th:if="${user.role.name().equals('ETUDIANT')}" class="badge bg-info">Étudiant</span>
+                                            <span th:if="${user.role.name().equals('CHEF_DE_CLUB')}" class="badge bg-warning">Chef de Club</span>
+                                            <span th:if="${user.role.name().equals('ADMIN')}" class="badge bg-danger">Administrateur</span>
+                                            <span th:if="${user.role.name().equals('SUPER_ADMIN')}" class="badge bg-purple">Super Admin</span>
                                         </td>
                                         <td>
                                             <span class="badge bg-success">Actif</span>
