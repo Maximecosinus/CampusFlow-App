@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{super-admin/layout :: layout('Gestion des Utilisateurs', ~{::content})}">
+      th:replace="~{super-admin/layout :: layout('Gestion des Utilisateurs', ~{::content})}">
 <head>
     <title>Gestion des Utilisateurs - Super Admin</title>
 </head>
 <body>
-<div layout:fragment="content">
+<div th:fragment="content">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="mb-0">
