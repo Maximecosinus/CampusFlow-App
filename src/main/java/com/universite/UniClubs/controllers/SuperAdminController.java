@@ -73,7 +73,7 @@ public class SuperAdminController {
         // Ajouter tous les rôles disponibles pour les formulaires
         model.addAttribute("allRoles", Arrays.asList(Role.values()));
         
-        return "super-admin/users";
+        return "super-admin/users-simple";
     }
     
     /**

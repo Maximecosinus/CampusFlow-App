@@ -90,7 +90,7 @@
                                         <div th:each="role : ${allRoles}" class="col-md-6 mb-2">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" th:id="${role.name()}" 
-                                                       th:name="roles" th:value="${role.name()}" th:id="${role.name()}">
+                                                       th:name="roles" th:value="${role.name()}">
                                                 <label class="form-check-label" th:for="${role.name()}">
                                                     <span th:switch="${role}">
                                                         <span th:case="ETUDIANT" class="badge bg-info me-2">Étudiant</span>
