@@ -48,4 +48,8 @@ public interface UtilisateurService {
     List<Utilisateur> findAllUsers();
     List<Utilisateur> findUsersByRole(com.universite.UniClubs.entities.Role role);
     long countUsersByRole(com.universite.UniClubs.entities.Role role);
+    
+    // Méthodes pour la gestion des utilisateurs
+    Utilisateur saveUser(Utilisateur utilisateur);
+    void deleteUser(UUID id);
 }

@@ -1,6 +1,7 @@
 package com.universite.UniClubs.controllers;
 
 import com.universite.UniClubs.entities.Utilisateur;
+import com.universite.UniClubs.entities.Role;
 import com.universite.UniClubs.services.UtilisateurService;
 import com.universite.UniClubs.services.ClubService;
 import com.universite.UniClubs.services.EvenementService;
@@ -8,10 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/super-admin")
@@ -26,6 +32,9 @@ public class SuperAdminController {
     
     @Autowired
     private EvenementService evenementService;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     /**
      * Dashboard Super Admin
@@ -61,7 +70,152 @@ public class SuperAdminController {
         var allUsers = utilisateurService.findAllUsers();
         model.addAttribute("users", allUsers);
         
+        // Ajouter tous les rôles disponibles pour les formulaires
+        model.addAttribute("allRoles", Arrays.asList(Role.values()));
+        
         return "super-admin/users";
+    }
+    
+    /**
+     * Formulaire de création d'utilisateur
+     */
+    @GetMapping("/users/create")
+    public String createUserForm(Model model) {
+        Utilisateur superAdmin = getCurrentUser();
+        model.addAttribute("superAdmin", superAdmin);
+        model.addAttribute("allRoles", Arrays.asList(Role.values()));
+        model.addAttribute("user", new Utilisateur());
+        
+        return "super-admin/create-user";
+    }
+    
+    /**
+     * Création d'un nouvel utilisateur
+     */
+    @PostMapping("/users/create")
+    public String createUser(@ModelAttribute Utilisateur user,
+                            @RequestParam(required = false) List<String> roles,
+                            RedirectAttributes redirectAttributes) {
+        try {
+            // Vérifier si l'email existe déjà
+            try {
+                utilisateurService.findByEmail(user.getEmail());
+                redirectAttributes.addFlashAttribute("error", "Un utilisateur avec cet email existe déjà.");
+                return "redirect:/super-admin/users/create";
+            } catch (Exception e) {
+                // Email n'existe pas, on peut continuer
+            }
+            
+            // Encoder le mot de passe
+            user.setMotDePasse(passwordEncoder.encode(user.getMotDePasse()));
+            
+            // Assigner les rôles (pour l'instant, on garde un seul rôle principal)
+            // TODO: Implémenter la gestion des rôles multiples
+            if (roles != null && !roles.isEmpty()) {
+                user.setRole(Role.valueOf(roles.get(0)));
+            } else {
+                user.setRole(Role.ETUDIANT); // Rôle par défaut
+            }
+            
+            utilisateurService.saveUser(user);
+            redirectAttributes.addFlashAttribute("success", "Utilisateur créé avec succès !");
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Erreur lors de la création de l'utilisateur : " + e.getMessage());
+        }
+        
+        return "redirect:/super-admin/users";
+    }
+    
+    /**
+     * Formulaire de modification d'utilisateur
+     */
+    @GetMapping("/users/{id}/edit")
+    public String editUserForm(@PathVariable UUID id, Model model) {
+        Utilisateur superAdmin = getCurrentUser();
+        model.addAttribute("superAdmin", superAdmin);
+        
+        var user = utilisateurService.findById(id);
+        if (user.isEmpty()) {
+            return "redirect:/super-admin/users";
+        }
+        
+        model.addAttribute("user", user.get());
+        model.addAttribute("allRoles", Arrays.asList(Role.values()));
+        
+        return "super-admin/edit-user";
+    }
+    
+    /**
+     * Modification d'un utilisateur
+     */
+    @PostMapping("/users/{id}/edit")
+    public String updateUser(@PathVariable UUID id,
+                           @ModelAttribute Utilisateur user,
+                           @RequestParam(required = false) List<String> roles,
+                           RedirectAttributes redirectAttributes) {
+        try {
+            var existingUser = utilisateurService.findById(id);
+            if (existingUser.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Utilisateur non trouvé.");
+                return "redirect:/super-admin/users";
+            }
+            
+            Utilisateur userToUpdate = existingUser.get();
+            
+            // Mettre à jour les informations de base
+            userToUpdate.setPrenom(user.getPrenom());
+            userToUpdate.setNom(user.getNom());
+            userToUpdate.setEmail(user.getEmail());
+            userToUpdate.setBio(user.getBio());
+            
+            // Mettre à jour le rôle
+            if (roles != null && !roles.isEmpty()) {
+                userToUpdate.setRole(Role.valueOf(roles.get(0)));
+            }
+            
+            // Si un nouveau mot de passe est fourni, l'encoder
+            if (user.getMotDePasse() != null && !user.getMotDePasse().trim().isEmpty()) {
+                userToUpdate.setMotDePasse(passwordEncoder.encode(user.getMotDePasse()));
+            }
+            
+            utilisateurService.saveUser(userToUpdate);
+            redirectAttributes.addFlashAttribute("success", "Utilisateur modifié avec succès !");
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Erreur lors de la modification de l'utilisateur : " + e.getMessage());
+        }
+        
+        return "redirect:/super-admin/users";
+    }
+    
+    /**
+     * Suppression d'un utilisateur
+     */
+    @PostMapping("/users/{id}/delete")
+    public String deleteUser(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
+        try {
+            var user = utilisateurService.findById(id);
+            if (user.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Utilisateur non trouvé.");
+                return "redirect:/super-admin/users";
+            }
+            
+            // Empêcher la suppression du Super Admin actuel
+            Utilisateur currentUser = getCurrentUser();
+            if (currentUser != null && currentUser.getId().equals(id)) {
+                redirectAttributes.addFlashAttribute("error", "Vous ne pouvez pas supprimer votre propre compte.");
+                return "redirect:/super-admin/users";
+            }
+            
+            utilisateurService.deleteUser(id);
+            redirectAttributes.addFlashAttribute("success", "Utilisateur supprimé avec succès !");
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Erreur lors de la suppression de l'utilisateur : " + e.getMessage());
+        }
+        
+        return "redirect:/super-admin/users";
     }
 
     /**

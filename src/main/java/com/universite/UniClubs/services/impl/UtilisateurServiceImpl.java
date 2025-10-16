@@ -182,4 +182,18 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     public long countUsersByRole(com.universite.UniClubs.entities.Role role) {
         return utilisateurRepository.countByRole(role);
     }
+    
+    // Méthodes pour la gestion des utilisateurs
+    @Override
+    @Transactional
+    public Utilisateur saveUser(Utilisateur utilisateur) {
+        return utilisateurRepository.save(utilisateur);
+    }
+    
+    @Override
+    @Transactional
+    public void deleteUser(UUID id) {
+        utilisateurRepository.deleteById(id);
+    }
+    
 }
