@@ -40,7 +40,7 @@
             <div class="super-admin-card">
                 <div class="card-body text-center">
                     <div class="stats-icon"><i class="bi bi-people"></i></div>
-                    <div class="stats-number" th:text="${users != null ? users.size() : 0}">0</div>
+                    <div class="stats-number" th:text="${totalUsers}">0</div>
                     <div class="stats-label">Total Utilisateurs</div>
                 </div>
             </div>
@@ -49,7 +49,7 @@
             <div class="super-admin-card">
                 <div class="card-body text-center">
                     <div class="stats-icon"><i class="bi bi-person-check"></i></div>
-                    <div class="stats-number" th:text="${users != null ? users.stream().filter(u -> u.getRole().name().equals('ETUDIANT')).count() : 0}">0</div>
+                    <div class="stats-number" th:text="${totalStudents}">0</div>
                     <div class="stats-label">Étudiants</div>
                 </div>
             </div>
@@ -58,7 +58,7 @@
             <div class="super-admin-card">
                 <div class="card-body text-center">
                     <div class="stats-icon"><i class="bi bi-shield-check"></i></div>
-                    <div class="stats-number" th:text="${users != null ? users.stream().filter(u -> u.getRole().name().equals('ADMIN')).count() : 0}">0</div>
+                    <div class="stats-number" th:text="${totalAdmins}">0</div>
                     <div class="stats-label">Administrateurs</div>
                 </div>
             </div>
@@ -67,7 +67,7 @@
             <div class="super-admin-card">
                 <div class="card-body text-center">
                     <div class="stats-icon"><i class="bi bi-crown"></i></div>
-                    <div class="stats-number" th:text="${users != null ? users.stream().filter(u -> u.getRole().name().equals('SUPER_ADMIN')).count() : 0}">0</div>
+                    <div class="stats-number" th:text="${totalSuperAdmins}">0</div>
                     <div class="stats-label">Super Admins</div>
                 </div>
             </div>

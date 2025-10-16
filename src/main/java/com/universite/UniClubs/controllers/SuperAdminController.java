@@ -70,6 +70,17 @@ public class SuperAdminController {
         var allUsers = utilisateurService.findAllUsers();
         model.addAttribute("users", allUsers);
         
+        // Calculer les statistiques côté contrôleur
+        long totalUsers = allUsers.size();
+        long totalStudents = allUsers.stream().filter(u -> u.getRole().name().equals("ETUDIANT")).count();
+        long totalAdmins = allUsers.stream().filter(u -> u.getRole().name().equals("ADMIN")).count();
+        long totalSuperAdmins = allUsers.stream().filter(u -> u.getRole().name().equals("SUPER_ADMIN")).count();
+        
+        model.addAttribute("totalUsers", totalUsers);
+        model.addAttribute("totalStudents", totalStudents);
+        model.addAttribute("totalAdmins", totalAdmins);
+        model.addAttribute("totalSuperAdmins", totalSuperAdmins);
+        
         // Ajouter tous les rôles disponibles pour les formulaires
         model.addAttribute("allRoles", Arrays.asList(Role.values()));
         
