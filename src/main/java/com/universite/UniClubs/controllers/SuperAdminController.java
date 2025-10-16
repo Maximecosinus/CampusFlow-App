@@ -271,9 +271,20 @@ public class SuperAdminController {
         Utilisateur superAdmin = getCurrentUser();
         model.addAttribute("superAdmin", superAdmin);
         
-        // Récupérer tous les clubs
-        var clubs = clubService.findAllClubs();
+        // Récupérer tous les clubs avec leurs inscriptions chargées
+        var clubs = clubService.findAllClubsWithInscriptions();
+        
+        // Calculer les statistiques côté contrôleur pour éviter les erreurs LazyInitializationException
+        long totalClubs = clubs.size();
+        long clubsWithChef = clubs.stream().filter(c -> c.getChefClub() != null).count();
+        long clubsWithoutChef = totalClubs - clubsWithChef;
+        long totalMembers = clubs.stream().mapToInt(c -> c.getInscriptions() != null ? c.getInscriptions().size() : 0).sum();
+        
         model.addAttribute("clubs", clubs);
+        model.addAttribute("totalClubs", totalClubs);
+        model.addAttribute("clubsWithChef", clubsWithChef);
+        model.addAttribute("clubsWithoutChef", clubsWithoutChef);
+        model.addAttribute("totalMembers", totalMembers);
         
         return "super-admin/clubs";
     }
@@ -288,7 +299,18 @@ public class SuperAdminController {
         
         // Récupérer tous les événements
         var events = evenementService.findAllEvents();
+        
+        // Calculer les statistiques côté contrôleur pour éviter les erreurs SpEL
+        long totalEvents = events.size();
+        long publishedEvents = events.stream().filter(e -> e.getStatut().name().equals("PUBLIE")).count();
+        long upcomingEvents = events.stream().filter(e -> e.getDateHeureDebut().isAfter(java.time.LocalDateTime.now())).count();
+        long universityEvents = events.stream().filter(e -> e.getClub() == null).count();
+        
         model.addAttribute("events", events);
+        model.addAttribute("totalEvents", totalEvents);
+        model.addAttribute("publishedEvents", publishedEvents);
+        model.addAttribute("upcomingEvents", upcomingEvents);
+        model.addAttribute("universityEvents", universityEvents);
         
         return "super-admin/events";
     }

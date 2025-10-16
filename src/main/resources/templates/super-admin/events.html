@@ -33,7 +33,7 @@
                                     <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                         Total Événements
                                     </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${events != null ? events.size() : 0}">0</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalEvents}">0</div>
                                 </div>
                                 <div class="col-auto">
                                     <i class="fas fa-calendar fa-2x text-gray-300"></i>
@@ -51,7 +51,7 @@
                                     <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                         Événements Publiés
                                     </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${events != null ? events.stream().filter(e -> e.statut.name() == 'PUBLIE').count() : 0}">0</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${publishedEvents}">0</div>
                                 </div>
                                 <div class="col-auto">
                                     <i class="fas fa-check-circle fa-2x text-gray-300"></i>
@@ -69,7 +69,7 @@
                                     <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                         Événements à Venir
                                     </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${events != null ? events.stream().filter(e -> e.dateHeureDebut.isAfter(java.time.LocalDateTime.now())).count() : 0}">0</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${upcomingEvents}">0</div>
                                 </div>
                                 <div class="col-auto">
                                     <i class="fas fa-clock fa-2x text-gray-300"></i>
@@ -87,7 +87,7 @@
                                     <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                         Événements Universitaires
                                     </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${events != null ? events.stream().filter(e -> e.club == null).count() : 0}">0</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${universityEvents}">0</div>
                                 </div>
                                 <div class="col-auto">
                                     <i class="fas fa-university fa-2x text-gray-300"></i>

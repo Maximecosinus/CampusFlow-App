@@ -126,7 +126,7 @@
                     <div class="stats-icon">
                         <i class="bi bi-people"></i>
                     </div>
-                    <div class="stats-number" th:text="${clubs != null ? clubs.size() : 0}"></div>
+                    <div class="stats-number" th:text="${totalClubs}"></div>
                     <div class="stats-label">Clubs Total</div>
                 </div>
             </div>
@@ -135,7 +135,7 @@
                     <div class="stats-icon">
                         <i class="bi bi-person-check"></i>
                     </div>
-                    <div class="stats-number" th:text="${clubs != null ? clubs.stream().filter(c -> c.chefClub != null).count() : 0}"></div>
+                    <div class="stats-number" th:text="${clubsWithChef}"></div>
                     <div class="stats-label">Avec Chef</div>
                 </div>
             </div>
@@ -144,7 +144,7 @@
                     <div class="stats-icon">
                         <i class="bi bi-person-x"></i>
                     </div>
-                    <div class="stats-number" th:text="${clubs != null ? clubs.stream().filter(c -> c.chefClub == null).count() : 0}"></div>
+                    <div class="stats-number" th:text="${clubsWithoutChef}"></div>
                     <div class="stats-label">Sans Chef</div>
                 </div>
             </div>
@@ -153,7 +153,7 @@
                     <div class="stats-icon">
                         <i class="bi bi-people-fill"></i>
                     </div>
-                    <div class="stats-number" th:text="${clubs != null ? clubs.stream().mapToInt(c -> c.inscriptions != null ? c.inscriptions.size() : 0).sum() : 0}"></div>
+                    <div class="stats-number" th:text="${totalMembers}"></div>
                     <div class="stats-label">Membres Total</div>
                 </div>
             </div>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{super-admin/layout :: layout('Mon Profil', ~{::content})}">
+<head>
+    <title>Mon Profil - Super Admin</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="container-fluid">
+        <!-- En-tête -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="fas fa-user-crown text-primary me-2"></i>
+                    Mon Profil Super Admin
+                </h1>
+                <p class="text-muted">Gérez vos informations personnelles</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Informations du profil -->
+            <div class="col-lg-8">
+                <div class="super-admin-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-user me-2"></i> Informations Personnelles</h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/super-admin/profile/update}" method="post">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="prenom" class="form-label">Prénom *</label>
+                                        <input type="text" class="form-control" id="prenom" name="prenom" 
+                                               th:value="${superAdmin.prenom}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="nom" class="form-label">Nom *</label>
+                                        <input type="text" class="form-control" id="nom" name="nom" 
+                                               th:value="${superAdmin.nom}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       th:value="${superAdmin.email}" required readonly>
+                                <div class="form-text">L'email ne peut pas être modifié</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="bio" class="form-label">Biographie</label>
+                                <textarea class="form-control" id="bio" name="bio" rows="4" 
+                                          th:text="${superAdmin.bio}"></textarea>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-super-admin">
+                                    <i class="fas fa-save me-2"></i>
+                                    Mettre à jour le profil
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations de compte -->
+            <div class="col-lg-4">
+                <div class="super-admin-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-shield-alt me-2"></i> Informations de Compte</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Rôle</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-primary text-white">
+                                    <i class="fas fa-crown"></i>
+                                </span>
+                                <input type="text" class="form-control" 
+                                       th:value="${superAdmin.role.name()}" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Statut</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-success text-white">
+                                    <i class="fas fa-check-circle"></i>
+                                </span>
+                                <input type="text" class="form-control" value="Actif" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Date de création</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-info text-white">
+                                    <i class="fas fa-calendar"></i>
+                                </span>
+                                <input type="text" class="form-control" 
+                                       th:value="${#temporals.format(superAdmin.dateCreation, 'dd/MM/yyyy')}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Changement de mot de passe -->
+                <div class="super-admin-card mt-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-key me-2"></i> Changer le Mot de Passe</h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/super-admin/profile/change-password}" method="post">
+                            <div class="mb-3">
+                                <label for="currentPassword" class="form-label">Mot de passe actuel *</label>
+                                <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="newPassword" class="form-label">Nouveau mot de passe *</label>
+                                <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">Confirmer le mot de passe *</label>
+                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-outline-primary">
+                                    <i class="fas fa-key me-2"></i>
+                                    Changer le mot de passe
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
