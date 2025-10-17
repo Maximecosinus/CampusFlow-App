@@ -104,13 +104,12 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="badge" 
-                                          th:classappend="${log.actionType.name() == 'CREATE'} ? 'bg-success' : 
-                                                         ${log.actionType.name() == 'UPDATE'} ? 'bg-warning' : 
-                                                         ${log.actionType.name() == 'DELETE'} ? 'bg-danger' : 
-                                                         ${log.actionType.name() == 'LOGIN'} ? 'bg-info' : 
-                                                         ${log.actionType.name() == 'LOGOUT'} ? 'bg-secondary' : 'bg-primary'"
-                                          th:text="${log.actionType.displayName}">Action</span>
+                                    <span class="badge bg-success" th:if="${log.actionType.name() == 'CREATE'}" th:text="${log.actionType.displayName}">Action</span>
+                                    <span class="badge bg-warning" th:if="${log.actionType.name() == 'UPDATE'}" th:text="${log.actionType.displayName}">Action</span>
+                                    <span class="badge bg-danger" th:if="${log.actionType.name() == 'DELETE'}" th:text="${log.actionType.displayName}">Action</span>
+                                    <span class="badge bg-info" th:if="${log.actionType.name() == 'LOGIN'}" th:text="${log.actionType.displayName}">Action</span>
+                                    <span class="badge bg-secondary" th:if="${log.actionType.name() == 'LOGOUT'}" th:text="${log.actionType.displayName}">Action</span>
+                                    <span class="badge bg-primary" th:if="${log.actionType.name() != 'CREATE' and log.actionType.name() != 'UPDATE' and log.actionType.name() != 'DELETE' and log.actionType.name() != 'LOGIN' and log.actionType.name() != 'LOGOUT'}" th:text="${log.actionType.displayName}">Action</span>
                                 </td>
                                 <td>
                                     <span class="badge bg-light text-dark" th:text="${log.entityType.displayName}">Entité</span>
