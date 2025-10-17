@@ -9,6 +9,8 @@ import com.universite.UniClubs.services.ChefClubValidationService.ValidationResu
 import com.universite.UniClubs.services.ClubService;
 import com.universite.UniClubs.services.EvenementService;
 import com.universite.UniClubs.services.UtilisateurService;
+import com.universite.UniClubs.services.AuditLogService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -49,6 +51,9 @@ public class AdminController {
     
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private AuditLogService auditLogService;
 
     /**
      * Page d'accueil du tableau de bord administrateur
@@ -102,7 +107,8 @@ public class AdminController {
     @PostMapping("/clubs/create")
     public String createClub(@ModelAttribute("club") Club club,
                            @RequestParam(value = "chefId", required = false) UUID chefId,
-                           RedirectAttributes redirectAttributes) {
+                           RedirectAttributes redirectAttributes,
+                           HttpServletRequest request) {
         try {
             System.out.println("=== DEBUG CREATION CLUB ===");
             System.out.println("Nom du club: " + club.getNom());
@@ -111,6 +117,10 @@ public class AdminController {
             // Créer le club
             Club savedClub = clubService.createClub(club);
             System.out.println("Club créé avec ID: " + savedClub.getId());
+            
+            // Enregistrer l'action dans le journal d'audit
+            Utilisateur currentUser = getCurrentUser();
+            auditLogService.logClubCreation(currentUser.getEmail(), savedClub.getNom(), savedClub.getId().toString(), request);
             
             // Si un chef a été sélectionné, valider et l'assigner
             if (chefId != null) {
@@ -316,7 +326,8 @@ public class AdminController {
                                       @RequestParam(value = "heureFin", required = false) String heureFin,
                                       @RequestParam(value = "capaciteMax", required = false) Integer capaciteMax,
                                       @RequestParam("statut") String statut,
-                                      RedirectAttributes redirectAttributes) {
+                                      RedirectAttributes redirectAttributes,
+                                      HttpServletRequest request) {
         try {
             // Créer l'événement
             Evenement event = new Evenement();
@@ -348,6 +359,10 @@ public class AdminController {
             
             // Sauvegarder
             evenementService.saveEvent(event);
+            
+            // Enregistrer l'action dans le journal d'audit
+            Utilisateur currentUser = getCurrentUser();
+            auditLogService.logEventCreation(currentUser.getEmail(), event.getTitre(), event.getId().toString(), request);
             
             redirectAttributes.addFlashAttribute("success", 
                 "Événement universitaire créé avec succès !");
@@ -485,10 +500,19 @@ public class AdminController {
      * Supprimer un événement
      */
     @PostMapping("/events/{eventId}/delete")
-    public String deleteEvent(@PathVariable UUID eventId, RedirectAttributes redirectAttributes) {
+    public String deleteEvent(@PathVariable UUID eventId, RedirectAttributes redirectAttributes, HttpServletRequest request) {
         try {
             System.out.println("=== BOUTON SUPPRIMER CLIQUE - ID: " + eventId + " ===");
+            
+            // Récupérer l'événement avant de le supprimer pour l'audit
+            Optional<Evenement> eventOpt = evenementService.findById(eventId);
+            String eventTitle = eventOpt.isPresent() ? eventOpt.get().getTitre() : "Événement inconnu";
+            
             evenementService.deleteEvent(eventId);
+            
+            // Enregistrer l'action dans le journal d'audit
+            Utilisateur currentUser = getCurrentUser();
+            auditLogService.logEventCancellation(currentUser.getEmail(), eventTitle, eventId.toString(), request);
             
             System.out.println("Événement supprimé avec succès: " + eventId);
             redirectAttributes.addFlashAttribute("success", 

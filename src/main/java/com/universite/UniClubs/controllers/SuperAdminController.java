@@ -5,6 +5,8 @@ import com.universite.UniClubs.entities.Role;
 import com.universite.UniClubs.services.UtilisateurService;
 import com.universite.UniClubs.services.ClubService;
 import com.universite.UniClubs.services.EvenementService;
+import com.universite.UniClubs.services.AuditLogService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -35,6 +37,9 @@ public class SuperAdminController {
     
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private AuditLogService auditLogService;
 
     /**
      * Dashboard Super Admin
@@ -106,7 +111,8 @@ public class SuperAdminController {
     @PostMapping("/users/create")
     public String createUser(@ModelAttribute Utilisateur user,
                             @RequestParam(required = false) List<String> roles,
-                            RedirectAttributes redirectAttributes) {
+                            RedirectAttributes redirectAttributes,
+                            HttpServletRequest request) {
         try {
             // Vérifier si l'email existe déjà
             try {
@@ -129,6 +135,19 @@ public class SuperAdminController {
             }
             
             utilisateurService.saveUser(user);
+            
+            // Enregistrer l'action dans le journal d'audit
+            Utilisateur currentUser = getCurrentUser();
+            if (user.getRole() == Role.ADMIN || user.getRole() == Role.SUPER_ADMIN) {
+                auditLogService.logAdminCreation(currentUser.getEmail(), user.getEmail(), user.getId().toString(), request);
+            } else {
+                auditLogService.logAction(currentUser.getEmail(), 
+                    String.format("Création de l'utilisateur '%s' avec le rôle %s", user.getEmail(), user.getRole().name()),
+                    com.universite.UniClubs.entities.AuditLog.ActionType.CREATE, 
+                    com.universite.UniClubs.entities.AuditLog.EntityType.USER, 
+                    user.getId().toString(), request);
+            }
+            
             redirectAttributes.addFlashAttribute("success", "Utilisateur créé avec succès !");
             
         } catch (Exception e) {
@@ -204,7 +223,7 @@ public class SuperAdminController {
      * Suppression d'un utilisateur
      */
     @PostMapping("/users/{id}/delete")
-    public String deleteUser(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
+    public String deleteUser(@PathVariable UUID id, RedirectAttributes redirectAttributes, HttpServletRequest request) {
         try {
             var user = utilisateurService.findById(id);
             if (user.isEmpty()) {
@@ -219,6 +238,19 @@ public class SuperAdminController {
                 return "redirect:/super-admin/users";
             }
             
+            Utilisateur userToDelete = user.get();
+            
+            // Enregistrer l'action dans le journal d'audit
+            if (userToDelete.getRole() == Role.ADMIN || userToDelete.getRole() == Role.SUPER_ADMIN) {
+                auditLogService.logAdminDeletion(currentUser.getEmail(), userToDelete.getEmail(), userToDelete.getId().toString(), request);
+            } else {
+                auditLogService.logAction(currentUser.getEmail(), 
+                    String.format("Suppression de l'utilisateur '%s'", userToDelete.getEmail()),
+                    com.universite.UniClubs.entities.AuditLog.ActionType.DELETE, 
+                    com.universite.UniClubs.entities.AuditLog.EntityType.USER, 
+                    userToDelete.getId().toString(), request);
+            }
+            
             utilisateurService.deleteUser(id);
             redirectAttributes.addFlashAttribute("success", "Utilisateur supprimé avec succès !");
             
@@ -231,14 +263,39 @@ public class SuperAdminController {
 
 
     /**
-     * Accès aux fonctionnalités admin normales
+     * Journal d'audit - Consultation des logs
      */
-    @GetMapping("/admin-features")
-    public String adminFeatures(Model model) {
+    @GetMapping("/audit-logs")
+    public String auditLogs(Model model, 
+                           @RequestParam(value = "page", defaultValue = "0") int page,
+                           @RequestParam(value = "size", defaultValue = "20") int size,
+                           @RequestParam(value = "search", required = false) String search) {
         Utilisateur superAdmin = getCurrentUser();
         model.addAttribute("superAdmin", superAdmin);
         
-        return "super-admin/admin-features";
+        // Calculer les statistiques
+        long totalLogs = auditLogService.getTotalLogCount();
+        long recentLogs = auditLogService.getRecentLogs().size();
+        
+        // Récupérer les logs avec pagination
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        org.springframework.data.domain.Page<com.universite.UniClubs.entities.AuditLog> logsPage;
+        
+        if (search != null && !search.trim().isEmpty()) {
+            logsPage = auditLogService.searchLogs(search.trim(), pageable);
+            model.addAttribute("searchTerm", search.trim());
+        } else {
+            logsPage = auditLogService.getAllLogs(pageable);
+        }
+        
+        model.addAttribute("logs", logsPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", logsPage.getTotalPages());
+        model.addAttribute("totalElements", logsPage.getTotalElements());
+        model.addAttribute("totalLogs", totalLogs);
+        model.addAttribute("recentLogs", recentLogs);
+        
+        return "super-admin/audit-logs";
     }
 
     /**

@@ -8,6 +8,8 @@ import com.universite.UniClubs.repositories.UtilisateurRepository;
 import com.universite.UniClubs.services.ClubService;
 import com.universite.UniClubs.services.InscriptionService;
 import com.universite.UniClubs.services.UtilisateurService;
+import com.universite.UniClubs.services.AuditLogService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,6 +31,9 @@ public class ClubController {
 
     @Autowired
     private InscriptionService inscriptionService; // Injecter le nouveau service
+
+    @Autowired
+    private AuditLogService auditLogService;
 
     @GetMapping("/{id}")
     public String showCLubDetailsPage(@PathVariable UUID id, Model model, @ModelAttribute("utilisateurConnecte") Utilisateur utilisateurConnecte){
@@ -53,19 +58,40 @@ public class ClubController {
     }
 
     @PostMapping("/{id}/inscrire")
-    public String processInscriotion(@PathVariable UUID id,Principal principal ){
+    public String processInscriotion(@PathVariable UUID id, Principal principal, HttpServletRequest request ){
         //vérifier si l'utilisateur est connecté
         if(principal ==null){
             return "redirect:/login";
         }
+        
+        // Récupérer les informations pour l'audit
+        Optional<Club> clubOpt = clubService.findClubById(id);
+        Utilisateur user = utilisateurService.findByEmail(principal.getName());
+        
+        if (clubOpt.isPresent() && user != null) {
+            Club club = clubOpt.get();
+            // Enregistrer l'action dans le journal d'audit
+            auditLogService.logStudentRegistration(user.getEmail(), user.getPrenom() + " " + user.getNom(), club.getNom(), id.toString(), request);
+        }
+        
         utilisateurService.inscrireUtilisateurAuclub(principal.getName(), id);
         return "redirect:/clubs/" + id;
     }
 
     @PostMapping("/{id}/desinscrire")
-    public String processDesinscription(@PathVariable UUID id,Principal principal ){
+    public String processDesinscription(@PathVariable UUID id, Principal principal, HttpServletRequest request ){
         if(principal ==null){
             return "redirect:/login";
+        }
+
+        // Récupérer les informations pour l'audit
+        Optional<Club> clubOpt = clubService.findClubById(id);
+        Utilisateur user = utilisateurService.findByEmail(principal.getName());
+        
+        if (clubOpt.isPresent() && user != null) {
+            Club club = clubOpt.get();
+            // Enregistrer l'action dans le journal d'audit
+            auditLogService.logStudentUnregistration(user.getEmail(), user.getPrenom() + " " + user.getNom(), club.getNom(), id.toString(), request);
         }
 
         utilisateurService.desinscrireUtilisateurDuClub(principal.getName(), id);
