@@ -25,9 +25,16 @@ public class HomeController {
     @Autowired
     private EvenementService evenementService;
 
-    @GetMapping("/accueil")
+    @GetMapping("/")
     public String showHomePage(Model model) {
+        model.addAttribute("clubs", clubService.getAllClubs());
+        model.addAttribute("clubsRecents", clubService.findRecentclubs());
+        model.addAttribute("evenementsAVenir",evenementService.findUpcomingEvents());
+        return "accueil";
+    }
 
+    @GetMapping("/accueil")
+    public String showHomePageAlt(Model model) {
         model.addAttribute("clubs", clubService.getAllClubs());
         model.addAttribute("clubsRecents", clubService.findRecentclubs());
         model.addAttribute("evenementsAVenir",evenementService.findUpcomingEvents());
