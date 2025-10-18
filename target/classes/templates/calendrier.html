@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<!-- On utilise notre layout de base -->
+<!-- On utilise notre layout spécifique aux étudiants -->
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/layout :: layout('Calendrier - CampusFlow', ~{::section})}">
+      th:replace="~{fragments/student-layout :: studentLayout('Calendrier - CampusFlow', ~{::section})}">
 <head>
     <title>Calendrier - CampusFlow</title>
 </head>

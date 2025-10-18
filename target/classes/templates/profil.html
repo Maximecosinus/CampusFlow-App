@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<!-- On réutilise notre layout de base -->
+<!-- On réutilise notre layout spécifique aux étudiants -->
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/layout :: layout('Mon Profil - CampusFlow', ~{::section})}">
+      th:replace="~{fragments/student-layout :: studentLayout('Mon Profil - CampusFlow', ~{::section})}">
 <head>
   <title>Mon Profil - CampusFlow</title>
 </head>
