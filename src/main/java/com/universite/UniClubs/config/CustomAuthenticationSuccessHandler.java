@@ -30,9 +30,12 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             } else if (utilisateur.getRole() == Role.ADMIN) {
                 response.sendRedirect("/admin");
             } else if (utilisateur.getRole() == Role.CHEF_DE_CLUB) {
-                response.sendRedirect("/club-management");
+                response.sendRedirect("/gestion-club");
+            } else if (utilisateur.getRole() == Role.ETUDIANT) {
+                // Rôle ETUDIANT - redirection vers la page d'accueil
+                response.sendRedirect("/");
             } else {
-                // Rôle ETUDIANT ou autre
+                // Autres rôles
                 response.sendRedirect("/");
             }
         } else {
