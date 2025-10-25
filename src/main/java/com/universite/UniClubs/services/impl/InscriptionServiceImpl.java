@@ -3,8 +3,10 @@ package com.universite.UniClubs.services.impl;
 
 import com.universite.UniClubs.entities.Inscription;
 import com.universite.UniClubs.entities.StatutInscription;
+import com.universite.UniClubs.entities.TypeNotification;
 import com.universite.UniClubs.repositories.InscriptionRepository;
 import com.universite.UniClubs.services.InscriptionService;
+import com.universite.UniClubs.services.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,9 @@ public class InscriptionServiceImpl implements InscriptionService {
     @Autowired
     private ClubRepository clubRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @Override
     @Transactional
     public void approuverInscription(UUID inscriptionId) {
@@ -38,7 +43,17 @@ public class InscriptionServiceImpl implements InscriptionService {
         // On vérifie que la demande est bien en attente avant de la modifier
         if (inscription.getStatut() == StatutInscription.EN_ATTENTE) {
             inscription.setStatut(StatutInscription.ACCEPTE);
-            // Pas besoin de save() explicite grâce à @Transactional
+            
+            // Envoyer notification à l'étudiant
+            String titre = "Inscription approuvée !";
+            String message = String.format("Votre demande d'inscription au club '%s' a été approuvée. Bienvenue !", 
+                                         inscription.getClub().getNom());
+            notificationService.envoyerNotification(
+                inscription.getUtilisateur().getId(), 
+                titre, 
+                message, 
+                TypeNotification.INSCRIPTION
+            );
         }
     }
 
@@ -51,6 +66,17 @@ public class InscriptionServiceImpl implements InscriptionService {
         if (inscription.getStatut() == StatutInscription.EN_ATTENTE) {
             inscription.setStatut(StatutInscription.REFUSE);
             inscription.setMotifRefus(motif); // On stocke le motif
+            
+            // Envoyer notification à l'étudiant
+            String titre = "Inscription refusée";
+            String message = String.format("Votre demande d'inscription au club '%s' a été refusée. Motif: %s", 
+                                         inscription.getClub().getNom(), motif);
+            notificationService.envoyerNotification(
+                inscription.getUtilisateur().getId(), 
+                titre, 
+                message, 
+                TypeNotification.INSCRIPTION
+            );
         }
     }
 

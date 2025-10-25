@@ -7,6 +7,7 @@ import com.universite.UniClubs.repositories.ClubRepository;
 import com.universite.UniClubs.repositories.InscriptionRepository;
 import com.universite.UniClubs.repositories.UtilisateurRepository;
 import com.universite.UniClubs.services.FileStorageService;
+import com.universite.UniClubs.services.NotificationService;
 import com.universite.UniClubs.services.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,6 +36,9 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
     @Autowired
     private FileStorageService fileStorageService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public Utilisateur creerEtudiant(UserRegistrationDto registrationDto) {
@@ -68,6 +72,25 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         nouvelleInscription.setStatut(StatutInscription.EN_ATTENTE);
 
         inscriptionRepository.save(nouvelleInscription);
+        
+        // Notifier le chef de club et les admins de la nouvelle demande
+        if (club.getChefClub() != null) {
+            String titre = "Nouvelle demande d'inscription";
+            String message = String.format("L'étudiant %s %s souhaite rejoindre le club '%s'", 
+                                         utilisateur.getPrenom(), utilisateur.getNom(), club.getNom());
+            notificationService.envoyerNotification(
+                club.getChefClub().getId(), 
+                titre, 
+                message, 
+                TypeNotification.INSCRIPTION
+            );
+        }
+        
+        // Notifier tous les admins (broadcast)
+        String titreAdmin = "Nouvelle demande d'inscription";
+        String messageAdmin = String.format("L'étudiant %s %s souhaite rejoindre le club '%s'", 
+                                          utilisateur.getPrenom(), utilisateur.getNom(), club.getNom());
+        notificationService.envoyerNotificationBroadcast(titreAdmin, messageAdmin, TypeNotification.INSCRIPTION);
     }
 
     @Override

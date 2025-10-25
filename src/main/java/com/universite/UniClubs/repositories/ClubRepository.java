@@ -8,9 +8,10 @@ import org.springframework.data.domain.Pageable; // <-- IMPORTER Pageable
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.List;
 
 @Repository
 public interface ClubRepository extends JpaRepository<Club, UUID> {
@@ -40,5 +41,8 @@ public interface ClubRepository extends JpaRepository<Club, UUID> {
             "LEFT JOIN FETCH c.evenementsOrganises " +
             "WHERE c.chefClub.id = :chefId")
     Optional<Club> findClubWithDetailsByChefId(@Param("chefId") UUID chefId);
+
+    // Méthode pour récupérer les clubs récents
+    List<Club> findByDateCreationAfterOrderByDateCreationDesc(LocalDateTime cutoffDate);
 
 }
