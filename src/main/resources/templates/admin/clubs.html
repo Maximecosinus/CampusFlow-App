@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Gestion des Clubs - Administration</title>
+</head>
+<body>
+
+<section>
+    <div class="container-fluid">
+        <!-- En-tête de la page -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Gestion des Clubs</h1>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createClubModal">
+                <i class="fas fa-plus me-2"></i>Créer un Club
+            </button>
+        </div>
+
+        <!-- Messages de succès/erreur -->
+        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong>Succès !</strong> L'opération a été effectuée avec succès.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <strong>Erreur !</strong> Une erreur s'est produite lors de l'opération.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Filtres et recherche -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" placeholder="Rechercher un club..." id="searchInput">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="statusFilter">
+                    <option value="">Tous les statuts</option>
+                    <option value="ACTIF">Actif</option>
+                    <option value="INACTIF">Inactif</option>
+                    <option value="EN_ATTENTE">En attente</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="chefFilter">
+                    <option value="">Tous les clubs</option>
+                    <option value="AVEC_CHEF">Avec chef de club</option>
+                    <option value="SANS_CHEF">Sans chef de club</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Liste des clubs -->
+        <div class="row" id="clubsList">
+            <div class="col-md-6 col-lg-4 mb-4" th:each="club : ${clubs}">
+                <div class="card h-100">
+                    <img th:src="${club.logo != null ? club.logo : '/images/default-club.png'}" class="card-img-top" alt="Logo du club" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${club.nom}">Nom du Club</h5>
+                        <p class="card-text" th:text="${club.description}">Description du club...</p>
+                        
+                        <!-- Informations du club -->
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-users me-1"></i>
+                                <span th:text="${club.membres != null ? club.membres.size() : 0}">0</span> membres
+                            </small>
+                            <br>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>
+                                Créé le <span th:text="${#temporals.format(club.dateCreation, 'dd/MM/yyyy')}">01/01/2024</span>
+                            </small>
+                        </div>
+
+                        <!-- Chef de club -->
+                        <div class="mb-3" th:if="${club.chefDeClub != null}">
+                            <small class="text-success">
+                                <i class="fas fa-crown me-1"></i>
+                                Chef: <span th:text="${club.chefDeClub.nom}">Nom du chef</span>
+                            </small>
+                        </div>
+                        <div class="mb-3" th:if="${club.chefDeClub == null}">
+                            <small class="text-warning">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                Aucun chef de club assigné
+                            </small>
+                        </div>
+
+                        <!-- Statut -->
+                        <span class="badge" th:classappend="${club.statut == 'ACTIF'} ? 'bg-success' : (${club.statut == 'INACTIF'} ? 'bg-danger' : 'bg-warning')" th:text="${club.statut}">Actif</span>
+                    </div>
+                    <div class="card-footer">
+                        <div class="btn-group w-100" role="group">
+                            <a th:href="@{/admin/clubs/{id}(id=${club.id})}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye me-1"></i>Voir
+                            </a>
+                            <a th:href="@{/admin/clubs/{id}/edit(id=${club.id})}" class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-edit me-1"></i>Modifier
+                            </a>
+                            <button class="btn btn-outline-info btn-sm" th:onclick="'assignChef(' + ${club.id} + ')'">
+                                <i class="fas fa-user-plus me-1"></i>Chef
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" th:onclick="'deleteClub(' + ${club.id} + ')'">
+                                <i class="fas fa-trash me-1"></i>Suppr
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message si aucun club -->
+        <div th:if="${clubs == null or clubs.isEmpty()}" class="text-center py-5">
+            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">Aucun club trouvé</h4>
+            <p class="text-muted">Commencez par créer votre premier club.</p>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createClubModal">
+                <i class="fas fa-plus me-2"></i>Créer un Club
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de création de club -->
+    <div class="modal fade" id="createClubModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Créer un Nouveau Club</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/admin/clubs/create}" method="post" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="nom" class="form-label">Nom du Club *</label>
+                                    <input type="text" class="form-control" id="nom" name="nom" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="categorie" class="form-label">Catégorie</label>
+                                    <select class="form-select" id="categorie" name="categorie">
+                                        <option value="SPORT">Sport</option>
+                                        <option value="CULTUREL">Culturel</option>
+                                        <option value="ACADEMIQUE">Académique</option>
+                                        <option value="SOCIAL">Social</option>
+                                        <option value="TECHNOLOGIE">Technologie</option>
+                                        <option value="AUTRE">Autre</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description *</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="logo" class="form-label">Logo du Club</label>
+                                    <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="chefDeClub" class="form-label">Chef de Club (optionnel)</label>
+                                    <select class="form-select" id="chefDeClub" name="chefDeClubId">
+                                        <option value="">Aucun chef pour le moment</option>
+                                        <option th:each="etudiant : ${etudiants}" th:value="${etudiant.id}" th:text="${etudiant.nom + ' (' + etudiant.email + ')'}">Étudiant</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Créer le Club</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal d'assignation de chef de club -->
+    <div class="modal fade" id="assignChefModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Assigner un Chef de Club</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/admin/clubs/assign-chef}" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="clubIdForChef" name="clubId">
+                        <div class="mb-3">
+                            <label for="nouveauChef" class="form-label">Sélectionner un Étudiant</label>
+                            <select class="form-select" id="nouveauChef" name="etudiantId" required>
+                                <option value="">Choisir un étudiant...</option>
+                                <option th:each="etudiant : ${etudiants}" th:value="${etudiant.id}" th:text="${etudiant.nom + ' (' + etudiant.email + ')'}">Étudiant</option>
+                            </select>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            L'étudiant sélectionné deviendra le chef de ce club et aura accès aux fonctionnalités de gestion.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Assigner</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Fonction pour assigner un chef de club
+    function assignChef(clubId) {
+        document.getElementById('clubIdForChef').value = clubId;
+        new bootstrap.Modal(document.getElementById('assignChefModal')).show();
+    }
+
+    // Fonction pour supprimer un club
+    function deleteClub(clubId) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce club ? Cette action est irréversible.')) {
+            window.location.href = '/admin/clubs/' + clubId + '/delete';
+        }
+    }
+
+    // Filtrage et recherche
+    document.getElementById('searchInput').addEventListener('input', filterClubs);
+    document.getElementById('statusFilter').addEventListener('change', filterClubs);
+    document.getElementById('chefFilter').addEventListener('change', filterClubs);
+
+    function filterClubs() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        const chefFilter = document.getElementById('chefFilter').value;
+        
+        const clubs = document.querySelectorAll('#clubsList .col-md-6');
+        
+        clubs.forEach(club => {
+            const title = club.querySelector('.card-title').textContent.toLowerCase();
+            const status = club.querySelector('.badge').textContent;
+            const hasChef = club.querySelector('.text-success') !== null;
+            
+            let show = true;
+            
+            if (searchTerm && !title.includes(searchTerm)) {
+                show = false;
+            }
+            
+            if (statusFilter && status !== statusFilter) {
+                show = false;
+            }
+            
+            if (chefFilter === 'AVEC_CHEF' && !hasChef) {
+                show = false;
+            }
+            
+            if (chefFilter === 'SANS_CHEF' && hasChef) {
+                show = false;
+            }
+            
+            club.style.display = show ? 'block' : 'none';
+        });
+    }
+</script>
+
+</body>
+</html>

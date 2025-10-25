@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Liste des Événements - Administration</title>
+</head>
+<body>
+
+<section>
+    <div class="container-fluid">
+        <!-- En-tête de la page -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Liste des Événements</h1>
+            <a th:href="@{/admin/evenements/gestion}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Créer un Événement
+            </a>
+        </div>
+
+        <!-- Filtres et recherche -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" placeholder="Rechercher un événement..." id="searchInput">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" id="statusFilter">
+                    <option value="">Tous les statuts</option>
+                    <option value="PUBLIE">Publié</option>
+                    <option value="PLANIFIE">Planifié</option>
+                    <option value="ANNULE">Annulé</option>
+                    <option value="TERMINE">Terminé</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" id="dateFilter">
+                    <option value="">Toutes les dates</option>
+                    <option value="AUJOURDHUI">Aujourd'hui</option>
+                    <option value="CETTE_SEMAINE">Cette semaine</option>
+                    <option value="CE_MOIS">Ce mois</option>
+                    <option value="PASSE">Passés</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" id="clubFilter">
+                    <option value="">Tous les clubs</option>
+                    <option th:each="club : ${clubs}" th:value="${club.id}" th:text="${club.nom}">Club</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                    <i class="fas fa-refresh me-1"></i>Réinitialiser
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistiques rapides -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">Total</h5>
+                        <h3 th:text="${evenements.size()}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-success">Publiés</h5>
+                        <h3 th:text="${evenements.stream().filter(e -> e.statut == 'PUBLIE').count()}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-warning">Planifiés</h5>
+                        <h3 th:text="${evenements.stream().filter(e -> e.statut == 'PLANIFIE').count()}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-info">Ce mois</h5>
+                        <h3 th:text="${evenementsCeMois}">0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des événements -->
+        <div class="row" id="evenementsList">
+            <div class="col-md-6 col-lg-4 mb-4" th:each="event : ${evenements}">
+                <div class="card h-100" th:classappend="${event.statut == 'PLANIFIE'} ? 'border-warning' : ''">
+                    <img th:src="${event.photo != null ? event.photo : '/images/default-event.png'}" class="card-img-top" alt="Image de l'événement" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${event.titre}">Titre de l'événement</h5>
+                        <p class="card-text">
+                            <i class="fas fa-calendar me-1"></i>
+                            <span th:text="${#temporals.format(event.dateHeureDebut, 'dd MMMM yyyy à HH:mm')}">Date</span>
+                        </p>
+                        <p class="card-text">
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            <span th:text="${event.lieu}">Lieu</span>
+                        </p>
+                        <p class="card-text" th:text="${event.description}">Description...</p>
+                        
+                        <!-- Informations supplémentaires -->
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-users me-1"></i>
+                                <span th:text="${event.inscrits != null ? event.inscrits.size() : 0}">0</span>/
+                                <span th:text="${event.capaciteMaximale}">∞</span> inscrits
+                            </small>
+                            <br>
+                            <small class="text-muted">
+                                <i class="fas fa-user me-1"></i>
+                                Créé par <span th:text="${event.createur != null ? event.createur.nom : 'Admin'}">Admin</span>
+                            </small>
+                        </div>
+
+                        <!-- Statut -->
+                        <span class="badge" th:classappend="${event.statut == 'PUBLIE'} ? 'bg-success' : (${event.statut == 'PLANIFIE'} ? 'bg-warning' : (${event.statut == 'ANNULE'} ? 'bg-danger' : 'bg-secondary'))" th:text="${event.statut}">Publié</span>
+                    </div>
+                    <div class="card-footer">
+                        <div class="btn-group w-100" role="group">
+                            <a th:href="@{/admin/evenements/{id}(id=${event.id})}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye me-1"></i>Voir
+                            </a>
+                            <a th:href="@{/admin/evenements/{id}/edit(id=${event.id})}" class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-edit me-1"></i>Modifier
+                            </a>
+                            <button th:if="${event.statut == 'PLANIFIE'}" class="btn btn-outline-success btn-sm" th:onclick="'publishEvent(' + ${event.id} + ')'">
+                                <i class="fas fa-paper-plane me-1"></i>Publier
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" th:onclick="'deleteEvent(' + ${event.id} + ')'">
+                                <i class="fas fa-trash me-1"></i>Suppr
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message si aucun événement -->
+        <div th:if="${evenements == null or evenements.isEmpty()}" class="text-center py-5">
+            <i class="fas fa-calendar fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">Aucun événement trouvé</h4>
+            <p class="text-muted">Commencez par créer votre premier événement.</p>
+            <a th:href="@{/admin/evenements/gestion}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Créer un Événement
+            </a>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Fonction pour publier un événement
+    function publishEvent(eventId) {
+        if (confirm('Êtes-vous sûr de vouloir publier cet événement ? Il sera visible par tous les étudiants.')) {
+            window.location.href = '/admin/evenements/' + eventId + '/publish';
+        }
+    }
+
+    // Fonction pour supprimer un événement
+    function deleteEvent(eventId) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.')) {
+            window.location.href = '/admin/evenements/' + eventId + '/delete';
+        }
+    }
+
+    // Fonction pour réinitialiser les filtres
+    function resetFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('statusFilter').value = '';
+        document.getElementById('dateFilter').value = '';
+        document.getElementById('clubFilter').value = '';
+        filterEvents();
+    }
+
+    // Filtrage et recherche
+    document.getElementById('searchInput').addEventListener('input', filterEvents);
+    document.getElementById('statusFilter').addEventListener('change', filterEvents);
+    document.getElementById('dateFilter').addEventListener('change', filterEvents);
+    document.getElementById('clubFilter').addEventListener('change', filterEvents);
+
+    function filterEvents() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        const dateFilter = document.getElementById('dateFilter').value;
+        const clubFilter = document.getElementById('clubFilter').value;
+        
+        const events = document.querySelectorAll('#evenementsList .col-md-6');
+        
+        events.forEach(event => {
+            const title = event.querySelector('.card-title').textContent.toLowerCase();
+            const status = event.querySelector('.badge').textContent;
+            
+            let show = true;
+            
+            if (searchTerm && !title.includes(searchTerm)) {
+                show = false;
+            }
+            
+            if (statusFilter && status !== statusFilter) {
+                show = false;
+            }
+            
+            // Filtrage par date (simplifié)
+            if (dateFilter) {
+                const eventDate = new Date(event.querySelector('.card-text').textContent);
+                const today = new Date();
+                
+                switch(dateFilter) {
+                    case 'AUJOURDHUI':
+                        if (eventDate.toDateString() !== today.toDateString()) show = false;
+                        break;
+                    case 'CETTE_SEMAINE':
+                        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        if (eventDate < weekAgo) show = false;
+                        break;
+                    case 'CE_MOIS':
+                        if (eventDate.getMonth() !== today.getMonth() || eventDate.getFullYear() !== today.getFullYear()) show = false;
+                        break;
+                    case 'PASSE':
+                        if (eventDate >= today) show = false;
+                        break;
+                }
+            }
+            
+            event.style.display = show ? 'block' : 'none';
+        });
+    }
+</script>
+
+</body>
+</html>

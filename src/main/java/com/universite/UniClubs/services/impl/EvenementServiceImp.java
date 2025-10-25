@@ -10,7 +10,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class EvenementServiceImp implements EvenementService {
@@ -27,5 +29,40 @@ public class EvenementServiceImp implements EvenementService {
     // Garde la session ouverte
     public List<Evenement> findAllUpcomingEvents(){
         return evenementRepository.findAllByDateHeureDebutAfterOrderByDateHeureDebutAsc(LocalDateTime.now());
+    }
+
+    @Override
+    public List<Evenement> getAllEvents() {
+        return evenementRepository.findAll();
+    }
+
+    @Override
+    public List<Evenement> findRecentEvents() {
+        // Implémentation temporaire - retourne les événements récents
+        return evenementRepository.findAllByDateHeureDebutAfterOrderByDateHeureDebutAsc(LocalDateTime.now().minusDays(30));
+    }
+
+    @Override
+    public List<Evenement> findEventsByCreator(UUID creatorId) {
+        // Implémentation temporaire - retourne tous les événements pour l'instant
+        return evenementRepository.findAll();
+    }
+
+    @Override
+    public List<Evenement> findPlannedEvents() {
+        // Implémentation temporaire - retourne tous les événements pour l'instant
+        return evenementRepository.findAll();
+    }
+
+    @Override
+    public int countEventsThisMonth() {
+        // Implémentation temporaire - retourne 0 pour l'instant
+        return 0;
+    }
+
+    @Override
+    public double calculateAverageParticipationRate() {
+        // Implémentation temporaire - retourne 0.0 pour l'instant
+        return 0.0;
     }
 }

@@ -2,28 +2,173 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- <link rel="stylesheet" th:href="@{/static/css/register.css}" /> -->
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .split-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .left-side {
+            flex: 1;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .left-side {
+            position: relative;
+        }
+
+        .left-side::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1f7a8c8e, #08212680);
+            z-index: 1;
+        }
+
+        .left-side img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            position: relative;
+            z-index: 0;
+        }
+
+        .right-side {
+            flex: 1;
+            background: #f9f9f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-container {
+            background: #fff;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        form div {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #333;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            padding: 10px 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: #f5f5f5;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            border-color: #1F7A8C;
+            outline: none;
+            background: #fff;
+        }
+        button[type="submit"] {
+            background: #1F7A8C;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+            transition: background 0.2s;
+        }
+        button[type="submit"]:hover {
+            background: #176574;
+        }
+        .form-container h1 {
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .form-container h2 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: #1F7A8C;
+            text-align: center;
+        }
+        .form-container p{
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .signup-link a {
+            color: #1F7A8C;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .signup-link a:hover {
+            color: #176574;
+            text-decoration: underline;
+        }
+    </style>
     <title>Connexion- CampusFlow</title>
 </head>
 <body>
-<h1>Connexion</h1>
-<div th:if="${param.error}">
-    <div style="color: red">Email ou mot de passe invalide</div>
+<div class="split-container">
+    <div class="left-side">
+        <img src="/images/login.jpg" alt="Connexion" />
+    </div>
+    <div class="right-side">
+        <div class="form-container">
+            <h1>CampusFlow</h1>
+            <h2>Connexion</h2>
+            <p>Rejoins la communauté étudiante</p>
+            <div th:if="${param.error}">
+                <div style="color: red">Email ou mot de passe invalide</div>
+            </div>
+            <div th:if="${param.logout}">
+                <div style="color: blue">Vous avez été déconnecté</div>
+            </div>
+            <form th:action="@{/login}" method="post">
+                <div>
+                    <label for="username">Email</label>
+                    <input id="username" type="text" name="username" required autofocus="autofocus"/>
+                </div>
+                <div>
+                    <label for="password">Mot de passe</label>
+                    <input id="password" type="password" name="password" required/>
+                </div>
+                <div>
+                    <button type="submit">Se connecter</button>
+                </div>
+            </form>
+            <div class="signup-link" style="text-align: center; margin-top: 20px;">
+                <p>Pas encore de compte ? <a href="/register">S'inscrire</a></p>
+            </div>
+        </div>
+    </div>
 </div>
-<div th:if="${param.logout}">
-    <div style="color: blue">Vous avez été déconnecté</div>
-</div>
-<form th:action="@{/login}" method="post">
-    <div>
-        <label for="username">Email</label>
-        <input id="username" type="text" name="username" required autofocus="autofocus"/>
-    </div>
-    <div>
-        <label for="password">Mot de passe</label>
-        <input id="password" type="password" name="password" required/>
-    </div>
-    <div>
-        <button type="submit">Se connecter</button>
-    </div>
-</form>
 </body>
 </html>

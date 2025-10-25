@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Calendrier - Administration</title>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+</head>
+<body>
+
+<section>
+    <div class="container-fluid">
+        <!-- En-tête de la page -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Calendrier des Événements</h1>
+            <div class="btn-group">
+                <button class="btn btn-outline-primary" onclick="calendar.changeView('month')">
+                    <i class="fas fa-calendar-alt me-1"></i>Mois
+                </button>
+                <button class="btn btn-outline-primary" onclick="calendar.changeView('week')">
+                    <i class="fas fa-calendar-week me-1"></i>Semaine
+                </button>
+                <button class="btn btn-outline-primary" onclick="calendar.changeView('day')">
+                    <i class="fas fa-calendar-day me-1"></i>Jour
+                </button>
+                <button class="btn btn-outline-primary" onclick="calendar.changeView('listWeek')">
+                    <i class="fas fa-list me-1"></i>Liste
+                </button>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="clubFilter" class="form-label">Filtrer par Club</label>
+                        <select class="form-select" id="clubFilter" onchange="filterCalendar()">
+                            <option value="">Tous les clubs</option>
+                            <option th:each="club : ${clubs}" th:value="${club.id}" th:text="${club.nom}">Club</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="statusFilter" class="form-label">Filtrer par Statut</label>
+                        <select class="form-select" id="statusFilter" onchange="filterCalendar()">
+                            <option value="">Tous les statuts</option>
+                            <option value="PUBLIE">Publié</option>
+                            <option value="PLANIFIE">Planifié</option>
+                            <option value="ANNULE">Annulé</option>
+                            <option value="TERMINE">Terminé</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="typeFilter" class="form-label">Filtrer par Type</label>
+                        <select class="form-select" id="typeFilter" onchange="filterCalendar()">
+                            <option value="">Tous les types</option>
+                            <option value="SPORT">Sport</option>
+                            <option value="CULTUREL">Culturel</option>
+                            <option value="ACADEMIQUE">Académique</option>
+                            <option value="SOCIAL">Social</option>
+                            <option value="TECHNOLOGIE">Technologie</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="dateRangeFilter" class="form-label">Période</label>
+                        <select class="form-select" id="dateRangeFilter" onchange="filterCalendar()">
+                            <option value="">Toutes les dates</option>
+                            <option value="today">Aujourd'hui</option>
+                            <option value="week">Cette semaine</option>
+                            <option value="month">Ce mois</option>
+                            <option value="nextMonth">Mois prochain</option>
+                            <option value="past">Passés</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="showOnlyMyEvents" onchange="filterCalendar()">
+                            <label class="form-check-label" for="showOnlyMyEvents">
+                                Afficher uniquement mes événements
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button class="btn btn-outline-secondary" onclick="resetFilters()">
+                            <i class="fas fa-refresh me-1"></i>Réinitialiser
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques rapides -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">Total</h5>
+                        <h3 th:text="${evenements.size()}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-success">Ce mois</h5>
+                        <h3 th:text="${evenementsCeMois}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-warning">À venir</h5>
+                        <h3 th:text="${evenementsAVenir.size()}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-info">Participation</h5>
+                        <h3 th:text="${tauxParticipation} + '%'">0%</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendrier -->
+        <div class="card">
+            <div class="card-body">
+                <div id="calendar"></div>
+            </div>
+        </div>
+
+        <!-- Légende -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Légende</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="badge bg-success me-2" style="width: 20px; height: 20px;"></div>
+                                    <span>Événements publiés</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="badge bg-warning me-2" style="width: 20px; height: 20px;"></div>
+                                    <span>Événements planifiés</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="badge bg-danger me-2" style="width: 20px; height: 20px;"></div>
+                                    <span>Événements annulés</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="badge bg-secondary me-2" style="width: 20px; height: 20px;"></div>
+                                    <span>Événements terminés</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de détails d'événement -->
+    <div class="modal fade" id="eventModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventTitle">Détails de l'Événement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="eventBody">
+                    <!-- Contenu dynamique -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <a href="#" class="btn btn-primary" id="eventEditLink">
+                        <i class="fas fa-edit me-1"></i>Modifier
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    let calendar;
+    let allEvents = [];
+    
+    // Données des événements depuis le serveur
+    const eventsData = /*[[${evenements}]]*/ [];
+    
+    // Initialisation du calendrier
+    document.addEventListener('DOMContentLoaded', function() {
+        const calendarEl = document.getElementById('calendar');
+        
+        // Conversion des données pour FullCalendar
+        allEvents = eventsData.map(event => ({
+            id: event.id,
+            title: event.titre,
+            start: event.dateHeureDebut,
+            end: event.dateHeureFin,
+            backgroundColor: getEventColor(event.statut),
+            borderColor: getEventColor(event.statut),
+            extendedProps: {
+                description: event.description,
+                lieu: event.lieu,
+                statut: event.statut,
+                capaciteMaximale: event.capaciteMaximale,
+                inscrits: event.inscrits ? event.inscrits.length : 0,
+                club: event.club ? event.club.nom : 'Aucun club',
+                createur: event.createur ? event.createur.nom : 'Admin'
+            }
+        }));
+        
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'fr',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+            },
+            events: allEvents,
+            eventClick: function(info) {
+                showEventDetails(info.event);
+            },
+            eventDidMount: function(info) {
+                // Ajouter des tooltips
+                info.el.title = info.event.title + ' - ' + info.event.extendedProps.lieu;
+            }
+        });
+        
+        calendar.render();
+    });
+    
+    // Fonction pour obtenir la couleur selon le statut
+    function getEventColor(statut) {
+        switch(statut) {
+            case 'PUBLIE': return '#28a745';
+            case 'PLANIFIE': return '#ffc107';
+            case 'ANNULE': return '#dc3545';
+            case 'TERMINE': return '#6c757d';
+            default: return '#007bff';
+        }
+    }
+    
+    // Fonction pour afficher les détails d'un événement
+    function showEventDetails(event) {
+        const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+        const title = document.getElementById('eventTitle');
+        const body = document.getElementById('eventBody');
+        const editLink = document.getElementById('eventEditLink');
+        
+        title.textContent = event.title;
+        editLink.href = '/admin/evenements/' + event.id + '/edit';
+        
+        const props = event.extendedProps;
+        body.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6><i class="fas fa-calendar me-2"></i>Date et Heure</h6>
+                    <p>${event.start.toLocaleDateString('fr-FR', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    })} à ${event.start.toLocaleTimeString('fr-FR', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    })}</p>
+                    
+                    <h6><i class="fas fa-map-marker-alt me-2"></i>Lieu</h6>
+                    <p>${props.lieu}</p>
+                    
+                    <h6><i class="fas fa-users me-2"></i>Participation</h6>
+                    <p>${props.inscrits}${props.capaciteMaximale ? '/' + props.capaciteMaximale : ''} inscrits</p>
+                </div>
+                <div class="col-md-6">
+                    <h6><i class="fas fa-info-circle me-2"></i>Description</h6>
+                    <p>${props.description || 'Aucune description'}</p>
+                    
+                    <h6><i class="fas fa-users me-2"></i>Club</h6>
+                    <p>${props.club}</p>
+                    
+                    <h6><i class="fas fa-user me-2"></i>Créateur</h6>
+                    <p>${props.createur}</p>
+                </div>
+            </div>
+            <div class="mt-3">
+                <span class="badge ${getEventColor(props.statut)}">${props.statut}</span>
+            </div>
+        `;
+        
+        modal.show();
+    }
+    
+    // Fonction de filtrage
+    function filterCalendar() {
+        const clubFilter = document.getElementById('clubFilter').value;
+        const statusFilter = document.getElementById('statusFilter').value;
+        const typeFilter = document.getElementById('typeFilter').value;
+        const dateRangeFilter = document.getElementById('dateRangeFilter').value;
+        const showOnlyMyEvents = document.getElementById('showOnlyMyEvents').checked;
+        
+        let filteredEvents = allEvents.filter(event => {
+            const props = event.extendedProps;
+            
+            // Filtre par club (simplifié - nécessiterait une relation dans les données)
+            if (clubFilter && props.club !== clubFilter) {
+                return false;
+            }
+            
+            // Filtre par statut
+            if (statusFilter && props.statut !== statusFilter) {
+                return false;
+            }
+            
+            // Filtre par type (simplifié)
+            if (typeFilter && !event.title.toLowerCase().includes(typeFilter.toLowerCase())) {
+                return false;
+            }
+            
+            // Filtre par période
+            if (dateRangeFilter) {
+                const today = new Date();
+                const eventDate = new Date(event.start);
+                
+                switch(dateRangeFilter) {
+                    case 'today':
+                        if (eventDate.toDateString() !== today.toDateString()) return false;
+                        break;
+                    case 'week':
+                        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        if (eventDate < weekAgo) return false;
+                        break;
+                    case 'month':
+                        if (eventDate.getMonth() !== today.getMonth() || eventDate.getFullYear() !== today.getFullYear()) return false;
+                        break;
+                    case 'nextMonth':
+                        const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+                        const nextMonthEnd = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+                        if (eventDate < nextMonth || eventDate > nextMonthEnd) return false;
+                        break;
+                    case 'past':
+                        if (eventDate >= today) return false;
+                        break;
+                }
+            }
+            
+            // Filtre par créateur (simplifié)
+            if (showOnlyMyEvents && props.createur !== 'Admin') {
+                return false;
+            }
+            
+            return true;
+        });
+        
+        calendar.removeAllEvents();
+        calendar.addEventSource(filteredEvents);
+    }
+    
+    // Fonction pour réinitialiser les filtres
+    function resetFilters() {
+        document.getElementById('clubFilter').value = '';
+        document.getElementById('statusFilter').value = '';
+        document.getElementById('typeFilter').value = '';
+        document.getElementById('dateRangeFilter').value = '';
+        document.getElementById('showOnlyMyEvents').checked = false;
+        
+        calendar.removeAllEvents();
+        calendar.addEventSource(allEvents);
+    }
+</script>
+
+</body>
+</html>

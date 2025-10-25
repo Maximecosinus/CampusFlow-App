@@ -5,6 +5,7 @@ import com.universite.UniClubs.entities.Utilisateur;
 import com.universite.UniClubs.dto.UserProfileDto;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,6 +24,10 @@ public interface UtilisateurService {
     void updateUserProfile(String email, UserProfileDto profileDto);
 
     void updateUserPhoto(String email, MultipartFile photo);
+
+    // Méthodes pour l'administration
+    List<Utilisateur> getAllStudents();
+    int countStudents();
 
     // --- CORRECTION : La méthode suivante a été supprimée ---
     // Elle était basée sur l'ancienne architecture.

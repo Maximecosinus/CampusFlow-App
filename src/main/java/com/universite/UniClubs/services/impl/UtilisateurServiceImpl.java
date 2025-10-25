@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -126,5 +127,17 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
         utilisateur.setPhotoProfil(photoPath);
+    }
+
+    @Override
+    public List<Utilisateur> getAllStudents() {
+        // Implémentation temporaire - retourne tous les utilisateurs pour l'instant
+        return utilisateurRepository.findAll();
+    }
+
+    @Override
+    public int countStudents() {
+        // Implémentation temporaire - retourne 0 pour l'instant
+        return 0;
     }
 }

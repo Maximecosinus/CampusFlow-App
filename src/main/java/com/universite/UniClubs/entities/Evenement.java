@@ -41,11 +41,19 @@ public class Evenement {
 
     @PrePersist
     protected void onPublish(){
-        this.datePublication= LocalDateTime.now();
+        this.datePublication = LocalDateTime.now();
+        // On peut définir un statut par défaut à la création
+        if (this.statut == null) {
+            this.statut = StatutEvenement.BROUILLON;
+        }
     }
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="club_id")
     private Club club;
+
+    // --- AJOUTEZ CETTE PARTIE ---
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StatutEvenement statut;
 
 }

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Accueil - Administration</title>
+</head>
+<body>
+
+<section>
+    <div class="accueil-page">
+        <!-- Bannière principale -->
+        <div class="banner">
+            <h2>Tableau de Bord Administrateur</h2>
+            <p>Gérez les clubs, événements et la communication de l'institut</p>
+        </div>
+
+        <!-- Statistiques rapides -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                        <h5 class="card-title">Clubs Actifs</h5>
+                        <h3 class="text-primary" th:text="${nombreClubs}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-calendar-alt fa-2x text-success mb-2"></i>
+                        <h5 class="card-title">Événements à Venir</h5>
+                        <h3 class="text-success" th:text="${evenementsAVenir.size()}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-user-graduate fa-2x text-info mb-2"></i>
+                        <h5 class="card-title">Étudiants Inscrits</h5>
+                        <h3 class="text-info" th:text="${nombreEtudiants}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
+                        <h5 class="card-title">Participation</h5>
+                        <h3 class="text-warning" th:text="${tauxParticipation} + '%'">0%</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Événements récents -->
+        <div class="section">
+            <h2>Événements Récents</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4" th:each="event : ${evenementsRecents}">
+                    <div class="card h-100">
+                        <img th:src="${event.photo != null ? event.photo : '/images/default-event.png'}" class="card-img-top" alt="Image de l'événement">
+                        <div class="card-body">
+                            <h5 class="card-title" th:text="${event.titre}">Titre de l'événement</h5>
+                            <p class="card-text">Le <span th:text="${#temporals.format(event.dateHeureDebut, 'dd MMMM yyyy à HH:mm')}"></span></p>
+                            <p class="card-text" th:text="${event.lieu}">Lieu de l'événement</p>
+                            <span class="badge bg-primary" th:text="${event.statut}">Publié</span>
+                        </div>
+                        <div class="card-footer">
+                            <a th:href="@{/admin/evenements/{id}(id=${event.id})}" class="btn btn-outline-primary btn-sm">Voir détails</a>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${evenementsRecents == null or evenementsRecents.isEmpty()}" class="col-12">
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Aucun événement récent pour le moment.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mes événements créés -->
+        <div class="section">
+            <h2>Mes Événements Créés</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4" th:each="event : ${mesEvenementsCrees}">
+                    <div class="card h-100">
+                        <img th:src="${event.photo != null ? event.photo : '/images/default-event.png'}" class="card-img-top" alt="Image de l'événement">
+                        <div class="card-body">
+                            <h5 class="card-title" th:text="${event.titre}">Titre de l'événement</h5>
+                            <p class="card-text">Le <span th:text="${#temporals.format(event.dateHeureDebut, 'dd MMMM yyyy à HH:mm')}"></span></p>
+                            <p class="card-text" th:text="${event.lieu}">Lieu de l'événement</p>
+                            <span class="badge" th:classappend="${event.statut == 'PUBLIE'} ? 'bg-success' : 'bg-warning'" th:text="${event.statut}">Publié</span>
+                        </div>
+                        <div class="card-footer">
+                            <a th:href="@{/admin/evenements/{id}/edit(id=${event.id})}" class="btn btn-outline-primary btn-sm me-2">Modifier</a>
+                            <a th:href="@{/admin/evenements/{id}/delete(id=${event.id})}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')">Supprimer</a>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${mesEvenementsCrees == null or mesEvenementsCrees.isEmpty()}" class="col-12">
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Vous n'avez créé aucun événement pour le moment.
+                        <a th:href="@{/admin/evenements/gestion}" class="btn btn-primary btn-sm ms-2">Créer un événement</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Événements planifiés (non publiés) -->
+        <div class="section">
+            <h2>Événements Planifiés (Non Publiés)</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4" th:each="event : ${evenementsPlanifies}">
+                    <div class="card h-100 border-warning">
+                        <img th:src="${event.photo != null ? event.photo : '/images/default-event.png'}" class="card-img-top" alt="Image de l'événement">
+                        <div class="card-body">
+                            <h5 class="card-title" th:text="${event.titre}">Titre de l'événement</h5>
+                            <p class="card-text">Le <span th:text="${#temporals.format(event.dateHeureDebut, 'dd MMMM yyyy à HH:mm')}"></span></p>
+                            <p class="card-text" th:text="${event.lieu}">Lieu de l'événement</p>
+                            <span class="badge bg-warning">Planifié</span>
+                        </div>
+                        <div class="card-footer">
+                            <a th:href="@{/admin/evenements/{id}/publish(id=${event.id})}" class="btn btn-success btn-sm me-2">Publier</a>
+                            <a th:href="@{/admin/evenements/{id}/edit(id=${event.id})}" class="btn btn-outline-primary btn-sm me-2">Modifier</a>
+                            <a th:href="@{/admin/evenements/{id}/delete(id=${event.id})}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')">Supprimer</a>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${evenementsPlanifies == null or evenementsPlanifies.isEmpty()}" class="col-12">
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Aucun événement planifié en attente de publication.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="section">
+            <h2>Actions Rapides</h2>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <a th:href="@{/admin/clubs}" class="card text-decoration-none h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Gérer les Clubs</h5>
+                            <p class="card-text">Voir et gérer tous les clubs</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <a th:href="@{/admin/evenements/gestion}" class="card text-decoration-none h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-calendar-plus fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">Créer un Événement</h5>
+                            <p class="card-text">Planifier un nouvel événement</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <a th:href="@{/admin/communication}" class="card text-decoration-none h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-bullhorn fa-3x text-info mb-3"></i>
+                            <h5 class="card-title">Communication</h5>
+                            <p class="card-text">Envoyer des notifications</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <a th:href="@{/admin/rapports}" class="card text-decoration-none h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-chart-bar fa-3x text-warning mb-3"></i>
+                            <h5 class="card-title">Rapports</h5>
+                            <p class="card-text">Voir les statistiques</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

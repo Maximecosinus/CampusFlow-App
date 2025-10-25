@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Rapports - Administration</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<section>
+    <div class="container-fluid">
+        <!-- En-tête de la page -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Rapports et Statistiques</h1>
+            <div class="btn-group">
+                <button class="btn btn-outline-primary" onclick="exportReport('pdf')">
+                    <i class="fas fa-file-pdf me-2"></i>Export PDF
+                </button>
+                <button class="btn btn-outline-success" onclick="exportReport('excel')">
+                    <i class="fas fa-file-excel me-2"></i>Export Excel
+                </button>
+                <button class="btn btn-outline-info" onclick="refreshData()">
+                    <i class="fas fa-refresh me-2"></i>Actualiser
+                </button>
+            </div>
+        </div>
+
+        <!-- Filtres de période -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="dateDebut" class="form-label">Date de Début</label>
+                        <input type="date" class="form-control" id="dateDebut" th:value="${dateDebut}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="dateFin" class="form-label">Date de Fin</label>
+                        <input type="date" class="form-control" id="dateFin" th:value="${dateFin}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="clubFilter" class="form-label">Club</label>
+                        <select class="form-select" id="clubFilter">
+                            <option value="">Tous les clubs</option>
+                            <option th:each="club : ${clubs}" th:value="${club.id}" th:text="${club.nom}">Club</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="typeFilter" class="form-label">Type d'Événement</label>
+                        <select class="form-select" id="typeFilter">
+                            <option value="">Tous les types</option>
+                            <option value="SPORT">Sport</option>
+                            <option value="CULTUREL">Culturel</option>
+                            <option value="ACADEMIQUE">Académique</option>
+                            <option value="SOCIAL">Social</option>
+                            <option value="TECHNOLOGIE">Technologie</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12 text-end">
+                        <button class="btn btn-primary" onclick="applyFilters()">
+                            <i class="fas fa-filter me-2"></i>Appliquer les Filtres
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques générales -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                        <h5 class="card-title">Total Étudiants</h5>
+                        <h3 th:text="${totalEtudiants}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-2x text-success mb-2"></i>
+                        <h5 class="card-title">Clubs Actifs</h5>
+                        <h3 th:text="${clubsActifs}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-calendar fa-2x text-info mb-2"></i>
+                        <h5 class="card-title">Événements</h5>
+                        <h3 th:text="${totalEvenements}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
+                        <h5 class="card-title">Participation</h5>
+                        <h3 th:text="${tauxParticipationGlobal} + '%'">0%</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphiques principaux -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Participation aux Événements</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="participationChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Événements par Mois</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="evenementsMoisChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphiques secondaires -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Événements par Type</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="typeEvenementsChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Clubs les Plus Actifs</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="clubsActifsChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Taux de Participation par Club</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="participationClubChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tableaux détaillés -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Top 10 des Événements</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Événement</th>
+                                        <th>Participants</th>
+                                        <th>Taux</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="event : ${topEvenements}">
+                                        <td th:text="${event.titre}">Titre</td>
+                                        <td th:text="${event.participants}">0</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar" th:style="'width: ' + ${event.tauxParticipation} + '%'" th:text="${event.tauxParticipation} + '%'">0%</div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Statistiques des Clubs</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Club</th>
+                                        <th>Membres</th>
+                                        <th>Événements</th>
+                                        <th>Activité</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="club : ${statistiquesClubs}">
+                                        <td th:text="${club.nom}">Club</td>
+                                        <td th:text="${club.nombreMembres}">0</td>
+                                        <td th:text="${club.nombreEvenements}">0</td>
+                                        <td>
+                                            <span class="badge" th:classappend="${club.activite == 'HAUTE'} ? 'bg-success' : (${club.activite == 'MOYENNE'} ? 'bg-warning' : 'bg-danger')" th:text="${club.activite}">Faible</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rapports détaillés -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Rapport Détaillé</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h6>Résumé Exécutif</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>Période :</strong> <span th:text="${periode}">Période</span></li>
+                                    <li><strong>Total d'événements :</strong> <span th:text="${totalEvenements}">0</span></li>
+                                    <li><strong>Participation moyenne :</strong> <span th:text="${participationMoyenne} + '%'">0%</span></li>
+                                    <li><strong>Club le plus actif :</strong> <span th:text="${clubPlusActif}">Club</span></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Recommandations</h6>
+                                <ul class="list-unstyled">
+                                    <li th:each="recommandation : ${recommandations}">
+                                        <i class="fas fa-arrow-right text-primary me-2"></i>
+                                        <span th:text="${recommandation}">Recommandation</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Tendances</h6>
+                                <ul class="list-unstyled">
+                                    <li th:each="tendance : ${tendances}">
+                                        <i class="fas fa-trend-up text-success me-2"></i>
+                                        <span th:text="${tendance}">Tendance</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Données des graphiques (à remplacer par les vraies données du serveur)
+    const participationData = /*[[${participationData}]]*/ [];
+    const evenementsMoisData = /*[[${evenementsMoisData}]]*/ [];
+    const typeEvenementsData = /*[[${typeEvenementsData}]]*/ [];
+    const clubsActifsData = /*[[${clubsActifsData}]]*/ [];
+    const participationClubData = /*[[${participationClubData}]]*/ [];
+
+    // Initialisation des graphiques
+    document.addEventListener('DOMContentLoaded', function() {
+        initCharts();
+    });
+
+    function initCharts() {
+        // Graphique de participation aux événements
+        const participationCtx = document.getElementById('participationChart').getContext('2d');
+        new Chart(participationCtx, {
+            type: 'line',
+            data: {
+                labels: participationData.map(item => item.mois),
+                datasets: [{
+                    label: 'Participation (%)',
+                    data: participationData.map(item => item.participation),
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // Graphique des événements par mois
+        const evenementsMoisCtx = document.getElementById('evenementsMoisChart').getContext('2d');
+        new Chart(evenementsMoisCtx, {
+            type: 'bar',
+            data: {
+                labels: evenementsMoisData.map(item => item.mois),
+                datasets: [{
+                    label: 'Nombre d\'événements',
+                    data: evenementsMoisData.map(item => item.nombre),
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Graphique des événements par type
+        const typeEvenementsCtx = document.getElementById('typeEvenementsChart').getContext('2d');
+        new Chart(typeEvenementsCtx, {
+            type: 'doughnut',
+            data: {
+                labels: typeEvenementsData.map(item => item.type),
+                datasets: [{
+                    data: typeEvenementsData.map(item => item.nombre),
+                    backgroundColor: [
+                        '#FF6384',
+                        '#36A2EB',
+                        '#FFCE56',
+                        '#4BC0C0',
+                        '#9966FF'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+
+        // Graphique des clubs les plus actifs
+        const clubsActifsCtx = document.getElementById('clubsActifsChart').getContext('2d');
+        new Chart(clubsActifsCtx, {
+            type: 'horizontalBar',
+            data: {
+                labels: clubsActifsData.map(item => item.nom),
+                datasets: [{
+                    label: 'Activité',
+                    data: clubsActifsData.map(item => item.activite),
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Graphique du taux de participation par club
+        const participationClubCtx = document.getElementById('participationClubChart').getContext('2d');
+        new Chart(participationClubCtx, {
+            type: 'radar',
+            data: {
+                labels: participationClubData.map(item => item.nom),
+                datasets: [{
+                    label: 'Taux de participation (%)',
+                    data: participationClubData.map(item => item.participation),
+                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                    borderColor: 'rgba(255, 206, 86, 1)',
+                    pointBackgroundColor: 'rgba(255, 206, 86, 1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    }
+
+    // Fonction pour appliquer les filtres
+    function applyFilters() {
+        const dateDebut = document.getElementById('dateDebut').value;
+        const dateFin = document.getElementById('dateFin').value;
+        const clubFilter = document.getElementById('clubFilter').value;
+        const typeFilter = document.getElementById('typeFilter').value;
+        
+        // Ici, vous pourriez envoyer une requête AJAX pour récupérer les données filtrées
+        // et mettre à jour les graphiques
+        console.log('Filtres appliqués:', { dateDebut, dateFin, clubFilter, typeFilter });
+        
+        // Pour l'instant, on recharge la page avec les paramètres
+        const params = new URLSearchParams();
+        if (dateDebut) params.append('dateDebut', dateDebut);
+        if (dateFin) params.append('dateFin', dateFin);
+        if (clubFilter) params.append('clubFilter', clubFilter);
+        if (typeFilter) params.append('typeFilter', typeFilter);
+        
+        window.location.href = '/admin/rapports?' + params.toString();
+    }
+
+    // Fonction pour exporter les rapports
+    function exportReport(format) {
+        const dateDebut = document.getElementById('dateDebut').value;
+        const dateFin = document.getElementById('dateFin').value;
+        const clubFilter = document.getElementById('clubFilter').value;
+        const typeFilter = document.getElementById('typeFilter').value;
+        
+        const params = new URLSearchParams();
+        params.append('format', format);
+        if (dateDebut) params.append('dateDebut', dateDebut);
+        if (dateFin) params.append('dateFin', dateFin);
+        if (clubFilter) params.append('clubFilter', clubFilter);
+        if (typeFilter) params.append('typeFilter', typeFilter);
+        
+        window.open('/admin/rapports/export?' + params.toString(), '_blank');
+    }
+
+    // Fonction pour actualiser les données
+    function refreshData() {
+        window.location.reload();
+    }
+</script>
+
+</body>
+</html>

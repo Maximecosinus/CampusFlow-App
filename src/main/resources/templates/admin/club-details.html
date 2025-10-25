@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Détails du Club - Administration</title>
+</head>
+<body>
+
+<section>
+    <div class="container-fluid">
+        <!-- En-tête de la page -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Détails du Club</h1>
+            <div class="btn-group">
+                <a th:href="@{/admin/clubs}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                </a>
+                <a th:href="@{/admin/clubs/{id}/edit(id=${club.id})}" class="btn btn-primary">
+                    <i class="fas fa-edit me-2"></i>Modifier
+                </a>
+            </div>
+        </div>
+
+        <!-- Informations du club -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Informations Générales</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Nom du Club</h6>
+                                <p th:text="${club.nom}" class="text-muted">Nom du club</p>
+                                
+                                <h6>Description</h6>
+                                <p th:text="${club.description}" class="text-muted">Description du club</p>
+                                
+                                <h6>Catégorie</h6>
+                                <p th:text="${club.categorie}" class="text-muted">Catégorie</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Date de Création</h6>
+                                <p th:text="${#temporals.format(club.dateCreation, 'dd/MM/yyyy')}" class="text-muted">Date</p>
+                                
+                                <h6>Statut</h6>
+                                <span class="badge" th:classappend="${club.statut == 'ACTIF'} ? 'bg-success' : (${club.statut == 'INACTIF'} ? 'bg-danger' : 'bg-warning')" th:text="${club.statut}">Statut</span>
+                                
+                                <h6>Nombre de Membres</h6>
+                                <p th:text="${club.membres != null ? club.membres.size() : 0}" class="text-muted">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chef de club -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Chef de Club</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${club.chefDeClub != null}" class="d-flex align-items-center">
+                            <i class="fas fa-crown fa-2x text-warning me-3"></i>
+                            <div>
+                                <h6 th:text="${club.chefDeClub.nom + ' ' + club.chefDeClub.prenom}">Nom du chef</h6>
+                                <p class="text-muted mb-0" th:text="${club.chefDeClub.email}">Email</p>
+                            </div>
+                        </div>
+                        <div th:if="${club.chefDeClub == null}" class="text-center text-muted">
+                            <i class="fas fa-user-times fa-2x mb-2"></i>
+                            <p>Aucun chef de club assigné</p>
+                            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#assignChefModal">
+                                <i class="fas fa-user-plus me-2"></i>Assigner un chef
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Membres du club -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Membres du Club</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${club.membres != null and !club.membres.isEmpty()}">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Nom</th>
+                                            <th>Email</th>
+                                            <th>Date d'inscription</th>
+                                            <th>Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="membre : ${club.membres}">
+                                            <td th:text="${membre.nom + ' ' + membre.prenom}">Nom</td>
+                                            <td th:text="${membre.email}">Email</td>
+                                            <td th:text="${#temporals.format(membre.dateInscription, 'dd/MM/yyyy')}">Date</td>
+                                            <td>
+                                                <span class="badge bg-success">Actif</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div th:if="${club.membres == null or club.membres.isEmpty()}" class="text-center text-muted">
+                            <i class="fas fa-users fa-2x mb-2"></i>
+                            <p>Aucun membre inscrit</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panneau latéral -->
+            <div class="col-md-4">
+                <!-- Logo du club -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Logo du Club</h6>
+                    </div>
+                    <div class="card-body text-center">
+                        <img th:src="${club.logo != null ? club.logo : '/images/default-club.png'}" 
+                             alt="Logo du club" class="img-fluid rounded" style="max-height: 200px;">
+                    </div>
+                </div>
+
+                <!-- Actions rapides -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">Actions Rapides</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#assignChefModal">
+                                <i class="fas fa-user-plus me-2"></i>Assigner un chef
+                            </button>
+                            <button class="btn btn-outline-warning" th:onclick="'changeStatus(' + ${club.id} + ')'">
+                                <i class="fas fa-toggle-on me-2"></i>Changer le statut
+                            </button>
+                            <button class="btn btn-outline-info" th:onclick="'sendNotification(' + ${club.id} + ')'">
+                                <i class="fas fa-bell me-2"></i>Envoyer notification
+                            </button>
+                            <button class="btn btn-outline-danger" th:onclick="'deleteClub(' + ${club.id} + ')'">
+                                <i class="fas fa-trash me-2"></i>Supprimer le club
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistiques -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">Statistiques</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h5 th:text="${club.membres != null ? club.membres.size() : 0}">0</h5>
+                                <small class="text-muted">Membres</small>
+                            </div>
+                            <div class="col-6">
+                                <h5 th:text="${club.evenements != null ? club.evenements.size() : 0}">0</h5>
+                                <small class="text-muted">Événements</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal d'assignation de chef de club -->
+    <div class="modal fade" id="assignChefModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Assigner un Chef de Club</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/admin/clubs/assign-chef}" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="clubId" th:value="${club.id}">
+                        <div class="mb-3">
+                            <label for="etudiantId" class="form-label">Sélectionner un Étudiant</label>
+                            <select class="form-select" id="etudiantId" name="etudiantId" required>
+                                <option value="">Choisir un étudiant...</option>
+                                <option th:each="etudiant : ${etudiants}" th:value="${etudiant.id}" th:text="${etudiant.nom + ' ' + etudiant.prenom + ' (' + etudiant.email + ')'}">Étudiant</option>
+                            </select>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            L'étudiant sélectionné deviendra le chef de ce club et aura accès aux fonctionnalités de gestion.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Assigner</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function changeStatus(clubId) {
+        if (confirm('Êtes-vous sûr de vouloir changer le statut de ce club ?')) {
+            // Ici, vous pourriez appeler une API pour changer le statut
+            alert('Fonctionnalité à implémenter');
+        }
+    }
+
+    function sendNotification(clubId) {
+        // Ici, vous pourriez ouvrir un modal pour envoyer une notification
+        alert('Fonctionnalité à implémenter');
+    }
+
+    function deleteClub(clubId) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce club ? Cette action est irréversible.')) {
+            window.location.href = '/admin/clubs/' + clubId + '/delete';
+        }
+    }
+</script>
+
+</body>
+</html>

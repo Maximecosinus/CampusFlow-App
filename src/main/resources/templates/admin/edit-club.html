@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Modifier le Club - Administration</title>
+</head>
+<body>
+
+<section>
+    <div class="container-fluid">
+        <!-- En-tête de la page -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Modifier le Club</h1>
+            <a th:href="@{/admin/clubs}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+            </a>
+        </div>
+
+        <!-- Formulaire de modification -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-edit me-2"></i>
+                            Modifier les Informations du Club
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/admin/clubs/{id}/update(id=${club.id})}" method="post" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="mb-3">
+                                        <label for="nom" class="form-label">Nom du Club *</label>
+                                        <input type="text" class="form-control" id="nom" name="nom" 
+                                               th:value="${club.nom}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="categorie" class="form-label">Catégorie</label>
+                                        <select class="form-select" id="categorie" name="categorie">
+                                            <option value="SPORT" th:selected="${club.categorie == 'SPORT'}">Sport</option>
+                                            <option value="CULTUREL" th:selected="${club.categorie == 'CULTUREL'}">Culturel</option>
+                                            <option value="ACADEMIQUE" th:selected="${club.categorie == 'ACADEMIQUE'}">Académique</option>
+                                            <option value="SOCIAL" th:selected="${club.categorie == 'SOCIAL'}">Social</option>
+                                            <option value="TECHNOLOGIE" th:selected="${club.categorie == 'TECHNOLOGIE'}">Technologie</option>
+                                            <option value="AUTRE" th:selected="${club.categorie == 'AUTRE'}">Autre</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description *</label>
+                                <textarea class="form-control" id="description" name="description" rows="4" required th:text="${club.description}"></textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="logo" class="form-label">Nouveau Logo du Club</label>
+                                        <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
+                                        <div class="form-text">Laisser vide pour conserver le logo actuel</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="statut" class="form-label">Statut</label>
+                                        <select class="form-select" id="statut" name="statut">
+                                            <option value="ACTIF" th:selected="${club.statut == 'ACTIF'}">Actif</option>
+                                            <option value="INACTIF" th:selected="${club.statut == 'INACTIF'}">Inactif</option>
+                                            <option value="EN_ATTENTE" th:selected="${club.statut == 'EN_ATTENTE'}">En attente</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="chefDeClub" class="form-label">Chef de Club</label>
+                                <select class="form-select" id="chefDeClub" name="chefDeClubId">
+                                    <option value="">Aucun chef de club</option>
+                                    <option th:each="etudiant : ${etudiants}" 
+                                            th:value="${etudiant.id}" 
+                                            th:selected="${club.chefDeClub != null and club.chefDeClub.id == etudiant.id}"
+                                            th:text="${etudiant.nom + ' ' + etudiant.prenom + ' (' + etudiant.email + ')'}">Étudiant</option>
+                                </select>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <a th:href="@{/admin/clubs}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Annuler
+                                </a>
+                                <div>
+                                    <button type="button" class="btn btn-outline-danger me-2" th:onclick="'deleteClub(' + ${club.id} + ')'">
+                                        <i class="fas fa-trash me-2"></i>Supprimer
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Mettre à jour
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panneau latéral -->
+            <div class="col-lg-4">
+                <!-- Logo actuel -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Logo Actuel</h6>
+                    </div>
+                    <div class="card-body text-center">
+                        <img th:src="${club.logo != null ? club.logo : '/images/default-club.png'}" 
+                             alt="Logo actuel" class="img-fluid rounded" style="max-height: 150px;">
+                    </div>
+                </div>
+
+                <!-- Informations du club -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">Informations</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <strong>Date de création :</strong><br>
+                            <span th:text="${#temporals.format(club.dateCreation, 'dd/MM/yyyy à HH:mm')}">Date</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Nombre de membres :</strong><br>
+                            <span th:text="${club.membres != null ? club.membres.size() : 0}">0</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Événements organisés :</strong><br>
+                            <span th:text="${club.evenements != null ? club.evenements.size() : 0}">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions rapides -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">Actions Rapides</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#assignChefModal">
+                                <i class="fas fa-user-plus me-2"></i>Changer le chef
+                            </button>
+                            <button class="btn btn-outline-info btn-sm" th:onclick="'viewMembers(' + ${club.id} + ')'">
+                                <i class="fas fa-users me-2"></i>Voir les membres
+                            </button>
+                            <button class="btn btn-outline-warning btn-sm" th:onclick="'viewEvents(' + ${club.id} + ')'">
+                                <i class="fas fa-calendar me-2"></i>Voir les événements
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal d'assignation de chef de club -->
+    <div class="modal fade" id="assignChefModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Changer le Chef de Club</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/admin/clubs/assign-chef}" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="clubId" th:value="${club.id}">
+                        <div class="mb-3">
+                            <label for="nouveauChef" class="form-label">Nouveau Chef de Club</label>
+                            <select class="form-select" id="nouveauChef" name="etudiantId" required>
+                                <option value="">Choisir un étudiant...</option>
+                                <option th:each="etudiant : ${etudiants}" th:value="${etudiant.id}" th:text="${etudiant.nom + ' ' + etudiant.prenom + ' (' + etudiant.email + ')'}">Étudiant</option>
+                            </select>
+                        </div>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            L'ancien chef de club perdra ses privilèges de gestion.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Changer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function deleteClub(clubId) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce club ? Cette action est irréversible.')) {
+            window.location.href = '/admin/clubs/' + clubId + '/delete';
+        }
+    }
+
+    function viewMembers(clubId) {
+        // Ici, vous pourriez ouvrir un modal ou rediriger vers une page des membres
+        alert('Fonctionnalité à implémenter');
+    }
+
+    function viewEvents(clubId) {
+        // Ici, vous pourriez rediriger vers les événements du club
+        window.location.href = '/admin/evenements/liste?club=' + clubId;
+    }
+
+    // Validation du formulaire
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const nom = document.getElementById('nom').value.trim();
+        const description = document.getElementById('description').value.trim();
+        
+        if (!nom || !description) {
+            e.preventDefault();
+            alert('Veuillez remplir tous les champs obligatoires.');
+            return;
+        }
+        
+        if (nom.length < 3) {
+            e.preventDefault();
+            alert('Le nom du club doit contenir au moins 3 caractères.');
+            return;
+        }
+        
+        if (description.length < 10) {
+            e.preventDefault();
+            alert('La description doit contenir au moins 10 caractères.');
+            return;
+        }
+    });
+</script>
+
+</body>
+</html>

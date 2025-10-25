@@ -1,64 +1,209 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
 <head>
-    <title>Accueil - Dashboard</title>
+    <title>Accueil - Campus Flow</title>
 </head>
 <body>
 
-<!-- Le contenu spécifique à la page d'accueil commence ici -->
+<!-- Le contenu spécifique de la page d'accueil commence ici -->
 <section>
-    <div class="container-fluid">
-        <h1>Bienvenue dans l'espace Vie Étudiante</h1>
-        <p class="lead">Découvrez les événements à venir et rejoignez les clubs qui vous intéressent.</p>
+    <div class="accueil-page">
+        <!-- Bannière principale -->
+        <div class="banner">
+            <h2>Bienvenue sur Campus Flow</h2>
+            <p>L'espace qui enrichit ton expérience universitaire !</p>
+            <p>Découvre, participe et connecte-toi avec ta communauté étudiante.</p>
+        </div>
 
-        <hr>
-        <!-- Section des Évènements à Venir-->
-        <h2>Évènements à Venir</h2>
-        <div class="row">
+        <!-- Section des Clubs -->
+        <div class="section clubs-section">
+            <h2>CLUBS DE L'ÉCOLE</h2>
+            <p>Les associations qui complètent & personnalisent ton développement dans les talents.</p>
+            
+            <!-- Structure pour les étudiants (carrousel) -->
+            <div class="carousel" th:if="${utilisateurConnecte?.role?.name() == 'ETUDIANT'}">
+                <button class="carousel-btn prev" onclick="moveCarousel('prev')">&#10094;</button>
+                <div class="clubs-container" th:if="${clubsRecents != null and !clubsRecents.isEmpty()}">
+                    <div class="club" th:each="club : ${clubsRecents}" th:data-club-id="${club.id}" onclick="goToClub(this)">
+                        <img th:src="${club.logo != null ? club.logo : '/images/foot.jpg'}"
+                             th:alt="${club.nom}" class="club-img" />
+                        <span th:text="${club.nom}">Nom du Club</span>
+                    </div>
+                </div>
+                <div th:if="${clubsRecents == null or clubsRecents.isEmpty()}" class="clubs-container">
+                    <div class="club">
+                        <img src="/images/foot.jpg" alt="Club Football" class="club-img" />
+                        <span>Club Football</span>
+                    </div>
+                    <div class="club">
+                        <img src="/images/basket.jpg" alt="Club Basketball" class="club-img" />
+                        <span>Club Basketball</span>
+                    </div>
+                    <div class="club">
+                        <img src="/images/danse.jpg" alt="Club Danse" class="club-img" />
+                        <span>Club Danse</span>
+                    </div>
+                </div>
+                <button class="carousel-btn next" onclick="moveCarousel('next')">&#10095;</button>
+            </div>
+
+            <!-- Structure pour les chefs de club et admins (grille Bootstrap) -->
+            <div th:if="${utilisateurConnecte?.role?.name() != 'ETUDIANT'}" class="row">
+                <div class="col-md-4 mb-4" th:each="club : ${clubsRecents}">
+                    <div class="card h-100">
+                        <img th:src="${club.logo != null ? club.logo : '/images/default-club.png'}" class="card-img-top" alt="Logo du club">
+                        <div class="card-body">
+                            <h5 class="card-title" th:text="${club.nom}">Nom du Club</h5>
+                            <p class="card-text" th:text="${club.description}">Description du club...</p>
+                        </div>
+                        <div class="card-footer">
+                            <a th:href="@{/clubs/{id}(id=${club.id})}" class="btn btn-primary">Voir détails</a>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${clubsRecents == null or clubsRecents.isEmpty()}" class="col-12">
+                    <p>Aucun club n'a été créé pour le moment.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section À propos -->
+        <section class="section about-section">
+            <h2>À PROPOS DE L'ÉCOLE</h2>
+            <div class="about-content">
+                <div class="about-image">
+                    <img th:src="@{/images/sji.jpg}" alt="École" class="about-img">
+                </div>
+                <div class="about-description">
+                    <p>Notre école est un lieu d'apprentissage dynamique où les étudiants développent leurs compétences académiques et personnelles. Rejoignez notre communauté pour explorer vos passions et contribuer à un environnement vibrant.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section des Événements -->
+        <div class="section events-section">
+            <h2>ÉVÉNEMENTS</h2>
+            <p>Ne rate aucun événement à ton goût.</p>
+            
+            <!-- Structure pour les étudiants (carrousel) -->
+            <div class="events-container" th:if="${utilisateurConnecte?.role?.name() == 'ETUDIANT'}">
+                <div class="event" th:each="event : ${evenementsAVenir}">
+                    <img th:src="${event.photo != null ? event.photo : '/images/basketball.jpg'}"
+                        th:alt="${event.titre}" class="event-img" />
+                    <span th:text="${event.titre}">Nom de l'événement</span>
+                </div>
+                <div th:if="${evenementsAVenir == null or evenementsAVenir.isEmpty()}">
+                    <div class="event">
+                        <img src="/images/basketball.jpg" alt="Tournoi Basketball" class="event-img" />
+                        <span>Tournoi Basketball</span>
+                    </div>
+                    <div class="event">
+                        <img src="/images/volley.jpg" alt="Match Volleyball" class="event-img" />
+                        <span>Match Volleyball</span>
+                    </div>
+                    <div class="event">
+                        <img src="/images/orchestre.jpg" alt="Concert Orchestre" class="event-img" />
+                        <span>Concert Orchestre</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Structure pour les chefs de club et admins (grille Bootstrap) -->
+            <div th:if="${utilisateurConnecte?.role?.name() != 'ETUDIANT'}" class="row">
             <div class="col-md-4 mb-4" th:each="event : ${evenementsAVenir}">
                 <div class="card h-100">
                     <img th:src="${event.photo != null ? event.photo : '/images/default-event.png'}" class="card-img-top" alt="Image de l'événement">
                     <div class="card-body">
-                        <h5 class="card-title" th:text="${event.titre}">Titre de l'évènement</h5>
-                        <p class="card-text">Le <span th:text="${#temporals.format(event.dateHeureDebut, 'dd MMMM yyyy à HH:mm')}"></span>
-                        </p>
-                        <p class="card-text" th:text="${event.lieu}">Lieu de l'évènement</p>
+                            <h5 class="card-title" th:text="${event.titre}">Titre de l'événement</h5>
+                            <p class="card-text">Le <span th:text="${#temporals.format(event.dateHeureDebut, 'dd MMMM yyyy à HH:mm')}"></span></p>
+                            <p class="card-text" th:text="${event.lieu}">Lieu de l'événement</p>
                     </div>
                     <div class="card-footer">
                         <a href="#" class="btn btn-info">Plus d'infos</a>
                     </div>
                 </div>
             </div>
-            <div th:if="${evenementsAVenir.isEmpty()}"> <p>Aucun évènement à venir pour le moment.</p></div>
-        </div>
-        <hr>
-        <!-- Section des Clubs récents -->
-        <h2>Clubs Récents</h2>
-        <div class="row">
-            <!-- 1. La boucle Thymeleaf : th:each -->
-            <div class="col-md-4 mb-4" th:each="club : ${clubsRecents}">
-                <!-- 2. Utilisation des classes "card" de Bootstrap -->
-                <div class="card h-100">
-                    <!-- Image du club (on met une image par défaut pour l'instant) -->
-                    <img th:src="${club.logo != null ? club.logo : '/images/default-club.png'}" class="card-img-top" alt="Logo du club">
-
-                    <div class="card-body">
-                        <!-- 3. Affichage des données du club -->
-                        <h5 class="card-title" th:text="${club.nom}">Nom du Club</h5>
-                        <p class="card-text" th:text="${club.description}">Description du club...</p>
-                    </div>
-
-                    <div class="card-footer">
-                        <a th:href="@{/clubs/{id}(id=${club.id})}"  class="btn btn-primary">Voir détails</a>
+                <div th:if="${evenementsAVenir == null or evenementsAVenir.isEmpty()}" class="col-12">
+                    <p>Aucun événement à venir pour le moment.</p>
                     </div>
                 </div>
             </div>
-            <!-- Message si aucun club n'est trouvé -->
-            <div th:if="${clubsRecents.isEmpty()}">
-                <p>Aucun club n'a été créé pour le moment.</p>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Tous droits réservés, Campus Flow 2025.</p>
             </div>
         </div>
-    </div>
+
+    <!-- JavaScript pour le carrousel (uniquement pour les étudiants) -->
+    <script th:if="${utilisateurConnecte?.role?.name() == 'ETUDIANT'}">
+        function moveCarousel(direction) {
+            const container = document.querySelector('.clubs-container');
+            const clubs = container.querySelectorAll('.club');
+            
+            if (clubs.length <= 1) return; // Pas besoin de carrousel avec 1 élément ou moins
+            
+            const clubWidth = clubs[0].offsetWidth;
+            const gap = 20; // La valeur du gap définie dans CSS
+            const scrollAmount = clubWidth + gap;
+            
+            if (direction === 'next') {
+                container.style.transform = `translateX(-${scrollAmount}px)`;
+                setTimeout(() => {
+                    container.appendChild(clubs[0]);
+                    container.style.transition = 'none';
+                    container.style.transform = 'translateX(0)';
+                    setTimeout(() => {
+                        container.style.transition = 'transform 0.5s ease-in-out';
+                    }, 10);
+                }, 500);
+            } else {
+                const lastClub = clubs[clubs.length - 1];
+                container.prepend(lastClub);
+                container.style.transition = 'none';
+                container.style.transform = `translateX(-${scrollAmount}px)`;
+                setTimeout(() => {
+                    container.style.transition = 'transform 0.5s ease-in-out';
+                    container.style.transform = 'translateX(0)';
+                }, 10);
+            }
+        }
+
+        // Fonction pour rediriger vers les détails d'un club
+        function goToClub(element) {
+            const clubId = element.getAttribute('data-club-id');
+            if (clubId) {
+                window.location.href = '/clubs/' + clubId;
+            }
+        }
+
+        // Défilement automatique
+        let autoScrollInterval;
+
+        function startAutoScroll() {
+            autoScrollInterval = setInterval(() => moveCarousel('next'), 5000);
+        }
+
+        function stopAutoScroll() {
+            if (autoScrollInterval) {
+                clearInterval(autoScrollInterval);
+            }
+        }
+
+        // Démarrer l'auto-scroll au chargement de la page
+        document.addEventListener('DOMContentLoaded', () => {
+            const carousel = document.querySelector('.carousel');
+            if (carousel) {
+                startAutoScroll();
+
+                // Arrêter le défilement automatique au survol
+                carousel.addEventListener('mouseenter', stopAutoScroll);
+
+                // Reprendre le défilement automatique quand la souris quitte le carrousel
+                carousel.addEventListener('mouseleave', startAutoScroll);
+            }
+        });
+    </script>
 </section>
 <!-- Le contenu spécifique se termine ici -->
 
