@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout('Gestion des Utilisateurs', ~{::content})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des Utilisateurs</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-person-gear"></i> Gestion des Utilisateurs</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info admin-alert">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Section en développement</strong><br>
+                            Cette section permettra de gérer tous les utilisateurs du système.
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Fonctionnalités prévues :</h6>
+                                <ul>
+                                    <li>Liste de tous les utilisateurs</li>
+                                    <li>Gestion des rôles et permissions</li>
+                                    <li>Activation/désactivation de comptes</li>
+                                    <li>Statistiques d'utilisation</li>
+                                    <li>Gestion des mots de passe</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Actions disponibles :</h6>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary" disabled>
+                                        <i class="bi bi-list"></i> Voir tous les Utilisateurs
+                                    </button>
+                                    <button class="btn btn-success" disabled>
+                                        <i class="bi bi-person-plus"></i> Créer un Utilisateur
+                                    </button>
+                                    <button class="btn btn-warning" disabled>
+                                        <i class="bi bi-shield-check"></i> Gérer les Rôles
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

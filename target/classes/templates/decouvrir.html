@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<!-- On utilise notre layout spécifique aux étudiants -->
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/student-layout :: studentLayout('Découvrir - CampusFlow', ~{::section})}">
+<head>
+    <!-- Le titre spécifique de la page -->
+    <title>Découvrir - CampusFlow</title>
+</head>
+<body>
+<!-- Le contenu spécifique de la page -->
+<section>
+    <div class="container-fluid">
+        <!-- Titre de la page -->
+        <h1 class="mb-4">Découvrir la vie associative</h1>
+        <p class="lead">Explorez les différentes facettes de la vie étudiante sur le campus.</p>
+
+        <div class="row mt-5">
+
+            <!-- GRANDE CARTE POUR LES CLUBS -->
+            <div class="col-lg-6 mb-4">
+                <div class="card text-white bg-primary shadow"> <!-- Classes Bootstrap pour le style -->
+                    <div class="card-body" style="padding: 2rem;">
+                        <h3 class="card-title">Clubs Étudiants</h3>
+                        <p class="card-text">Trouvez et rejoignez des groupes passionnés par la technologie, les arts, le sport et bien plus encore.</p>
+                        <!-- Ce lien pointera vers la future page listant tous les clubs -->
+                        <a th:href="@{/decouvrir/clubs}" class="btn btn-light stretched-link">Explorer les clubs</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRANDE CARTE POUR LES ÉVÉNEMENTS -->
+            <div class="col-lg-6 mb-4">
+                <div class="card text-white bg-success shadow"> <!-- Des couleurs différentes pour le style -->
+                    <div class="card-body" style="padding: 2rem;">
+                        <h3 class="card-title">Événements</h3>
+                        <p class="card-text">Ne manquez aucune conférence, atelier ou compétition. Découvrez l'agenda complet des événements à venir.</p>
+                        <!-- Ce lien pointera vers la future page listant tous les événements -->
+                        <a href="#" class="btn btn-light stretched-link">Explorer les événements</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- On pourra ajouter d'autres grandes cartes ici (Associations, Ateliers, etc.) -->
+
+        </div>
+    </div>
+</section>
+</body>
+</html>

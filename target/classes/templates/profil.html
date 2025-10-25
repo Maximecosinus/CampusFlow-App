@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<!-- On réutilise notre layout spécifique aux étudiants -->
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/student-layout :: studentLayout('Mon Profil - CampusFlow', ~{::section})}">
+<head>
+  <title>Mon Profil - CampusFlow</title>
+</head>
+<body>
+<section>
+  <div class="container-fluid">
+    <h1 class="mb-4">Mon Profil</h1>
+
+    <!-- Message de succès après la mise à jour -->
+    <div th:if="${param.success}" class="alert alert-success">
+      Votre profil a été mis à jour avec succès.
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        <img th:src="${utilisateur.photoProfil != null ? utilisateur.photoProfil: '/images/default-avatar.png'}" alt="Photo de profil" class="img-fluid rounded-circle mb-3"
+        style="width: 200px; height: 200px; object-fit: cover">
+        <form th:action="@{/profil/modifier-photo}" method="post" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="photo" class="form-label">Changer la photo</label>
+            <input type="file" id="photo" name="photo" class="form-control" accept="image/*" required>
+          </div>
+          <button type="submit" class="btn btn-secondary">Mettre à jour la photo</button>
+        </form>
+      </div>
+
+      <div class="col-md-8">
+        <form th:action="@{/profil/modifier}" th:object="${profile}" method="post">
+          <div class="mb-3">
+            <label for="prenom" class="form-label">Prénom</label>
+            <input type="text" id="prenom" class="form-control" th:field="*{prenom}" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="nom" class="form-label">Nom</label>
+            <input type="text" id="nom" class="form-control" th:field="*{nom}" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="bio" class="form-label">Biographie</label>
+            <textarea id="bio" class="form-control" th:field="*{bio}" rows="4"
+                      placeholder="Parlez un peu de vous, de vos passions..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr" th:replace="~{super-admin/layout :: layout('Communication - CampusFlow', ~{::content})}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Communication - CampusFlow</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="container-fluid">
+            <h1 class="h3 mb-4 text-gray-800"><i class="fas fa-bullhorn"></i> Communication</h1>
+
+    <!-- Messages de succès/erreur -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Formulaire d'envoi de notification -->
+    <div class="super-admin-card">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-paper-plane me-2"></i>
+                Envoyer une notification à tous les étudiants
+            </h6>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/admin/communication/send}" method="post">
+                <div class="mb-3">
+                    <label for="sujet" class="form-label">
+                        <i class="fas fa-tag me-1"></i>
+                        Sujet *
+                    </label>
+                    <input type="text" 
+                           class="form-control" 
+                           id="sujet" 
+                           name="sujet" 
+                           placeholder="Ex: Nouvelle activité du club de musique"
+                           required
+                           maxlength="100">
+                    <div class="form-text">Maximum 100 caractères</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="message" class="form-label">
+                        <i class="fas fa-comment-alt me-1"></i>
+                        Message *
+                    </label>
+                    <textarea class="form-control" 
+                              id="message" 
+                              name="message" 
+                              rows="8" 
+                              placeholder="Rédigez votre message ici..."
+                              required
+                              maxlength="1000"></textarea>
+                    <div class="form-text">Maximum 1000 caractères</div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Information :</strong>
+                        Cette notification sera envoyée par email à tous les étudiants inscrits dans l'application.
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                        <i class="fas fa-undo me-1"></i>
+                        Effacer
+                    </button>
+                    <button type="submit" class="btn btn-super-admin">
+                        <i class="fas fa-paper-plane me-1"></i>
+                        Envoyer la notification
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Statistiques de communication -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="super-admin-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-info">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Statistiques
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <div class="text-primary">
+                                    <i class="fas fa-users fa-2x"></i>
+                                </div>
+                                <div class="text-gray-600">Destinataires</div>
+                                <div class="h4 mb-0">Tous les étudiants</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-success">
+                                <i class="fas fa-envelope fa-2x"></i>
+                            </div>
+                            <div class="text-gray-600">Méthode</div>
+                            <div class="h4 mb-0">Email</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="super-admin-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Important
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Vérifiez votre message avant l'envoi
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Utilisez un sujet clair et descriptif
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Respectez les limites de caractères
+                        </li>
+                        <li>
+                            <i class="fas fa-check text-success me-2"></i>
+                            L'envoi peut prendre quelques minutes
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Fonction pour effacer le formulaire
+    function resetForm() {
+        if (confirm('Êtes-vous sûr de vouloir effacer le formulaire ?')) {
+            document.getElementById('sujet').value = '';
+            document.getElementById('message').value = '';
+        }
+    }
+
+    // Compteur de caractères en temps réel
+    document.addEventListener('DOMContentLoaded', function() {
+        const sujetInput = document.getElementById('sujet');
+        const messageTextarea = document.getElementById('message');
+        
+        // Ajouter des compteurs de caractères
+        addCharacterCounter(sujetInput, 100);
+        addCharacterCounter(messageTextarea, 1000);
+    });
+
+    function addCharacterCounter(element, maxLength) {
+        const counter = document.createElement('div');
+        counter.className = 'form-text text-end';
+        counter.style.fontSize = '0.875rem';
+        
+        element.parentNode.appendChild(counter);
+        
+        function updateCounter() {
+            const remaining = maxLength - element.value.length;
+            counter.textContent = `${element.value.length}/${maxLength} caractères`;
+            
+            if (remaining < 50) {
+                counter.className = 'form-text text-end text-warning';
+            } else if (remaining < 0) {
+                counter.className = 'form-text text-end text-danger';
+            } else {
+                counter.className = 'form-text text-end';
+            }
+        }
+        
+        element.addEventListener('input', updateCounter);
+        updateCounter();
+    }
+</script>
+        </div>
+    </div>
+</body>
+</html>

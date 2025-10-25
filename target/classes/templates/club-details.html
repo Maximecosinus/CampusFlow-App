@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Détails du Club - ' + ${club.nom}, ~{::section})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Détails du Club</title>
+</head>
+<body>
+<!-- Le contenu spécifique de la page -->
+<section>
+    <div class="container-fluid">
+        <!-- On utilise l'objet "club" passé par le contrôleur -->
+
+        <!-- En-tête avec le nom du club et le logo -->
+        <div class="d-flex align-items-center mb-4">
+            <img th:src="${club.logo != null ? club.logo : '/images/default-club.png'}"
+                 alt="Logo" style="width: 100px; height: 100px; border-radius: 50%;" class="me-4">
+            <div>
+                <h1 th:text="${club.nom}">Nom du Club</h1>
+                <!-- On affichera le nom du président ici plus tard -->
+                <p class="lead text-muted">Présidé par : [Nom du Président]</p>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- Description complète du club -->
+        <h3>Description</h3>
+        <p th:text="${club.description}">Description complète du club...</p>
+
+        <hr>
+
+        <!-- Boutons d'action -->
+        <!-- Boutons d'action -->
+        <div class="mt-4">
+            <!-- Cas 1 : L'utilisateur n'a jamais fait de demande (le statut est null) -->
+            <div th:if="${statutInscription == null}">
+                <form th:action="@{/clubs/{id}/inscrire(id=${club.id})}" method="post">
+                    <button type="submit" class="btn btn-success">S'inscrire au club</button>
+                </form>
+            </div>
+
+            <!-- Cas 2 : La demande est en attente -->
+            <div th:if="${statutInscription != null && statutInscription.name() == 'EN_ATTENTE'}">
+                <button class="btn btn-warning" disabled>Demande en attente d'approbation</button>
+            </div>
+
+            <!-- Cas 3 : La demande a été acceptée (l'utilisateur est membre) -->
+            <div th:if="${statutInscription != null && statutInscription.name() == 'ACCEPTE'}">
+                <p class="text-success fw-bold"><i class="bi bi-check-circle-fill"></i> Vous êtes membre de ce club.</p>
+                <form th:action="@{/clubs/{id}/desinscrire(id=${club.id})}" method="post">
+                    <button type="submit" class="btn btn-danger">Se désinscrire</button>
+                </form>
+            </div>
+
+            <!-- Cas 4 (Optionnel) : La demande a été refusée -->
+            <div th:if="${statutInscription != null && statutInscription.name() == 'REFUSE'}">
+                <p class="text-danger">Votre dernière demande d'adhésion a été refusée.</p>
+                <!-- On pourrait ici permettre de refaire une demande après un certain temps -->
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

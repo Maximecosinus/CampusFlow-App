@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Calendrier du Club - ' + ${club.nom}, ~{::section})}">
+<head>
+    <title>Calendrier du Club</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+    
+    <style>
+        .calendar-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .calendar-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            margin-bottom: 0;
+        }
+        
+        .calendar-toolbar {
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 0.75rem 1rem;
+        }
+        
+        .calendar-view-buttons {
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .calendar-view-buttons .btn {
+            font-size: 0.875rem;
+            padding: 0.375rem 0.75rem;
+        }
+        
+        .calendar-view-buttons .btn.active {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        .calendar-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .calendar-stats {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        /* FullCalendar personnalisation */
+        .fc {
+            font-family: inherit;
+        }
+        
+        .fc-toolbar-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .fc-button-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        .fc-button-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+        
+        .fc-event {
+            border-radius: 4px;
+            border: none;
+            font-size: 0.875rem;
+        }
+        
+        .fc-event-title {
+            font-weight: 500;
+        }
+        
+        .fc-daygrid-event {
+            margin: 1px 2px;
+        }
+        
+        .fc-timegrid-event {
+            margin: 1px 0;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .calendar-toolbar {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .calendar-view-buttons {
+                justify-content: center;
+            }
+            
+            .calendar-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<section>
+        <div class="container-fluid mt-4">
+            <!-- En-tête de la page -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h3 mb-1">
+                                <i class="fas fa-calendar-alt text-primary me-2"></i>
+                                Calendrier du Club
+                            </h1>
+                            <p class="text-muted mb-0" th:text="'Club: ' + ${club.nom}">Club: Nom du Club</p>
+                        </div>
+                        <div>
+                            <a th:href="@{/gestion-club}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Retour au Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtres et Statistiques -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <!-- Filtres de statut -->
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title mb-3">Filtrer les événements</h6>
+                            <div class="btn-group" role="group" aria-label="Filtres d'événements">
+                                <button type="button" class="btn btn-outline-primary filter-btn active" data-filter="all">
+                                    <i class="fas fa-calendar-alt me-1"></i>Tous
+                                </button>
+                                <button type="button" class="btn btn-outline-success filter-btn" data-filter="upcoming">
+                                    <i class="fas fa-clock me-1"></i>À venir
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary filter-btn" data-filter="past">
+                                    <i class="fas fa-history me-1"></i>Passés
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <!-- Statistiques rapides -->
+                    <div class="calendar-stats">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="stat-item">
+                                    <div class="stat-number text-primary" id="total-events">0</div>
+                                    <div class="stat-label">Total</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-item">
+                                    <div class="stat-number text-success" id="upcoming-events">0</div>
+                                    <div class="stat-label">À venir</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendrier interactif -->
+            <div class="calendar-container">
+                <!-- En-tête du calendrier -->
+                <div class="calendar-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-0">
+                                <i class="fas fa-calendar-week me-2"></i>
+                                Calendrier Interactif
+                            </h4>
+                            <small class="opacity-75">Visualisez et gérez vos événements</small>
+                        </div>
+                        <div class="calendar-actions">
+                            <a th:href="@{/gestion-club/evenements/creer}" class="btn btn-light btn-sm">
+                                <i class="fas fa-plus me-1"></i>Nouvel Événement
+                            </a>
+                            <a th:href="@{/gestion-club/evenements}" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-list me-1"></i>Gérer
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barre d'outils du calendrier -->
+                <div class="calendar-toolbar d-flex justify-content-between align-items-center">
+                    <div class="calendar-view-buttons">
+                        <button type="button" class="btn btn-outline-primary active" id="view-month">
+                            <i class="fas fa-calendar-alt me-1"></i>Mois
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" id="view-week">
+                            <i class="fas fa-calendar-week me-1"></i>Semaine
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" id="view-day">
+                            <i class="fas fa-calendar-day me-1"></i>Jour
+                        </button>
+                    </div>
+                    
+                    <div class="calendar-actions">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="prev-btn">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="today-btn">
+                                Aujourd'hui
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="next-btn">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-download me-1"></i>Export
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" th:href="@{/gestion-club/calendrier/export/ics}">
+                                        <i class="fas fa-file-export me-2"></i>Télécharger (.ics)
+                                    </a>
+                                </li>
+                                <li>
+                                    <button class="dropdown-item" onclick="copyCalendarUrl()">
+                                        <i class="fas fa-copy me-2"></i>Copier le lien
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendrier FullCalendar -->
+                <div id="calendar" style="padding: 1rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup pour les détails d'événement -->
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalLabel">Détails de l'événement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <h6 class="text-primary" id="eventTitle">Titre de l'événement</h6>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Date et heure :</strong>
+                        <span id="eventDateTime">Non spécifié</span>
+                    </div>
+                    <div class="mb-3" id="eventLocationDiv" style="display: none;">
+                        <strong>Lieu :</strong>
+                        <span id="eventLocation">Non spécifié</span>
+                    </div>
+                    <div class="mb-3" id="eventDescriptionDiv" style="display: none;">
+                        <strong>Description :</strong>
+                        <p id="eventDescription" class="text-muted">Aucune description</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <a href="#" class="btn btn-warning" id="editEventBtn">
+                        <i class="fas fa-edit me-1"></i>Modifier
+                    </a>
+                    <button type="button" class="btn btn-danger" id="deleteEventBtn">
+                        <i class="fas fa-trash me-1"></i>Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FullCalendar JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales/fr.global.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuration du calendrier
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                // Configuration de base
+                locale: 'fr',
+                firstDay: 1, // Lundi comme premier jour
+                height: 'auto',
+                
+                // Vues disponibles
+                headerToolbar: false, // On utilise notre propre toolbar
+                views: {
+                    dayGridMonth: {
+                        titleFormat: { year: 'numeric', month: 'long' }
+                    },
+                    timeGridWeek: {
+                        titleFormat: { year: 'numeric', month: 'short', day: 'numeric' }
+                    },
+                    timeGridDay: {
+                        titleFormat: { year: 'numeric', month: 'long', day: 'numeric' }
+                    }
+                },
+                
+                // Vue par défaut
+                initialView: 'dayGridMonth',
+                
+                // Source de données
+                events: function(info, successCallback, failureCallback) {
+                    const activeFilter = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
+                    fetch('/gestion-club/calendrier/api/events?filter=' + activeFilter)
+                        .then(response => response.json())
+                        .then(data => {
+                            successCallback(data);
+                            updateStatistics(data);
+                        })
+                        .catch(error => {
+                            console.error('Erreur lors du chargement des événements:', error);
+                            failureCallback(error);
+                            showNotification('Erreur lors du chargement des événements', 'error');
+                        });
+                },
+                
+                // Personnalisation des événements
+                eventDisplay: 'block',
+                eventTextColor: '#ffffff',
+                eventBackgroundColor: '#0d6efd',
+                eventBorderColor: '#0d6efd',
+                
+                // Interactions
+                selectable: false,
+                selectMirror: true,
+                dayMaxEvents: true,
+                moreLinkClick: 'popover',
+                
+                // Gestion des clics
+                eventClick: function(info) {
+                    // Afficher la popup avec les détails de l'événement
+                    showEventModal(info.event);
+                },
+                
+                // Dates et heures
+                slotMinTime: '08:00:00',
+                slotMaxTime: '22:00:00',
+                slotDuration: '01:00:00',
+                slotLabelInterval: '01:00:00',
+                
+                // Responsive
+                aspectRatio: 1.8,
+                
+                // Callbacks
+                loading: function(bool) {
+                    if (bool) {
+                        console.log('Chargement des événements...');
+                    } else {
+                        console.log('Événements chargés');
+                    }
+                }
+            });
+
+            // Initialisation du calendrier
+            calendar.render();
+
+            // Gestion des boutons de vue
+            document.getElementById('view-month').addEventListener('click', function() {
+                calendar.changeView('dayGridMonth');
+                updateViewButtons('month');
+            });
+            
+            document.getElementById('view-week').addEventListener('click', function() {
+                calendar.changeView('timeGridWeek');
+                updateViewButtons('week');
+            });
+            
+            document.getElementById('view-day').addEventListener('click', function() {
+                calendar.changeView('timeGridDay');
+                updateViewButtons('day');
+            });
+
+            // Gestion de la navigation
+            document.getElementById('prev-btn').addEventListener('click', function() {
+                calendar.prev();
+            });
+            
+            document.getElementById('next-btn').addEventListener('click', function() {
+                calendar.next();
+            });
+            
+            document.getElementById('today-btn').addEventListener('click', function() {
+                calendar.today();
+            });
+
+            // Fonction pour mettre à jour les boutons de vue
+            function updateViewButtons(activeView) {
+                document.querySelectorAll('.calendar-view-buttons .btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                if (activeView === 'month') {
+                    document.getElementById('view-month').classList.add('active');
+                } else if (activeView === 'week') {
+                    document.getElementById('view-week').classList.add('active');
+                } else if (activeView === 'day') {
+                    document.getElementById('view-day').classList.add('active');
+                }
+            }
+
+            // Gestion des filtres
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const filter = this.dataset.filter;
+                    
+                    // Mettre à jour les classes actives
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Recharger les événements avec le nouveau filtre
+                    calendar.refetchEvents();
+                });
+            });
+            
+            // Fonction pour afficher la popup d'événement
+            function showEventModal(event) {
+                const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+                
+                // Remplir les informations de l'événement
+                document.getElementById('eventTitle').textContent = event.title;
+                
+                // Formater la date et l'heure
+                const startDate = new Date(event.start);
+                const endDate = event.end ? new Date(event.end) : null;
+                
+                let dateTimeText = startDate.toLocaleDateString('fr-FR', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                if (endDate) {
+                    dateTimeText += ' - ' + endDate.toLocaleTimeString('fr-FR', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+                
+                document.getElementById('eventDateTime').textContent = dateTimeText;
+                
+                // Afficher le lieu si disponible
+                if (event.extendedProps.location) {
+                    document.getElementById('eventLocation').textContent = event.extendedProps.location;
+                    document.getElementById('eventLocationDiv').style.display = 'block';
+                } else {
+                    document.getElementById('eventLocationDiv').style.display = 'none';
+                }
+                
+                // Afficher la description si disponible
+                if (event.extendedProps.description) {
+                    document.getElementById('eventDescription').textContent = event.extendedProps.description;
+                    document.getElementById('eventDescriptionDiv').style.display = 'block';
+                } else {
+                    document.getElementById('eventDescriptionDiv').style.display = 'none';
+                }
+                
+                // Configurer les boutons d'action
+                document.getElementById('editEventBtn').href = '/gestion-club/evenements/' + event.id + '/modifier';
+                
+                document.getElementById('deleteEventBtn').onclick = function() {
+                    if (confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) {
+                        window.location.href = '/gestion-club/evenements/' + event.id + '/supprimer';
+                    }
+                };
+                
+                // Afficher la popup
+                modal.show();
+            }
+            
+            // Fonction pour mettre à jour les statistiques
+            function updateStatistics(events) {
+                const totalEvents = events.length;
+                const now = new Date();
+                const upcomingEvents = events.filter(event => {
+                    const eventDate = new Date(event.start);
+                    return eventDate > now;
+                }).length;
+                
+                document.getElementById('total-events').textContent = totalEvents;
+                document.getElementById('upcoming-events').textContent = upcomingEvents;
+            }
+            
+            // Fonction pour afficher les notifications
+            function showNotification(message, type = 'info') {
+                const alertClass = type === 'error' ? 'alert-danger' : 'alert-info';
+                const notification = document.createElement('div');
+                notification.className = `alert ${alertClass} position-fixed`;
+                notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
+                notification.innerHTML = `<i class="fas fa-info-circle me-2"></i>${message}`;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 5000);
+            }
+
+            // Fonction pour copier l'URL du calendrier
+            window.copyCalendarUrl = function() {
+                const calendarUrl = window.location.origin + '/gestion-club/calendrier/export/ics';
+                navigator.clipboard.writeText(calendarUrl).then(function() {
+                    showNotification('Lien copié dans le presse-papiers !', 'success');
+                }).catch(function(err) {
+                    console.error('Erreur lors de la copie: ', err);
+                    showNotification('Impossible de copier le lien', 'error');
+                });
+            };
+        });
+    </script>
+</section>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr" th:replace="~{super-admin/layout :: layout('Gestion des Événements', ~{::content})}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Événements</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="container-fluid">
+            <!-- Header avec bouton de création -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0 text-gray-800">
+                        <i class="fas fa-calendar-alt text-primary me-2"></i>
+                        Gestion des Événements
+                    </h1>
+                    <p class="text-muted">Gérez tous les événements de l'université</p>
+                </div>
+                <button class="btn btn-super-admin" data-bs-toggle="modal" data-bs-target="#createEventModal">
+                    <i class="fas fa-plus me-2"></i>
+                    Créer un Événement Universitaire
+                </button>
+            </div>
+
+            <!-- Statistiques rapides -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="super-admin-card">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Total Événements
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalEvents}">0</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="super-admin-card">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Événements Publiés
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${publishedEvents}">0</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="super-admin-card">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Événements à Venir
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${upcomingEvents}">0</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-clock fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="super-admin-card">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Événements Universitaires
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${universityEvents}">0</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-university fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des événements -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="super-admin-card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-list"></i> Liste des Événements</h5>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${events != null and !events.empty}">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Titre</th>
+                                                <th>Description</th>
+                                                <th>Date</th>
+                                                <th>Lieu</th>
+                                                <th>Club</th>
+                                                <th>Statut</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="event : ${events}">
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <img th:src="${event.photo != null ? event.photo : '/images/default-event.png'}" 
+                                                             th:alt="${event.titre}" 
+                                                             class="rounded me-3" 
+                                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                                        <strong th:text="${event.titre}"></strong>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span th:text="${event.description != null ? (#strings.abbreviate(event.description, 50)) : 'Aucune description'}" 
+                                                          class="text-muted"></span>
+                                                </td>
+                                                <td>
+                                                    <span th:text="${#temporals.format(event.dateHeureDebut, 'dd/MM/yyyy HH:mm')}"></span>
+                                                </td>
+                                                <td>
+                                                    <span th:text="${event.lieu != null ? event.lieu : 'Non spécifié'}"></span>
+                                                </td>
+                                                <td>
+                                                    <span th:if="${event.club != null}" th:text="${event.club.nom}" class="badge bg-info"></span>
+                                                    <span th:unless="${event.club != null}" class="badge bg-secondary">Universitaire</span>
+                                                </td>
+                                                <td>
+                                                    <span th:switch="${event.statut.name()}" class="badge">
+                                                        <span th:case="'PUBLIE'" class="badge bg-success">Publié</span>
+                                                        <span th:case="'BROUILLON'" class="badge bg-warning">Brouillon</span>
+                                                        <span th:case="'ANNULE'" class="badge bg-danger">Annulé</span>
+                                                        <span th:case="*" class="badge bg-secondary" th:text="${event.statut.name()}"></span>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button class="btn btn-outline-primary btn-sm view-event-btn" 
+                                                                th:data-event-id="${event.id}"
+                                                                title="Voir">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-warning btn-sm edit-event-btn" 
+                                                                th:data-event-id="${event.id}"
+                                                                title="Modifier">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-danger btn-sm delete-event-btn" 
+                                                                th:data-event-id="${event.id}"
+                                                                title="Supprimer">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div th:unless="${events != null and !events.empty}" class="text-center py-5">
+                                <i class="fas fa-calendar text-muted" style="font-size: 3rem;"></i>
+                                <h5 class="text-muted mt-3">Aucun événement trouvé</h5>
+                                <p class="text-muted">Commencez par créer votre premier événement.</p>
+                                <button class="btn btn-super-admin" data-bs-toggle="modal" data-bs-target="#createEventModal">
+                                    <i class="fas fa-plus"></i> Créer un événement
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de création d'événement -->
+        <div class="modal fade" id="createEventModal" tabindex="-1" aria-labelledby="createEventModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createEventModalLabel">
+                            <i class="fas fa-plus-circle me-2"></i>
+                            Créer un Nouvel Événement
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form th:action="@{/admin/events/create}" method="post">
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="titre" class="form-label">Titre de l'événement *</label>
+                                        <input type="text" class="form-control" id="titre" name="titre" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="lieu" class="form-label">Lieu</label>
+                                        <input type="text" class="form-control" id="lieu" name="lieu">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="dateHeureDebut" class="form-label">Date et heure de début *</label>
+                                        <input type="datetime-local" class="form-control" id="dateHeureDebut" name="dateHeureDebut" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="capaciteMax" class="form-label">Capacité maximale</label>
+                                        <input type="number" class="form-control" id="capaciteMax" name="capaciteMax" min="1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-super-admin">
+                                <i class="fas fa-save me-2"></i>
+                                Créer l'événement
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

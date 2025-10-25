@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{super-admin/layout :: layout('Journal d\'Audit', ~{::content})}">
+<head>
+    <title>Journal d'Audit - Super Admin</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="container-fluid">
+        <!-- En-tête -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="fas fa-clipboard-list text-primary me-2"></i>
+                    Journal d'Audit
+                </h1>
+                <p class="text-muted">Consultez toutes les actions importantes effectuées dans le système</p>
+            </div>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="super-admin-card">
+                    <div class="card-body text-center">
+                        <div class="stats-icon"><i class="bi bi-journal-text"></i></div>
+                        <div class="stats-number" th:text="${totalLogs}">0</div>
+                        <div class="stats-label">Total des Logs</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="super-admin-card">
+                    <div class="card-body text-center">
+                        <div class="stats-icon"><i class="bi bi-clock-history"></i></div>
+                        <div class="stats-number" th:text="${recentLogs}">0</div>
+                        <div class="stats-label">Logs Récents (24h)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barre de recherche et filtres -->
+        <div class="super-admin-card mb-4">
+            <div class="card-body">
+                <form method="get" action="/super-admin/audit-logs" class="row g-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" name="search" 
+                                   th:value="${searchTerm}" 
+                                   placeholder="Rechercher dans les actions...">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" name="size">
+                            <option value="10" th:selected="${size == 10}">10 par page</option>
+                            <option value="20" th:selected="${size == 20}">20 par page</option>
+                            <option value="50" th:selected="${size == 50}">50 par page</option>
+                            <option value="100" th:selected="${size == 100}">100 par page</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Rechercher
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tableau des logs -->
+        <div class="super-admin-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-list-ul me-2"></i>
+                    Historique des Actions
+                    <span class="badge bg-secondary ms-2" th:text="${totalElements}">0</span>
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="width: 15%;">Utilisateur</th>
+                                <th style="width: 10%;">Action</th>
+                                <th style="width: 10%;">Type</th>
+                                <th style="width: 15%;">Entité</th>
+                                <th style="width: 12%;">Date/Heure</th>
+                                <th style="width: 38%;">Détails</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="log : ${logs}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                            <i class="bi bi-person"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold" th:text="${log.userEmail}">user@example.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success" th:if="${log.actionType.name() == 'CREATE'}" th:text="${log.actionType.displayName}">Action</span>
+                                    <span class="badge bg-warning" th:if="${log.actionType.name() == 'UPDATE'}" th:text="${log.actionType.displayName}">Action</span>
+                                    <span class="badge bg-danger" th:if="${log.actionType.name() == 'DELETE'}" th:text="${log.actionType.displayName}">Action</span>
+                                    <span class="badge bg-info" th:if="${log.actionType.name() == 'LOGIN'}" th:text="${log.actionType.displayName}">Action</span>
+                                    <span class="badge bg-secondary" th:if="${log.actionType.name() == 'LOGOUT'}" th:text="${log.actionType.displayName}">Action</span>
+                                    <span class="badge bg-primary" th:if="${log.actionType.name() != 'CREATE' and log.actionType.name() != 'UPDATE' and log.actionType.name() != 'DELETE' and log.actionType.name() != 'LOGIN' and log.actionType.name() != 'LOGOUT'}" th:text="${log.actionType.displayName}">Action</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark" th:text="${log.entityType.displayName}">Entité</span>
+                                </td>
+                                <td>
+                                    <span th:if="${log.entityType.name() == 'USER'}" class="text-primary">
+                                        <i class="bi bi-person"></i> Utilisateur
+                                    </span>
+                                    <span th:if="${log.entityType.name() == 'CLUB'}" class="text-success">
+                                        <i class="bi bi-collection"></i> Club
+                                    </span>
+                                    <span th:if="${log.entityType.name() == 'EVENT'}" class="text-info">
+                                        <i class="bi bi-calendar-event"></i> Événement
+                                    </span>
+                                    <span th:if="${log.entityType.name() == 'INSCRIPTION'}" class="text-warning">
+                                        <i class="bi bi-person-plus"></i> Inscription
+                                    </span>
+                                    <span th:if="${log.entityType.name() == 'ADMIN'}" class="text-danger">
+                                        <i class="bi bi-shield-check"></i> Admin
+                                    </span>
+                                    <span th:if="${log.entityType.name() == 'SYSTEM'}" class="text-secondary">
+                                        <i class="bi bi-gear"></i> Système
+                                    </span>
+                                    <small class="text-muted d-block" th:text="${log.entityId}">ID</small>
+                                </td>
+                                <td>
+                                    <div class="text-muted small">
+                                        <div th:text="${#temporals.format(log.timestamp, 'dd/MM/yyyy')}">01/01/2024</div>
+                                        <div th:text="${#temporals.format(log.timestamp, 'HH:mm:ss')}">12:00:00</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="audit-details" style="max-width: 300px;">
+                                        <div class="fw-bold text-dark" th:text="${log.action}">Description de l'action</div>
+                                        <div th:if="${log.details != null and !log.details.isEmpty()}" 
+                                             class="text-muted small mt-1" 
+                                             th:text="${log.details}"
+                                             style="word-wrap: break-word; white-space: pre-wrap;">Détails supplémentaires</div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(logs)}">
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                    Aucun log trouvé
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${totalPages > 1}" class="d-flex justify-content-center mt-4">
+            <nav aria-label="Pagination des logs">
+                <ul class="pagination">
+                    <!-- Page précédente -->
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/super-admin/audit-logs(page=${currentPage - 1}, size=${size}, search=${searchTerm})}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    
+                    <!-- Pages -->
+                    <li th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}" 
+                        class="page-item" 
+                        th:classappend="${pageNum == currentPage} ? 'active'">
+                        <a class="page-link" 
+                           th:href="@{/super-admin/audit-logs(page=${pageNum}, size=${size}, search=${searchTerm})}"
+                           th:text="${pageNum + 1}">1</a>
+                    </li>
+                    
+                    <!-- Page suivante -->
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/super-admin/audit-logs(page=${currentPage + 1}, size=${size}, search=${searchTerm})}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Informations de pagination -->
+        <div class="text-center text-muted mt-3">
+            <small>
+                Affichage de <span th:text="${#lists.size(logs)}">0</span> logs sur <span th:text="${totalElements}">0</span> au total
+                <span th:if="${searchTerm != null and !searchTerm.isEmpty()}">
+                    (recherche: "<span th:text="${searchTerm}">terme</span>")
+                </span>
+            </small>
+        </div>
+    </div>
+</div>
+</body>
+</html>

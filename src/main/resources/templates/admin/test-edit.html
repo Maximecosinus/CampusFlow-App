@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="fr" th:replace="~{admin/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Test Édition</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="container-fluid">
+            <h1>Test Édition d'Événement</h1>
+            <p>Événement ID: <span th:text="${eventId}"></span></p>
+            <p>Événement trouvé: <span th:text="${event != null ? event.titre : 'Non trouvé'}"></span></p>
+            <a th:href="@{/admin/events}" class="btn btn-primary">Retour</a>
+        </div>
+    </div>
+</body>
+</html>

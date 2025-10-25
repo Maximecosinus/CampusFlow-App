@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Administration - CampusFlow</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --admin-primary: #dc3545;
+            --admin-secondary: #6c757d;
+            --admin-success: #198754;
+            --admin-warning: #ffc107;
+            --admin-info: #0dcaf0;
+            --admin-light: #f8f9fa;
+            --admin-dark: #212529;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--admin-light);
+        }
+
+        .admin-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: linear-gradient(135deg, var(--admin-primary) 0%, #c82333 100%);
+            color: white;
+            z-index: 1000;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .admin-sidebar .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .admin-sidebar .sidebar-header h4 {
+            margin: 0;
+            font-weight: 600;
+            color: white;
+        }
+
+        .admin-sidebar .sidebar-header small {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.8rem;
+        }
+
+        .admin-sidebar .nav-link {
+            color: rgba(255,255,255,0.9);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .admin-sidebar .nav-link:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: white;
+        }
+
+        .admin-sidebar .nav-link.active {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+            border-left-color: white;
+            font-weight: 600;
+        }
+
+        .admin-sidebar .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .admin-main-content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .admin-header {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .admin-header .breadcrumb {
+            margin: 0;
+            background: none;
+            padding: 0;
+        }
+
+        .admin-header .breadcrumb-item + .breadcrumb-item::before {
+            content: ">";
+            color: var(--admin-secondary);
+        }
+
+        .admin-content {
+            padding: 2rem;
+        }
+
+        .admin-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .admin-card .card-header {
+            background: linear-gradient(135deg, var(--admin-primary) 0%, #c82333 100%);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            border: none;
+            padding: 1rem 1.5rem;
+        }
+
+        .admin-card .card-header h5 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .admin-stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--admin-primary);
+            transition: transform 0.3s ease;
+        }
+
+        .admin-stats-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .admin-stats-card .stats-icon {
+            font-size: 2.5rem;
+            color: var(--admin-primary);
+            margin-bottom: 1rem;
+        }
+
+        .admin-stats-card .stats-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--admin-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .admin-stats-card .stats-label {
+            color: var(--admin-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .admin-alert {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .admin-sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .admin-main-content {
+                margin-left: 0;
+            }
+            
+            .admin-content {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Administration -->
+    <nav class="admin-sidebar">
+        <div class="sidebar-header">
+            <h4><i class="bi bi-shield-check"></i> Administration</h4>
+            <small>CampusFlow</small>
+        </div>
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/admin}" data-page="admin">
+                    <i class="bi bi-house-door"></i>
+                    Accueil
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/admin/clubs}" data-page="clubs">
+                    <i class="bi bi-people"></i>
+                    Clubs
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/admin/events}" data-page="events">
+                    <i class="bi bi-calendar-event"></i>
+                    Événements
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/admin/communication}" data-page="communication">
+                    <i class="bi bi-megaphone"></i>
+                    Communication
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/admin/profile}" data-page="profile">
+                    <i class="bi bi-person-circle"></i>
+                    Profil
+                </a>
+            </li>
+            <li class="nav-item mt-3">
+                <hr style="border-color: rgba(255,255,255,0.2);">
+            </li>
+            <li class="nav-item">
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="nav-link btn btn-link" style="color: rgba(255,255,255,0.7); border: none; background: none; padding: 0.5rem 1rem; width: 100%; text-align: left;">
+                        <i class="bi bi-box-arrow-right"></i>
+                        Déconnexion
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Contenu principal -->
+    <div class="admin-main-content">
+        <!-- En-tête -->
+        <div class="admin-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a th:href="@{/admin}" style="text-decoration: none; color: var(--admin-primary);">
+                                <i class="bi bi-house-door"></i> Administration
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item active" th:text="${breadcrumb}" th:if="${breadcrumb}"></li>
+                    </ol>
+                </nav>
+                
+                <div class="d-flex align-items-center">
+                    <span class="text-muted me-3" th:if="${admin}">
+                        <i class="bi bi-person-circle"></i>
+                        <span th:text="${admin.prenom + ' ' + admin.nom}">Admin</span>
+                    </span>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleSidebar()">
+                            <i class="bi bi-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenu de la page -->
+        <div class="admin-content">
+            <div th:insert="${content}">
+                <!-- Le contenu spécifique de chaque page sera inséré ici -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.admin-sidebar');
+            sidebar.classList.toggle('show');
+        }
+
+        // Gérer l'état actif des liens de navigation
+        function setActiveNavLink() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link[data-page]');
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                const page = link.getAttribute('data-page');
+                
+                if (page === 'admin' && currentPath === '/admin') {
+                    link.classList.add('active');
+                } else if (page !== 'admin' && currentPath.startsWith('/admin/' + page)) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // Fermer la sidebar sur mobile quand on clique à l'extérieur
+        document.addEventListener('click', function(event) {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const toggleBtn = document.querySelector('[onclick="toggleSidebar()"]');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(event.target) && 
+                !toggleBtn.contains(event.target)) {
+                sidebar.classList.remove('show');
+            }
+        });
+
+        // Gestion du redimensionnement de la fenêtre
+        window.addEventListener('resize', function() {
+            const sidebar = document.querySelector('.admin-sidebar');
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('show');
+            }
+        });
+
+        // Initialiser l'état actif au chargement de la page
+        document.addEventListener('DOMContentLoaded', setActiveNavLink);
+        
+        // JavaScript pour gérer les boutons d'action des événements
+        console.log('=== SCRIPT DES BOUTONS CHARGÉ DANS LAYOUT ===');
+        
+        // Event listener global pour tous les boutons d'action
+        document.addEventListener('click', function(e) {
+            console.log('=== CLIC DÉTECTÉ ===', e.target);
+            
+            // Bouton Voir
+            if (e.target.closest('.view-event-btn')) {
+                console.log('=== BOUTON VOIR CLIQUE ===');
+                e.preventDefault();
+                const button = e.target.closest('.view-event-btn');
+                const eventId = button.dataset.eventId;
+                console.log('Event ID:', eventId);
+                window.location.href = '/admin/events/' + eventId;
+                return;
+            }
+            
+            // Bouton Modifier
+            if (e.target.closest('.edit-event-btn')) {
+                console.log('=== BOUTON MODIFIER CLIQUE ===');
+                e.preventDefault();
+                const button = e.target.closest('.edit-event-btn');
+                const eventId = button.dataset.eventId;
+                console.log('Event ID:', eventId);
+                window.location.href = '/admin/events/' + eventId + '/edit';
+                return;
+            }
+            
+            // Bouton Supprimer
+            if (e.target.closest('.delete-event-btn')) {
+                console.log('=== BOUTON SUPPRIMER CLIQUE ===');
+                e.preventDefault();
+                const button = e.target.closest('.delete-event-btn');
+                const eventId = button.dataset.eventId;
+                console.log('Event ID:', eventId);
+                
+                if (confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) {
+                    // Utiliser fetch avec méthode POST
+                    fetch('/admin/events/' + eventId + '/delete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        credentials: 'same-origin'
+                    }).then(response => {
+                        if (response.ok) {
+                            window.location.href = '/admin/events';
+                        } else {
+                            console.error('Erreur lors de la suppression:', response.status);
+                            alert('Erreur lors de la suppression de l\'événement');
+                        }
+                    }).catch(error => {
+                        console.error('Erreur:', error);
+                        alert('Erreur lors de la suppression de l\'événement');
+                    });
+                }
+                return;
+            }
+        });
+        
+        console.log('=== EVENT LISTENERS DES BOUTONS INITIALISÉS ===');
+    </script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Debug Événements</title>
+</head>
+<body>
+<section>
+    <div class="container-fluid">
+        <h1>Debug Événements</h1>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Club du Chef</h4>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Nom:</strong> <span th:text="${club.nom}"></span></p>
+                        <p><strong>ID:</strong> <span th:text="${club.id}"></span></p>
+                        <p><strong>Nombre d'événements:</strong> <span th:text="${club.evenementsOrganises.size()}"></span></p>
+                        
+                        <h5>Événements du club:</h5>
+                        <ul th:if="${!#lists.isEmpty(club.evenementsOrganises)}">
+                            <li th:each="event : ${club.evenementsOrganises}">
+                                <strong th:text="${event.titre}"></strong> 
+                                (ID: <span th:text="${event.id}"></span>) 
+                                - Statut: <span th:text="${event.statut}"></span>
+                                - Club: <span th:text="${event.club != null ? event.club.nom : 'NULL'}"></span>
+                            </li>
+                        </ul>
+                        <p th:if="${#lists.isEmpty(club.evenementsOrganises)}" class="text-muted">Aucun événement</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Tous les Événements (Base de données)</h4>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Nombre total:</strong> <span th:text="${allEvents.size()}"></span></p>
+                        
+                        <h5>Liste des événements:</h5>
+                        <ul th:if="${!#lists.isEmpty(allEvents)}">
+                            <li th:each="event : ${allEvents}">
+                                <strong th:text="${event.titre}"></strong> 
+                                (ID: <span th:text="${event.id}"></span>) 
+                                - Club: <span th:text="${event.club != null ? event.club.nom : 'NULL'}"></span>
+                            </li>
+                        </ul>
+                        <p th:if="${#lists.isEmpty(allEvents)}" class="text-muted">Aucun événement dans la base</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <a th:href="@{/gestion-club/evenements}" class="btn btn-primary">Retour à la gestion des événements</a>
+            <form th:action="@{/gestion-club/debug/creer-evenement-test}" method="post" class="d-inline ms-2">
+                <button type="submit" class="btn btn-success">Créer un événement de test</button>
+            </form>
+        </div>
+        
+        <!-- Messages de succès/erreur -->
+        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:if="${param.success[0] == 'test-event-created'}">Événement de test créé avec succès !</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:if="${param.error[0] == 'no-club'}">Aucun club trouvé pour créer l'événement de test.</span>
+            <span th:if="${param.error[0] == 'creation-failed'}">Erreur lors de la création de l'événement de test.</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+</section>
+</body>
+</html>

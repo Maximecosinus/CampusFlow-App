@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{super-admin/layout :: layout('Gestion des Utilisateurs', ~{::content})}">
+<head>
+    <title>Gestion des Utilisateurs - Super Admin</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0">
+                <i class="bi bi-people-fill text-primary me-2"></i>
+                Gestion des Utilisateurs
+            </h2>
+            <p class="text-muted mb-0">Gérez tous les utilisateurs de l'application</p>
+        </div>
+        <a th:href="@{/super-admin/users/create}" class="btn btn-super-admin">
+            <i class="bi bi-person-plus me-2"></i>
+            Créer un nouvel utilisateur
+        </a>
+    </div>
+
+    <!-- Messages de succès/erreur -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Statistiques rapides -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="super-admin-card">
+                <div class="card-body text-center">
+                    <div class="stats-icon"><i class="bi bi-people"></i></div>
+                    <div class="stats-number" th:text="${totalUsers}">0</div>
+                    <div class="stats-label">Total Utilisateurs</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="super-admin-card">
+                <div class="card-body text-center">
+                    <div class="stats-icon"><i class="bi bi-person-check"></i></div>
+                    <div class="stats-number" th:text="${totalStudents}">0</div>
+                    <div class="stats-label">Étudiants</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="super-admin-card">
+                <div class="card-body text-center">
+                    <div class="stats-icon"><i class="bi bi-shield-check"></i></div>
+                    <div class="stats-number" th:text="${totalAdmins}">0</div>
+                    <div class="stats-label">Administrateurs</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="super-admin-card">
+                <div class="card-body text-center">
+                    <div class="stats-icon"><i class="bi bi-crown"></i></div>
+                    <div class="stats-number" th:text="${totalSuperAdmins}">0</div>
+                    <div class="stats-label">Super Admins</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau des utilisateurs -->
+    <div class="super-admin-card">
+        <div class="card-header">
+            <h5 class="mb-0">Liste des Utilisateurs</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Utilisateur</th>
+                            <th>Email</th>
+                            <th>Rôle</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="user : ${users}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-3">
+                                        <img th:if="${user.photoProfil != null}" 
+                                             th:src="@{'/uploads/avatars/' + ${user.photoProfil}}" 
+                                             class="rounded-circle" 
+                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                        <div th:unless="${user.photoProfil != null}" 
+                                             class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+                                             style="width: 40px; height: 40px;">
+                                            <i class="bi bi-person"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold" th:text="${user.prenom + ' ' + user.nom}">John Doe</div>
+                                        <small class="text-muted" th:if="${user.bio != null}" th:text="${user.bio}">Bio utilisateur</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span th:text="${user.email}">john@example.com</span>
+                            </td>
+                            <td>
+                                <span th:if="${user.role.name().equals('ETUDIANT')}" class="badge bg-info">Étudiant</span>
+                                <span th:if="${user.role.name().equals('CHEF_DE_CLUB')}" class="badge bg-warning">Chef de Club</span>
+                                <span th:if="${user.role.name().equals('ADMIN')}" class="badge bg-danger">Administrateur</span>
+                                <span th:if="${user.role.name().equals('SUPER_ADMIN')}" class="badge bg-purple">Super Admin</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success">Actif</span>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a th:href="@{/super-admin/users/{id}/edit(id=${user.id})}" 
+                                       class="btn btn-sm btn-outline-primary me-2">
+                                        <i class="bi bi-pencil"></i> Modifier
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger delete-user-btn"
+                                            th:data-user-id="${user.id}"
+                                            th:data-user-name="${user.prenom + ' ' + user.nom}">
+                                        <i class="bi bi-trash"></i> Supprimer
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${users == null or users.isEmpty()}">
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="bi bi-people fs-1 text-muted"></i>
+                                <p class="mt-2">Aucun utilisateur trouvé</p>
+                                <a th:href="@{/super-admin/users/create}" class="btn btn-super-admin">
+                                    <i class="bi bi-person-plus me-2"></i> Créer le premier utilisateur
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteUserModalLabel">Confirmer la suppression</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer l'utilisateur <strong id="userNameToDelete"></strong> ?</p>
+                    <p class="text-danger"><small>Cette action est irréversible.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <form id="deleteUserForm" method="post" style="display: inline;">
+                        <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteUserModal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
+            const deleteUserButtons = document.querySelectorAll('.delete-user-btn');
+            const userNameToDelete = document.getElementById('userNameToDelete');
+            const deleteUserForm = document.getElementById('deleteUserForm');
+
+            deleteUserButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const userId = this.dataset.userId;
+                    const name = this.dataset.userName;
+                    userNameToDelete.textContent = name;
+                    deleteUserForm.action = `/super-admin/users/${userId}/delete`;
+                    deleteUserModal.show();
+                });
+            });
+        });
+    </script>
+</div>
+</body>
+</html>

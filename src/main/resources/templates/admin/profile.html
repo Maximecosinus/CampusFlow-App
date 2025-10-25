@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr" th:replace="~{admin/layout :: layout('Profil Administrateur', ~{::content})}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Administrateur</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="container-fluid">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0 text-gray-800">
+                        <i class="bi bi-person-circle text-primary me-2"></i>
+                        Mon Profil
+                    </h1>
+                    <p class="text-muted">Gérez vos informations personnelles</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Informations du profil -->
+                <div class="col-lg-8">
+                    <div class="admin-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-person-lines-fill me-2"></i>
+                                Informations Personnelles
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/admin/profile/update}" method="post">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="prenom" class="form-label">Prénom</label>
+                                            <input type="text" class="form-control" id="prenom" name="prenom" 
+                                                   th:value="${admin.prenom}" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="nom" class="form-label">Nom</label>
+                                            <input type="text" class="form-control" id="nom" name="nom" 
+                                                   th:value="${admin.nom}" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email" name="email" 
+                                           th:value="${admin.email}" readonly>
+                                    <div class="form-text">L'email ne peut pas être modifié</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="bio" class="form-label">Bio</label>
+                                    <textarea class="form-control" id="bio" name="bio" rows="4" 
+                                              th:text="${admin.bio}">Votre bio...</textarea>
+                                </div>
+                                
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-lg me-2"></i>
+                                        Enregistrer les modifications
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informations de compte -->
+                <div class="col-lg-4">
+                    <div class="admin-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-shield-check me-2"></i>
+                                Informations de Compte
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Rôle</label>
+                                <p class="form-control-plaintext">
+                                    <span class="badge bg-danger" th:text="${admin.role}">ADMIN</span>
+                                </p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Date d'inscription</label>
+                                <p class="form-control-plaintext" th:text="${#temporals.format(admin.dateInscription, 'dd/MM/yyyy')}">
+                                    01/01/2024
+                                </p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Photo de profil</label>
+                                <div class="text-center">
+                                    <img th:src="${admin.photoProfil != null ? admin.photoProfil : '/images/default-avatar.png'}" 
+                                         class="rounded-circle" width="100" height="100" alt="Photo de profil">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Changement de mot de passe -->
+                    <div class="admin-card mt-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-key me-2"></i>
+                                Changer le Mot de Passe
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/admin/profile/change-password}" method="post">
+                                <div class="mb-3">
+                                    <label for="currentPassword" class="form-label">Mot de passe actuel</label>
+                                    <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="newPassword" class="form-label">Nouveau mot de passe</label>
+                                    <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="confirmPassword" class="form-label">Confirmer le nouveau mot de passe</label>
+                                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="bi bi-key me-2"></i>
+                                        Changer le mot de passe
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

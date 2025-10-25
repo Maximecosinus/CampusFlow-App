@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{super-admin/layout :: layout('Créer un Utilisateur', ~{::content})}">
+<head>
+    <title>Créer un Utilisateur - Super Admin</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0"><i class="bi bi-person-plus me-2"></i> Créer un nouvel utilisateur</h2>
+        <a th:href="@{/super-admin/users}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i> Retour à la liste
+        </a>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="super-admin-card">
+        <div class="card-header">
+            <h5 class="mb-0">Informations de l'utilisateur</h5>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/super-admin/users/create}" th:object="${user}" method="post">
+                <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="prenom" class="form-label">Prénom *</label>
+                            <input type="text" class="form-control" id="prenom" th:field="*{prenom}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="nom" class="form-label">Nom *</label>
+                            <input type="text" class="form-control" id="nom" th:field="*{nom}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email *</label>
+                    <input type="email" class="form-control" id="email" th:field="*{email}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="motDePasse" class="form-label">Mot de passe temporaire *</label>
+                    <input type="password" class="form-control" id="motDePasse" th:field="*{motDePasse}" required>
+                    <div class="form-text">L'utilisateur devra changer ce mot de passe lors de sa première connexion.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Rôle *</label>
+                    <div class="row">
+                        <div th:each="role : ${allRoles}" class="col-md-6 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" th:id="${'role_' + role.name()}" 
+                                       th:name="roles" th:value="${role.name()}"
+                                       th:checked="${user.role != null and user.role.name() == role.name()}"
+                                       th:disabled="${role.name() == 'SUPER_ADMIN'}">
+                                <label class="form-check-label" th:for="${'role_' + role.name()}">
+                                    <span th:switch="${role}">
+                                        <span th:case="ETUDIANT" class="badge bg-info me-2">Étudiant</span>
+                                        <span th:case="CHEF_DE_CLUB" class="badge bg-warning me-2">Chef de Club</span>
+                                        <span th:case="ADMIN" class="badge bg-danger me-2">Administrateur</span>
+                                        <span th:case="SUPER_ADMIN" class="badge bg-purple me-2">Super Admin</span>
+                                        <span th:case="*" class="badge bg-secondary me-2" th:text="${role}"></span>
+                                    </span>
+                                    <span th:text="${role.name()}"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="bio" class="form-label">Bio (optionnel)</label>
+                    <textarea class="form-control" id="bio" th:field="*{bio}" rows="3" placeholder="Description de l'utilisateur..."></textarea>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <a th:href="@{/super-admin/users}" class="btn btn-outline-secondary me-3">Annuler</a>
+                    <button type="submit" class="btn btn-super-admin">
+                        <i class="bi bi-save me-2"></i> Créer l'utilisateur
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr" th:replace="~{admin/layout :: layout('Gestion des Événements', ~{::content})}">
+<head>
+    <title>Gestion des Événements</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <h1 class="h3 mb-4 text-gray-800">Gestion des Événements</h1>
+                    
+                    <!-- Statistiques -->
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-primary shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Événements</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalEvents}">0</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bouton Créer -->
+                    <div class="mb-4">
+                        <button type="button" class="btn btn-primary" onclick="window.location.href='/admin/events/create'">
+                            <i class="fas fa-plus me-2"></i>
+                            Créer un événement universitaire
+                        </button>
+                    </div>
+                    
+                    <!-- Liste des événements -->
+                    <div class="row">
+                        <div th:each="event : ${events}" class="col-lg-4 col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h6 class="mb-0" th:text="${event.titre}">Titre</h6>
+                                    <span class="badge bg-success">Publié</span>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Date:</strong> <span th:text="${event.dateHeureDebut}">Date</span></p>
+                                    <p><strong>Lieu:</strong> <span th:text="${event.lieu}">Lieu</span></p>
+                                    <p th:text="${event.description}">Description</p>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="btn-group w-100">
+                                        <button type="button" class="btn btn-outline-primary btn-sm view-event-btn" 
+                                                th:data-event-id="${event.id}">
+                                            <i class="fas fa-eye me-1"></i>
+                                            Voir
+                                        </button>
+                                        <button type="button" class="btn btn-outline-warning btn-sm edit-event-btn" 
+                                                th:data-event-id="${event.id}">
+                                            <i class="fas fa-edit me-1"></i>
+                                            Modifier
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm delete-event-btn" 
+                                                th:data-event-id="${event.id}">
+                                            <i class="fas fa-trash me-1"></i>
+                                            Supprimer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript simple et fonctionnel pour les boutons d'action
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== DOM CHARGÉ ===');
+            
+            // Event listener global pour tous les boutons d'action
+            document.addEventListener('click', function(e) {
+                console.log('=== CLIC DÉTECTÉ ===', e.target);
+                
+                // Bouton Voir
+                if (e.target.closest('.view-event-btn')) {
+                    console.log('=== BOUTON VOIR CLIQUE ===');
+                    e.preventDefault();
+                    const button = e.target.closest('.view-event-btn');
+                    const eventId = button.dataset.eventId;
+                    console.log('Event ID:', eventId);
+                    window.location.href = '/admin/events/' + eventId;
+                    return;
+                }
+                
+                // Bouton Modifier
+                if (e.target.closest('.edit-event-btn')) {
+                    console.log('=== BOUTON MODIFIER CLIQUE ===');
+                    e.preventDefault();
+                    const button = e.target.closest('.edit-event-btn');
+                    const eventId = button.dataset.eventId;
+                    console.log('Event ID:', eventId);
+                    window.location.href = '/admin/events/' + eventId + '/edit';
+                    return;
+                }
+                
+                // Bouton Supprimer
+                if (e.target.closest('.delete-event-btn')) {
+                    console.log('=== BOUTON SUPPRIMER CLIQUE ===');
+                    e.preventDefault();
+                    const button = e.target.closest('.delete-event-btn');
+                    const eventId = button.dataset.eventId;
+                    console.log('Event ID:', eventId);
+                    if (confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) {
+                        // Créer un formulaire pour la suppression POST
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '/admin/events/' + eventId + '/delete';
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                    return;
+                }
+            });
+            
+            console.log('=== EVENT LISTENERS INITIALISÉS ===');
+        });
+    </script>
+</body>
+</html>

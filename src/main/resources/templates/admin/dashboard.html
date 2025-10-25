@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout('Tableau de Bord Administrateur', ~{::content})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Tableau de Bord Administrateur</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Message de bienvenue -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-shield-check"></i> Bienvenue dans l'Administration</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h4 class="mb-2">Bonjour <span th:text="${admin.prenom}">Admin</span> !</h4>
+                                <p class="text-muted mb-0">
+                                    Vous êtes connecté en tant qu'<strong>Administrateur</strong> de CampusFlow. 
+                                    Utilisez le menu de gauche pour naviguer dans les différentes sections d'administration.
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="admin-stats-card text-center">
+                                    <div class="stats-icon">
+                                        <i class="bi bi-person-gear"></i>
+                                    </div>
+                                    <div class="stats-label">Rôle</div>
+                                    <div class="stats-number" style="font-size: 1.2rem;">ADMIN</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques générales -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h4 class="mb-3"><i class="bi bi-graph-up"></i> Statistiques Générales</h4>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="admin-stats-card">
+                    <div class="stats-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div class="stats-number" th:text="${totalUsers}">0</div>
+                    <div class="stats-label">Utilisateurs</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="admin-stats-card">
+                    <div class="stats-icon">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="stats-number" th:text="${totalClubs}">0</div>
+                    <div class="stats-label">Clubs</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="admin-stats-card">
+                    <div class="stats-icon">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <div class="stats-number" th:text="${totalEvents}">0</div>
+                    <div class="stats-label">Événements</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="admin-stats-card">
+                    <div class="stats-icon">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div class="stats-number">100%</div>
+                    <div class="stats-label">Système</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-lightning"></i> Actions Rapides</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <a th:href="@{/admin/clubs}" class="btn btn-outline-primary w-100 p-3">
+                                    <i class="bi bi-people d-block mb-2" style="font-size: 2rem;"></i>
+                                    <strong>Gérer les Clubs</strong>
+                                    <br>
+                                    <small class="text-muted">Créer, modifier, supprimer</small>
+                                </a>
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <a th:href="@{/admin/events}" class="btn btn-outline-warning w-100 p-3">
+                                    <i class="bi bi-calendar-event d-block mb-2" style="font-size: 2rem;"></i>
+                                    <strong>Gérer les Événements</strong>
+                                    <br>
+                                    <small class="text-muted">Modération et validation</small>
+                                </a>
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <a th:href="@{/admin/communication}" class="btn btn-outline-info w-100 p-3">
+                                    <i class="bi bi-megaphone d-block mb-2" style="font-size: 2rem;"></i>
+                                    <strong>Communication</strong>
+                                    <br>
+                                    <small class="text-muted">Annonces et notifications</small>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informations système -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-info-circle"></i> Informations Système</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="bi bi-server"></i> Serveur</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>Version:</strong> CampusFlow v1.0</li>
+                                    <li><strong>Statut:</strong> <span class="badge bg-success">En ligne</span></li>
+                                    <li><strong>Base de données:</strong> <span class="badge bg-success">Connectée</span></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="bi bi-shield-check"></i> Sécurité</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>Authentification:</strong> <span class="badge bg-success">Active</span></li>
+                                    <li><strong>Autorisation:</strong> <span class="badge bg-success">Active</span></li>
+                                    <li><strong>Session:</strong> <span class="badge bg-success">Sécurisée</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-clock"></i> Activité Récente</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info admin-alert">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Bienvenue !</strong><br>
+                            Vous venez de vous connecter au tableau de bord administrateur.
+                        </div>
+                        <div class="text-center text-muted">
+                            <small>Les activités récentes seront affichées ici.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

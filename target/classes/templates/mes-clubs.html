@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!-- On réutilise notre layout spécifique aux étudiants -->
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/student-layout :: studentLayout('Mes Clubs - CampusFlow', ~{::section})}">
+<head>
+  <!-- Le titre de la page -->
+  <title>Mes Clubs - CampusFlow</title>
+</head>
+<body>
+<!-- Le contenu spécifique à cette page -->
+<section>
+  <div class="container-fluid">
+    <!-- Titre de la page -->
+    <h1 class="mb-4">Mes Clubs</h1>
+    <p class="lead">Retrouvez ici tous les clubs que vous avez rejoints.</p>
+
+    <!-- La boucle pour afficher chaque club sous forme de carte -->
+    <div class="row mt-4">
+      <!-- On boucle sur la liste "mesClubs" fournie par le contrôleur -->
+      <div class="col-md-4 col-lg-3 mb-4" th:each="club : ${mesClubs}">
+        <div class="card h-100 shadow-sm">
+          <!-- Image du club -->
+          <img th:src="${club.logo != null ? club.logo : '/images/default-club.png'}" class="card-img-top" alt="Logo du club">
+
+          <div class="card-body">
+            <!-- Nom du club -->
+            <h5 class="card-title" th:text="${club.nom}">Nom du Club</h5>
+            <!-- Description du club (tronquée) -->
+            <p class="card-text" th:text="${#strings.abbreviate(club.description, 100)}">
+              Description courte du club...
+            </p>
+          </div>
+
+          <div class="card-footer bg-transparent border-top-0">
+            <!-- Lien vers la page de détail du club -->
+            <a th:href="@{/clubs/{id}(id=${club.id})}" class="btn btn-primary w-100">Accéder au club</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message affiché si l'utilisateur n'a rejoint aucun club -->
+      <div class="col-12" th:if="${mesClubs.isEmpty()}">
+        <div class="alert alert-info">
+          Vous n'avez rejoint aucun club pour le moment.
+          <a th:href="@{/decouvrir/clubs}" class="alert-link">Explorez les clubs disponibles !</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</body>
+</html>

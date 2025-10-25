@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="fr" th:replace="~{admin/layout :: layout('Détails de l\'Événement', ~{::content})}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails de l'Événement</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="container-fluid">
+            <!-- Header avec boutons d'action -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0 text-gray-800">
+                        <i class="fas fa-calendar-alt text-primary me-2"></i>
+                        <span th:text="${event.titre}">Titre de l'événement</span>
+                    </h1>
+                    <p class="text-muted">Détails de l'événement</p>
+                </div>
+                <div>
+                    <button class="btn btn-warning me-2" onclick="editEvent()">
+                        <i class="fas fa-edit me-2"></i>
+                        Modifier
+                    </button>
+                    <button class="btn btn-danger" onclick="deleteEvent()">
+                        <i class="fas fa-trash me-2"></i>
+                        Supprimer
+                    </button>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Informations principales -->
+                <div class="col-lg-8">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Informations Générales</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Titre :</label>
+                                        <p class="form-control-plaintext" th:text="${event.titre}">Titre</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Statut :</label>
+                                        <p class="form-control-plaintext">
+                                            <span class="badge" 
+                                                  th:classappend="${event.statut == T(com.universite.UniClubs.entities.StatutEvenement).PUBLIE} ? 'bg-success' : 'bg-warning'" 
+                                                  th:text="${event.statut == T(com.universite.UniClubs.entities.StatutEvenement).PUBLIE} ? 'Publié' : 'Brouillon'">
+                                                Statut
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Date de début :</label>
+                                        <p class="form-control-plaintext" 
+                                           th:text="${#temporals.format(event.dateHeureDebut, 'dd/MM/yyyy HH:mm')}">Date</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Date de fin :</label>
+                                        <p class="form-control-plaintext text-muted">Non définie</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Lieu :</label>
+                                        <p class="form-control-plaintext" th:text="${event.lieu ?: 'Non spécifié'}">Lieu</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Capacité maximale :</label>
+                                        <p class="form-control-plaintext" th:text="${event.capaciteMax ?: 'Non limitée'}">Capacité</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Description :</label>
+                                <div class="form-control-plaintext" style="min-height: 100px; white-space: pre-wrap;" 
+                                     th:text="${event.description}">Description</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informations complémentaires -->
+                <div class="col-lg-4">
+                    <!-- Type d'événement -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Type d'Événement</h6>
+                        </div>
+                        <div class="card-body text-center">
+                            <div th:if="${event.club != null}">
+                                <i class="fas fa-users fa-3x text-info mb-3"></i>
+                                <h5>Événement de Club</h5>
+                                <p class="text-muted mb-0">
+                                    <strong>Club :</strong> <span th:text="${event.club.nom}">Nom du club</span>
+                                </p>
+                                <p class="text-muted mb-0">
+                                    <strong>Chef :</strong> 
+                                    <span th:if="${event.club.chefClub != null}" 
+                                          th:text="${event.club.chefClub.prenom + ' ' + event.club.chefClub.nom}">Chef</span>
+                                    <span th:unless="${event.club.chefClub != null}">Non assigné</span>
+                                </p>
+                            </div>
+                            <div th:unless="${event.club != null}">
+                                <i class="fas fa-university fa-3x text-warning mb-3"></i>
+                                <h5>Événement Universitaire</h5>
+                                <p class="text-muted mb-0">Organisé par l'administration</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions rapides -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Actions Rapides</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary" onclick="toggleStatus()">
+                                    <i class="fas fa-toggle-on me-2"></i>
+                                    <span th:if="${event.statut == T(com.universite.UniClubs.entities.StatutEvenement).PUBLIE}">
+                                        Dépublier
+                                    </span>
+                                    <span th:unless="${event.statut == T(com.universite.UniClubs.entities.StatutEvenement).PUBLIE}">
+                                        Publier
+                                    </span>
+                                </button>
+                                
+                                <button class="btn btn-outline-info" onclick="duplicateEvent()">
+                                    <i class="fas fa-copy me-2"></i>
+                                    Dupliquer
+                                </button>
+                                
+                                <a th:href="@{/admin/events}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>
+                                    Retour à la liste
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistiques -->
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Statistiques</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="border-end">
+                                        <h4 class="text-primary mb-0">0</h4>
+                                        <small class="text-muted">Participants</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <h4 class="text-success mb-0">0%</h4>
+                                    <small class="text-muted">Taux de participation</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function editEvent() {
+            window.location.href = '/admin/events/' + '[[${event.id}]]' + '/edit';
+        }
+        
+        function deleteEvent() {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.')) {
+                fetch('/admin/events/' + '[[${event.id}]]' + '/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '/admin/events';
+                    } else {
+                        alert('Erreur lors de la suppression de l\'événement');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur lors de la suppression de l\'événement');
+                });
+            }
+        }
+        
+        function toggleStatus() {
+            const newStatus = '[[${event.statut}]]' === 'PUBLIE' ? 'BROUILLON' : 'PUBLIE';
+            const action = newStatus === 'PUBLIE' ? 'publier' : 'dépublier';
+            
+            if (confirm('Êtes-vous sûr de vouloir ' + action + ' cet événement ?')) {
+                fetch('/admin/events/' + '[[${event.id}]]' + '/toggle-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Erreur lors du changement de statut');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur lors du changement de statut');
+                });
+            }
+        }
+        
+        function duplicateEvent() {
+            if (confirm('Êtes-vous sûr de vouloir dupliquer cet événement ?')) {
+                fetch('/admin/events/' + '[[${event.id}]]' + '/duplicate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '/admin/events';
+                    } else {
+                        alert('Erreur lors de la duplication de l\'événement');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur lors de la duplication de l\'événement');
+                });
+            }
+        }
+    </script>
+</body>
+</html>
