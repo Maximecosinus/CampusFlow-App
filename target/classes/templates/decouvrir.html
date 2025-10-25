@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<!-- On utilise notre layout spécifique aux étudiants -->
+<!-- On utilise notre layout de base -->
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/student-layout :: studentLayout('Découvrir - CampusFlow', ~{::section})}">
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
 <head>
     <!-- Le titre spécifique de la page -->
     <title>Découvrir - CampusFlow</title>

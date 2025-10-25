@@ -1,483 +1,174 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="'Connexion - CampusFlow'">Connexion - CampusFlow</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <!-- <link rel="stylesheet" th:href="@{/static/css/register.css}" /> -->
     <style>
-        :root {
-            --primary-color: #f97316;
-            --primary-dark: #ea580c;
-            --secondary-color: #fb923c;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-300: #d1d5db;
-            --gray-400: #9ca3af;
-            --gray-500: #6b7280;
-            --gray-600: #4b5563;
-            --gray-700: #374151;
-            --gray-800: #1f2937;
-            --gray-900: #111827;
-        }
-
-        * {
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
         }
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        .split-container {
+            display: flex;
             min-height: 100vh;
+        }
+
+        .left-side {
+            flex: 1;
+            background: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
         }
 
-        .auth-container {
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .auth-card {
-            background: white;
-            border-radius: 1.5rem;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            animation: slideUp 0.6s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .auth-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 2rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .auth-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
-            50% { transform: translate(-50%, -50%) rotate(180deg); }
-        }
-
-        .auth-header h1 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .auth-header p {
-            opacity: 0.9;
-            font-size: 0.95rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .auth-body {
-            padding: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: var(--gray-700);
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            border: 2px solid var(--gray-200);
-            border-radius: 0.75rem;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: var(--gray-50);
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            background: white;
-            box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
-        }
-
-        .form-control::placeholder {
-            color: var(--gray-400);
-        }
-
-        .input-group {
+        .left-side {
             position: relative;
         }
 
-        .input-group i {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--gray-400);
-            z-index: 2;
-        }
-
-        .input-group .form-control {
-            padding-left: 3rem;
-        }
-
-        .btn-login {
-            width: 100%;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-            color: white;
-            border: none;
-            padding: 0.875rem 1.5rem;
-            border-radius: 0.75rem;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-login:active {
-            transform: translateY(0);
-        }
-
-        .btn-login::before {
+        .left-side::before {
             content: '';
             position: absolute;
             top: 0;
-            left: -100%;
+            left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
+            background: linear-gradient(135deg, #1f7a8c8e, #08212680);
+            z-index: 1;
         }
 
-        .btn-login:hover::before {
-            left: 100%;
+        .left-side img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            position: relative;
+            z-index: 0;
         }
 
-        .alert {
-            border-radius: 0.75rem;
-            border: none;
-            padding: 1rem 1.25rem;
-            margin-bottom: 1.5rem;
-            font-weight: 500;
-        }
-
-        .alert-danger {
-            background: #fef2f2;
-            color: #dc2626;
-            border-left: 4px solid var(--danger-color);
-        }
-
-        .alert-success {
-            background: #f0fdf4;
-            color: #16a34a;
-            border-left: 4px solid var(--success-color);
-        }
-
-        .auth-footer {
-            text-align: center;
-            padding: 1.5rem 2rem;
-            background: var(--gray-50);
-            border-top: 1px solid var(--gray-200);
-        }
-
-        .auth-footer p {
-            color: var(--gray-600);
-            margin-bottom: 0.5rem;
-        }
-
-        .auth-footer a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s ease;
-        }
-
-        .auth-footer a:hover {
-            color: var(--primary-dark);
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 1.5rem 0;
-            color: var(--gray-400);
-            font-size: 0.875rem;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: '';
+        .right-side {
             flex: 1;
-            height: 1px;
-            background: var(--gray-200);
-        }
-
-        .divider span {
-            padding: 0 1rem;
-            background: white;
-        }
-
-        .social-login {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
-            margin-top: 1rem;
-        }
-
-        .btn-social {
+            background: #f9f9f9;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
-            padding: 0.75rem;
-            border: 2px solid var(--gray-200);
-            border-radius: 0.75rem;
-            background: white;
-            color: var(--gray-600);
+        }
+
+        .form-container {
+            background: #fff;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        form div {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #333;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            padding: 10px 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: #f5f5f5;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            border-color: #1F7A8C;
+            outline: none;
+            background: #fff;
+        }
+        button[type="submit"] {
+            background: #1F7A8C;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+            transition: background 0.2s;
+        }
+        button[type="submit"]:hover {
+            background: #176574;
+        }
+        .form-container h1 {
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .form-container h2 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: #1F7A8C;
+            text-align: center;
+        }
+        .form-container p{
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .signup-link a {
+            color: #1F7A8C;
             text-decoration: none;
             font-weight: 500;
-            transition: all 0.3s ease;
+            transition: color 0.2s;
         }
-
-        .btn-social:hover {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-            transform: translateY(-2px);
-        }
-
-        .loading {
-            display: none;
-        }
-
-        .loading.show {
-            display: inline-block;
-        }
-
-        .spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top: 2px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 1rem;
-            }
-            
-            .auth-body {
-                padding: 1.5rem;
-            }
-            
-            .auth-header {
-                padding: 1.5rem;
-            }
+        .signup-link a:hover {
+            color: #176574;
+            text-decoration: underline;
         }
     </style>
+    <title>Connexion- CampusFlow</title>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="auth-header">
-                <h1>
-                    <i class="fas fa-graduation-cap me-2"></i>
-                    CampusFlow
-                </h1>
-                <p>Connectez-vous à votre espace étudiant</p>
+<div class="split-container">
+    <div class="left-side">
+        <img src="/images/login.jpg" alt="Connexion" />
+    </div>
+    <div class="right-side">
+        <div class="form-container">
+            <h1>CampusFlow</h1>
+            <h2>Connexion</h2>
+            <p>Rejoins la communauté étudiante</p>
+            <div th:if="${param.error}">
+                <div style="color: red">Email ou mot de passe invalide</div>
             </div>
-
-            <div class="auth-body">
-                <!-- Messages d'erreur/succès -->
-                <div th:if="${param.error}" class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Email ou mot de passe invalide
+            <div th:if="${param.logout}">
+                <div style="color: blue">Vous avez été déconnecté</div>
+            </div>
+            <form th:action="@{/login}" method="post">
+                <div>
+                    <label for="username">Email</label>
+                    <input id="username" type="text" name="username" required autofocus="autofocus"/>
                 </div>
-                
-                <div th:if="${param.logout}" class="alert alert-success">
-                    <i class="fas fa-check-circle me-2"></i>
-                    Vous avez été déconnecté avec succès
+                <div>
+                    <label for="password">Mot de passe</label>
+                    <input id="password" type="password" name="password" required/>
                 </div>
-
-                <!-- Formulaire de connexion -->
-                <form th:action="@{/login}" method="post" id="loginForm">
-                    <div class="form-group">
-                        <label for="username" class="form-label">Adresse email</label>
-                        <div class="input-group">
-                            <i class="fas fa-envelope"></i>
-                            <input type="email" 
-                                   id="username" 
-                                   name="username" 
-                                   class="form-control" 
-                                   placeholder="votre.email@universite.fr"
-                                   required 
-                                   autofocus>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password" class="form-label">Mot de passe</label>
-                        <div class="input-group">
-                            <i class="fas fa-lock"></i>
-                            <input type="password" 
-                                   id="password" 
-                                   name="password" 
-                                   class="form-control" 
-                                   placeholder="Votre mot de passe"
-                                   required>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-login" id="loginBtn">
-                        <span class="btn-text">
-                            <i class="fas fa-sign-in-alt me-2"></i>
-                            Se connecter
-                        </span>
-                        <span class="loading">
-                            <div class="spinner"></div>
-                        </span>
-                    </button>
-                </form>
-
-                <div class="divider">
-                    <span>ou</span>
+                <div>
+                    <button type="submit">Se connecter</button>
                 </div>
-
-                <div class="social-login">
-                    <a href="#" class="btn-social">
-                        <i class="fab fa-google"></i>
-                        <span>Google</span>
-                    </a>
-                    <a href="#" class="btn-social">
-                        <i class="fab fa-microsoft"></i>
-                        <span>Microsoft</span>
-                    </a>
+            </form>
+            <div class="signup-link" style="text-align: center; margin-top: 20px;">
+                <p>Pas encore de compte ? <a href="/register">S'inscrire</a></p>
+            </div>
+        </div>
+    </div>
 </div>
-</div>
-
-            <div class="auth-footer">
-                <p>Pas encore de compte ?</p>
-                <a th:href="@{/register}">
-                    <i class="fas fa-user-plus me-1"></i>
-                    Créer un compte
-                </a>
-    </div>
-    </div>
-    </div>
-
-    <script>
-        // Animation du formulaire
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('loginForm');
-            const inputs = form.querySelectorAll('.form-control');
-            
-            // Animation des inputs au focus
-            inputs.forEach(input => {
-                input.addEventListener('focus', function() {
-                    this.parentElement.style.transform = 'scale(1.02)';
-                });
-                
-                input.addEventListener('blur', function() {
-                    this.parentElement.style.transform = 'scale(1)';
-                });
-            });
-        });
-
-        // Animation du bouton de connexion
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            const btn = document.getElementById('loginBtn');
-            const btnText = btn.querySelector('.btn-text');
-            const loading = btn.querySelector('.loading');
-            
-            btnText.style.display = 'none';
-            loading.classList.add('show');
-            btn.disabled = true;
-            
-            // Simuler un délai si nécessaire
-            setTimeout(() => {
-                // Le formulaire sera soumis normalement
-            }, 100);
-        });
-
-        // Validation côté client
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            const email = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            if (!email || !password) {
-                e.preventDefault();
-                alert('Veuillez remplir tous les champs');
-                return false;
-            }
-            
-            if (!email.includes('@')) {
-                e.preventDefault();
-                alert('Veuillez entrer une adresse email valide');
-                return false;
-            }
-        });
-
-        // Effet de parallaxe sur le header
-        document.addEventListener('mousemove', function(e) {
-            const header = document.querySelector('.auth-header');
-            const x = e.clientX / window.innerWidth;
-            const y = e.clientY / window.innerHeight;
-            
-            header.style.backgroundPosition = `${x * 100}% ${y * 100}%`;
-        });
-    </script>
 </body>
 </html>

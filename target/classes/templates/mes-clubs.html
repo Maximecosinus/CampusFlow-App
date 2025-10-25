@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<!-- On réutilise notre layout spécifique aux étudiants -->
+<!-- On réutilise notre layout de base -->
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/student-layout :: studentLayout('Mes Clubs - CampusFlow', ~{::section})}">
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
 <head>
   <!-- Le titre de la page -->
   <title>Mes Clubs - CampusFlow</title>

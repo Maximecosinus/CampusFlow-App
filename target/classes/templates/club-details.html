@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/layout :: layout('Détails du Club - ' + ${club.nom}, ~{::section})}">
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
 <head>
     <meta charset="UTF-8">
-    <title>Détails du Club</title>
+    <title th:text="${club.nom}">Détails du Club</title>
 </head>
 <body>
 <!-- Le contenu spécifique de la page -->
