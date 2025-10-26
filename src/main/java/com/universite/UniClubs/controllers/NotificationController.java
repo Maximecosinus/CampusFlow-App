@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -205,7 +206,14 @@ public class NotificationController {
      * Page d'historique des notifications (pour l'interface web)
      */
     @GetMapping("/page-historique")
-    public String showNotificationHistoryPage() {
+    public String showNotificationHistoryPage(Model model, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
+
+        UUID utilisateurId = getUserIdFromAuthentication(authentication);
+        model.addAttribute("utilisateurConnecte", ((CustomUserDetails) authentication.getPrincipal()).getUtilisateur());
+        
         return "notifications-historique";
     }
 
