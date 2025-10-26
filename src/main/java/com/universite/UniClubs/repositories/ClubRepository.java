@@ -2,6 +2,7 @@ package com.universite.UniClubs.repositories;
 
 
 import com.universite.UniClubs.entities.Club;
+import com.universite.UniClubs.entities.Utilisateur;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.domain.Pageable; // <-- IMPORTER Pageable
@@ -45,4 +46,6 @@ public interface ClubRepository extends JpaRepository<Club, UUID> {
     // Méthode pour récupérer les clubs récents
     List<Club> findByDateCreationAfterOrderByDateCreationDesc(LocalDateTime cutoffDate);
 
+    // Méthode manquante pour les contrôleurs
+    boolean existsByChefClub(Utilisateur chefClub);
 }

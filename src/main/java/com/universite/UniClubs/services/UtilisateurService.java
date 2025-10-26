@@ -28,6 +28,17 @@ public interface UtilisateurService {
     // Méthodes pour l'administration
     List<Utilisateur> getAllStudents();
     int countStudents();
+    
+    // Méthodes manquantes pour les contrôleurs
+    Optional<Utilisateur> findByEmail(String email);
+    Utilisateur saveUser(Utilisateur utilisateur);
+    Utilisateur updateUser(Utilisateur utilisateur);
+    Optional<Utilisateur> findById(UUID id);
+    void deleteUser(UUID id);
+    List<Utilisateur> findAllUsers();
+    long countAllUsers();
+    long countUsersByRole(com.universite.UniClubs.entities.Role role);
+    List<Utilisateur> searchStudentsByNameOrEmail(String searchTerm);
 
     // --- CORRECTION : La méthode suivante a été supprimée ---
     // Elle était basée sur l'ancienne architecture.

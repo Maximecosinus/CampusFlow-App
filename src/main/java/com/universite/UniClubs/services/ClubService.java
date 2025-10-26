@@ -18,4 +18,7 @@ public interface ClubService {
     Club updateClub(UUID clubId, String nom, String description, String categorie, MultipartFile logo);
     void assignChef(UUID clubId, UUID chefId);
     void deleteClub(UUID clubId);
+    
+    // Méthode manquante pour les contrôleurs
+    List<Club> findAllClubsWithInscriptions();
 }

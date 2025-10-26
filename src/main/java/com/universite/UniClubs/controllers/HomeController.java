@@ -43,6 +43,8 @@ public class HomeController {
                 if (utilisateur.getRole().name().equals("ADMIN") || utilisateur.getRole().name().equals("SUPER_ADMIN")) {
                     return "redirect:/admin/accueil";
                 }
+                // Ajouter l'utilisateur connecté au modèle pour les notifications
+                model.addAttribute("utilisateurConnecte", utilisateur);
             }
         }
 

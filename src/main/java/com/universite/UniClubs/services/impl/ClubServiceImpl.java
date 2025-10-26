@@ -143,4 +143,10 @@ public class ClubServiceImpl implements ClubService {
         String message = String.format("Le club '%s' a été supprimé.", nomClub);
         notificationService.envoyerNotificationBroadcast(titre, message, TypeNotification.CLUB);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Club> findAllClubsWithInscriptions() {
+        return clubRepository.findAll();
+    }
 }

@@ -163,4 +163,50 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         // Implémentation temporaire - retourne 0 pour l'instant
         return 0;
     }
+
+    // Méthodes manquantes pour les contrôleurs
+    @Override
+    public Optional<Utilisateur> findByEmail(String email) {
+        return utilisateurRepository.findByEmail(email);
+    }
+
+    @Override
+    public Utilisateur saveUser(Utilisateur utilisateur) {
+        return utilisateurRepository.save(utilisateur);
+    }
+
+    @Override
+    public Utilisateur updateUser(Utilisateur utilisateur) {
+        return utilisateurRepository.save(utilisateur);
+    }
+
+    @Override
+    public Optional<Utilisateur> findById(UUID id) {
+        return utilisateurRepository.findById(id);
+    }
+
+    @Override
+    public void deleteUser(UUID id) {
+        utilisateurRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Utilisateur> findAllUsers() {
+        return utilisateurRepository.findAll();
+    }
+
+    @Override
+    public long countAllUsers() {
+        return utilisateurRepository.count();
+    }
+
+    @Override
+    public long countUsersByRole(Role role) {
+        return utilisateurRepository.countByRole(role);
+    }
+
+    @Override
+    public List<Utilisateur> searchStudentsByNameOrEmail(String searchTerm) {
+        return utilisateurRepository.findByNomContainingIgnoreCaseOrEmailContainingIgnoreCase(searchTerm, searchTerm);
+    }
 }

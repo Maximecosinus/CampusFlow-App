@@ -37,27 +37,32 @@ class NotificationManager {
     }
 
     connect() {
-        const socket = new SockJS('/ws');
-        this.stompClient = Stomp.over(socket);
-        
-        // Configuration pour éviter les warnings de debug
-        this.stompClient.debug = function(str) {
-            // console.log('STOMP: ' + str);
-        };
-
-        this.stompClient.connect({}, (frame) => {
-            console.log('Connecté aux notifications WebSocket: ' + frame);
-            this.connected = true;
-            this.reconnectAttempts = 0;
+        try {
+            const socket = new SockJS('/ws');
+            this.stompClient = Stomp.over(socket);
             
-            this.subscribeToNotifications();
-            this.updateConnectionStatus(true);
-        }, (error) => {
-            console.error('Erreur de connexion WebSocket:', error);
-            this.connected = false;
-            this.updateConnectionStatus(false);
+            // Configuration pour éviter les warnings de debug
+            this.stompClient.debug = function(str) {
+                // console.log('STOMP: ' + str);
+            };
+
+            this.stompClient.connect({}, (frame) => {
+                console.log('Connecté aux notifications WebSocket: ' + frame);
+                this.connected = true;
+                this.reconnectAttempts = 0;
+                
+                this.subscribeToNotifications();
+                this.updateConnectionStatus(true);
+            }, (error) => {
+                console.error('Erreur de connexion WebSocket:', error);
+                this.connected = false;
+                this.updateConnectionStatus(false);
+                this.scheduleReconnect();
+            });
+        } catch (error) {
+            console.error('Erreur lors de l\'initialisation de WebSocket:', error);
             this.scheduleReconnect();
-        });
+        }
     }
 
     subscribeToNotifications() {

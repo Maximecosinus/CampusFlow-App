@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.Optional;
+
 /**
  * Contrôleur temporaire pour créer un admin de test
  */
@@ -22,9 +24,9 @@ public class SetupController {
     public String createAdmin() {
         try {
             // Vérifier si l'admin existe déjà
-            Utilisateur adminExists = utilisateurService.findByEmail("admin@campusflow.com");
-            if (adminExists != null) {
-                return "Admin existe déjà: " + adminExists.getEmail();
+            Optional<Utilisateur> adminExists = utilisateurService.findByEmail("admin@campusflow.com");
+            if (adminExists.isPresent()) {
+                return "Admin existe déjà: " + adminExists.get().getEmail();
             }
             
             // Créer un utilisateur admin

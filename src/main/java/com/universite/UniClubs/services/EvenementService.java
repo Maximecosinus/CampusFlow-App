@@ -12,4 +12,7 @@ public interface EvenementService {
     List<Evenement> findPlannedEvents();
     int countEventsThisMonth();
     double calculateAverageParticipationRate();
+    
+    // Méthode manquante pour les contrôleurs
+    List<Evenement> findAllEvents();
 }

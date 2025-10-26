@@ -126,4 +126,9 @@ public class EvenementServiceImp implements EvenementService {
         String messageNotif = String.format("L'événement '%s' a été annulé. Motif: %s", titreEvenement, motif);
         notificationService.envoyerNotificationBroadcast(titreNotif, messageNotif, TypeNotification.EVENEMENT);
     }
+
+    @Override
+    public List<Evenement> findAllEvents() {
+        return evenementRepository.findAll();
+    }
 }
