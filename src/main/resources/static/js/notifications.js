@@ -88,8 +88,9 @@ class NotificationManager {
         // Jouer un son de notification (optionnel)
         this.playNotificationSound();
         
-        // Mettre à jour la liste des notifications dans le dropdown
+        // Mettre à jour la liste des notifications dans les dropdowns
         this.addNotificationToDropdown(notification);
+        this.addNotificationToDropdownAdmin(notification);
     }
 
     showToastNotification(notification) {
@@ -162,14 +163,51 @@ class NotificationManager {
         }
     }
 
+    addNotificationToDropdownAdmin(notification) {
+        const notificationList = document.getElementById('notification-list-admin');
+        if (!notificationList) return;
+
+        const notificationElement = document.createElement('div');
+        notificationElement.className = 'notification-item';
+        notificationElement.innerHTML = `
+            <div class="notification-content">
+                <div class="notification-title">${this.escapeHtml(notification.titre)}</div>
+                <div class="notification-message">${this.escapeHtml(notification.message)}</div>
+                <div class="notification-time">${this.formatTime(notification.dateCreation)}</div>
+            </div>
+            <div class="notification-actions">
+                <button class="btn btn-sm btn-outline-primary" onclick="notificationManager.markAsRead('${notification.id}')">
+                    Marquer comme lu
+                </button>
+            </div>
+        `;
+
+        // Ajouter en haut de la liste
+        notificationList.insertBefore(notificationElement, notificationList.firstChild);
+
+        // Limiter à 10 notifications dans le dropdown
+        const items = notificationList.querySelectorAll('.notification-item');
+        if (items.length > 10) {
+            items[items.length - 1].remove();
+        }
+    }
+
     updateNotificationCount() {
         fetch('/api/notifications/count-non-lues')
             .then(response => response.json())
             .then(data => {
+                // Mettre à jour le badge dans la navbar étudiante
                 const badge = document.getElementById('notif-count');
                 if (badge) {
                     badge.textContent = data.count;
                     badge.style.display = data.count > 0 ? 'inline' : 'none';
+                }
+                
+                // Mettre à jour le badge dans la sidebar admin
+                const badgeAdmin = document.getElementById('notif-count-admin');
+                if (badgeAdmin) {
+                    badgeAdmin.textContent = data.count;
+                    badgeAdmin.style.display = data.count > 0 ? 'inline' : 'none';
                 }
             })
             .catch(error => console.error('Erreur lors de la mise à jour du compteur:', error));
@@ -180,11 +218,21 @@ class NotificationManager {
         fetch('/api/notifications/recentes')
             .then(response => response.json())
             .then(notifications => {
+                // Mettre à jour la liste dans la navbar étudiante
                 const notificationList = document.getElementById('notification-list');
                 if (notificationList) {
                     notificationList.innerHTML = '';
                     notifications.forEach(notification => {
                         this.addNotificationToDropdown(notification);
+                    });
+                }
+                
+                // Mettre à jour la liste dans la sidebar admin
+                const notificationListAdmin = document.getElementById('notification-list-admin');
+                if (notificationListAdmin) {
+                    notificationListAdmin.innerHTML = '';
+                    notifications.forEach(notification => {
+                        this.addNotificationToDropdownAdmin(notification);
                     });
                 }
             })
@@ -226,6 +274,11 @@ class NotificationManager {
             if (notificationList) {
                 notificationList.innerHTML = '<div class="text-center text-muted">Aucune notification non lue</div>';
             }
+            
+            const notificationListAdmin = document.getElementById('notification-list-admin');
+            if (notificationListAdmin) {
+                notificationListAdmin.innerHTML = '<div class="text-center text-muted">Aucune notification non lue</div>';
+            }
         })
         .catch(error => console.error('Erreur lors du marquage:', error));
     }
@@ -248,6 +301,12 @@ class NotificationManager {
         if (statusIndicator) {
             statusIndicator.className = connected ? 'connected' : 'disconnected';
             statusIndicator.textContent = connected ? 'Connecté' : 'Déconnecté';
+        }
+        
+        const statusIndicatorAdmin = document.getElementById('connection-status-admin');
+        if (statusIndicatorAdmin) {
+            statusIndicatorAdmin.className = connected ? 'connected' : 'disconnected';
+            statusIndicatorAdmin.textContent = connected ? 'Connecté' : 'Déconnecté';
         }
     }
 
